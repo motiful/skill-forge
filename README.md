@@ -10,17 +10,27 @@ Skill Forge takes a skill idea (or an existing project-local skill) and automate
 
 ## Install
 
+### Claude Code
+
 ```bash
+# From marketplace (if published)
+/skill install motiful/skill-forge
+
+# Or manual
 git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
+ln -s ~/skills/skill-forge/skill ~/.claude/skills/skill-forge
 ```
 
-Then register on your platform:
+### Cursor
 
-| Platform | Command |
-|----------|---------|
-| Claude Code | `ln -s ~/skills/skill-forge/skill ~/.claude/skills/skill-forge` |
-| Cursor | `ln -s ~/skills/skill-forge/skill ~/.cursor/skills/skill-forge` |
-| Other | Symlink or copy `skill/` to your agent's skills directory |
+```bash
+git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
+ln -s ~/skills/skill-forge/skill ~/.cursor/skills/skill-forge
+```
+
+### Other Platforms
+
+Clone the repo and symlink/copy `skill/` to your agent's skills directory.
 
 ## What's Inside
 

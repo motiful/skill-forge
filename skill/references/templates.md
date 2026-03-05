@@ -13,17 +13,27 @@ An [Agent Skills](https://agentskills.io) compatible skill that <expanded descri
 
 ## Install
 
+### Claude Code
+
 ```bash
+# From marketplace (if published)
+/skill install <org>/<skill-name>
+
+# Or manual
 git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
+ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>
 ```
 
-Then register on your platform:
+### Cursor
 
-| Platform | Command |
-|----------|---------|
-| Claude Code | `ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>` |
-| Cursor | `ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>` |
-| Other | Symlink or copy `skill/` to your agent's skills directory |
+```bash
+git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
+ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>
+```
+
+### Other Platforms
+
+Clone the repo and symlink/copy `skill/` to your agent's skills directory.
 
 ## What's Inside
 

@@ -206,16 +206,27 @@ An [Agent Skills](https://agentskills.io) compatible skill that <description>.
 
 ## Install
 
+### Claude Code
+
 ```bash
+# From marketplace (if published)
+/skill install <org>/<skill-name>
+
+# Or manual
 git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
+ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>
 ```
 
-Then register on your platform:
+### Cursor
 
-| Platform | Command |
-|----------|---------|
-| Claude Code | `ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>` |
-| Cursor | `ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>` |
+```bash
+git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
+ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>
+```
+
+### Other Platforms
+
+Clone the repo and symlink/copy `skill/` to your agent's skills directory.
 
 ## Usage
 
@@ -253,13 +264,21 @@ The `<org>` defaults to the user's GitHub username. Ask if they want a different
 
 ### 4e. Register skill on user's platforms
 
-Read the `Skill Install Paths` from `~/.config/skill-forge/config.md`. Create symlinks for each platform the user has configured:
+Read the `Skill Install Paths` from `~/.config/skill-forge/config.md`. For each platform the user has configured:
 
+**Symlink registration** (always available):
 ```bash
 # Example: user has claude_code and cursor configured
 ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
 ln -sfn <skill_root>/<skill-name>/skill ~/.cursor/skills/<skill-name>
 ```
+
+**Platform-native publishing** (if user wants marketplace distribution):
+- CC: prepare `.claude-plugin/` metadata for marketplace submission
+- Cursor: follow Cursor's skill registry process
+- Other: follow platform-specific publishing docs
+
+Symlink registration is the minimum. Marketplace publishing is optional and additive.
 
 If config has no install paths yet, ask the user which platform(s) they use and update the config.
 
