@@ -7,6 +7,23 @@ description: Create, validate, and publish skills to GitHub as independent repos
 
 Full pipeline for creating and publishing skills as independent GitHub repositories.
 
+## Relationship with Other Tools
+
+**skill-creator** (CC built-in) handles skill *design methodology* — it guides users through what a skill should do, how to structure the content, and generates initial SKILL.md scaffolding. It's always available without installation.
+
+**skill-forge** handles *format validation + publishing* — it takes a skill (whether created by skill-creator, hand-written, or migrated from a project) and turns it into a published GitHub repo with proper structure, symlinks, and registration.
+
+They complement each other: skill-creator helps you *think through* the skill; skill-forge helps you *ship* it. You can use either independently.
+
+## Respecting User Conventions
+
+Before creating or publishing a skill, check for the user's existing skill conventions:
+- `~/.claude/rules/skill-publishing.md` — global publishing workflow
+- Project-level `.claude/rules/` — project-specific skill patterns
+- Project `CLAUDE.md` — may contain skill structure preferences
+
+If the user has established conventions (naming, structure, org, licensing), **follow them**. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
+
 ## When to Use
 
 - User has a skill idea and wants it as a GitHub repo
@@ -160,17 +177,23 @@ MIT
 *.skill
 ```
 
-### 4d. Git init + GitHub create + push
+### 4d. Git init + remote push
 
 ```bash
 cd ~/motifpool/<skill-name>
 git init
 git add -A
 git commit -m "init: <skill-name> skill"
+```
+
+**GitHub (default):**
+```bash
 gh repo create <org>/<skill-name> --public --source=. --push
 ```
 
 The `<org>` defaults to the user's GitHub username. Ask if they want a different org.
+
+**Non-GitHub remotes:** If the user's project uses a non-GitHub git remote (GitLab, Bitbucket, self-hosted), follow their existing remote conventions. Ask for the remote URL, then `git remote add origin <url> && git push -u origin main`. The rest of the pipeline (symlink, .gitignore, etc.) works identically.
 
 ### 4e. Register symlink
 
