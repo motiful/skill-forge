@@ -33,18 +33,40 @@ If migrating from a project-local skill, read the existing files first.
 
 ## Step 2: Create
 
-### SKILL.md Format (CC 2026 Convention)
+### SKILL.md Format (Agent Skills Open Standard + CC Extensions)
 
+Skills follow the **Agent Skills open standard** (agentskills.io), adopted by Claude Code, Microsoft Copilot, OpenAI ChatGPT, GitHub, Cursor, Atlassian, and Figma.
+
+**Standard frontmatter** (works on all Agent Skills platforms):
 ```yaml
 ---
-name: kebab-case-name       # required, max 64 chars
-description: >-             # required, max 1024 chars
+name: kebab-case-name       # required, max 64 chars, lowercase alphanumeric + hyphens
+description: >-             # required, max 1024 chars, no angle brackets
   What it does + when to trigger.
   Include all trigger conditions here, NOT in the body.
+  The description IS the trigger mechanism.
+license: MIT                # optional
+compatibility: node>=18     # optional, system requirements
+metadata:                   # optional, custom key-value pairs
+  author: name
+  version: "1.0"
 ---
 ```
 
-Body: instructions for the AI agent using this skill. Keep under 500 lines. Use progressive disclosure — put details in `references/` files, reference them from SKILL.md.
+**CC-specific extensions** (only use if not targeting other platforms):
+```yaml
+disable-model-invocation: true   # only user can invoke via /skill-name
+user-invocable: false            # only Claude auto-triggers, not in / menu
+allowed-tools: Read, Grep, Bash  # restrict tool access when active
+model: claude-opus-4-6           # override model for this skill
+context: fork                    # run in isolated subagent
+agent: Explore                   # subagent type (Explore, Plan, general-purpose)
+argument-hint: "[file] [format]" # show expected args in autocomplete
+```
+
+**Body** supports string substitutions: `$ARGUMENTS`, `$0`, `$1`, `${CLAUDE_SKILL_DIR}`.
+
+Body: instructions for the AI agent. Keep under 500 lines. Use progressive disclosure — put details in `references/` files, reference them from SKILL.md.
 
 ### File Structure
 
@@ -67,11 +89,13 @@ skill-name/
 - References: one level deep from SKILL.md. Large files (>100 lines) get a TOC.
 - Delete empty directories (don't create scripts/ or references/ if unused).
 
-### Cross-Platform Notes
+### Cross-Platform Compatibility
 
-The skill/ directory is CC-specific. For broader compatibility:
-- README.md should explain the skill's purpose for humans AND other AI tools
-- The skill's core knowledge can be extracted from SKILL.md for use in AGENTS.md or other formats
+Skills follow the Agent Skills open standard. For maximum portability:
+- Use only standard frontmatter fields (name, description, license, compatibility, metadata)
+- Avoid CC-specific extensions unless the skill truly needs them
+- README.md serves as the human-readable + other-AI-tool-readable entry point
+- Skill's core knowledge in SKILL.md body is platform-agnostic markdown
 
 ## Step 3: Validate
 
