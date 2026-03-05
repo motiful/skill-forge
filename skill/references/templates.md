@@ -9,23 +9,21 @@
 
 ## What This Is
 
-A [Claude Code](https://claude.com/claude-code) skill that <expanded description>.
+An [Agent Skills](https://agentskills.io) compatible skill that <expanded description>.
 
 ## Install
 
-### Claude Code
-
 ```bash
-# Clone the repo
-git clone https://github.com/<org>/<skill-name> ~/motifpool/<skill-name>
-
-# Register as a global skill
-ln -s ~/motifpool/<skill-name>/skill ~/.claude/skills/<skill-name>
+git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
 ```
 
-### Other AI Tools
+Then register on your platform:
 
-The skill's knowledge is in `skill/SKILL.md` and `skill/references/`. You can adapt these files for your tool's format (e.g., append to AGENTS.md, include in system prompt).
+| Platform | Command |
+|----------|---------|
+| Claude Code | `ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>` |
+| Cursor | `ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>` |
+| Other | Symlink or copy `skill/` to your agent's skills directory |
 
 ## What's Inside
 

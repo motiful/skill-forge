@@ -1,26 +1,26 @@
-# skill-forge
+# Skill Forge
 
-> Create, validate, and publish skills to GitHub as independent repos.
+> Create, validate, and publish skills as independent repos — for any AI agent platform.
 
 ## What This Is
 
-A [Claude Code](https://claude.com/claude-code) skill that handles the full pipeline from skill creation to GitHub publication. When you have a skill idea or an existing project-local skill, skill-forge automates: content creation following CC conventions, validation, git init, GitHub repo creation, push, and symlink registration.
+An [Agent Skills](https://agentskills.io) compatible skill that handles the full pipeline from skill creation to publication. Follows the Agent Skills open standard adopted by Claude Code, Cursor, Microsoft Copilot, GitHub, and others.
+
+Skill Forge takes a skill idea (or an existing project-local skill) and automates: content creation following the Agent Skills standard, validation, git init, remote push, and registration on your platform(s).
 
 ## Install
 
-### Claude Code
-
 ```bash
-# Clone the repo
-git clone https://github.com/motiful/skill-forge ~/motifpool/skill-forge
-
-# Register as a global skill
-ln -s ~/motifpool/skill-forge/skill ~/.claude/skills/skill-forge
+git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
 ```
 
-### Other AI Tools
+Then register on your platform:
 
-The skill's knowledge is in `skill/SKILL.md` and `skill/references/`. You can adapt these files for your tool's format (e.g., append to AGENTS.md, include in system prompt).
+| Platform | Command |
+|----------|---------|
+| Claude Code | `ln -s ~/skills/skill-forge/skill ~/.claude/skills/skill-forge` |
+| Cursor | `ln -s ~/skills/skill-forge/skill ~/.cursor/skills/skill-forge` |
+| Other | Symlink or copy `skill/` to your agent's skills directory |
 
 ## What's Inside
 
@@ -33,11 +33,15 @@ skill/
 
 ## Usage
 
-In Claude Code, say any of:
-- "Create a skill for X and publish it to GitHub"
+Say any of:
+- "Create a skill for X and publish it"
 - "Publish this skill to GitHub"
 - "Forge a skill from my notes"
-- "Turn this project-local skill into a GitHub repo"
+- "Turn this project-local skill into a repo"
+
+## Cross-Platform
+
+Skill Forge creates skills that work on any Agent Skills compatible platform. On first use, it asks which platform(s) you use and stores preferences in `~/.config/skill-forge/config.md`.
 
 ## License
 
