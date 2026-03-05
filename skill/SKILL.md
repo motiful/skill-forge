@@ -33,11 +33,57 @@ If the user has established conventions (naming, structure, org, licensing), **f
 ## Pipeline
 
 ```
+0. Config  → ensure user's publishing preferences exist
 1. Gather  → understand what the skill does (examples, triggers, scope)
 2. Create  → write SKILL.md + references/ + scripts/ following CC conventions
 3. Validate → check frontmatter, structure, content quality
-4. Publish → git init, GitHub repo, push, symlink
+4. Publish → git init, remote push, symlink
 ```
+
+## Step 0: Ensure Configuration
+
+Before any publish operation, check `~/.claude/rules/skill-publishing.md`:
+
+**Found** → read user's preferences: `skill_root` path, GitHub org, default license, directory structure conventions.
+
+**Not found** → ask user three questions, then generate the file:
+
+1. Where to store skill repos? (suggest `~/motifpool/` as default)
+2. GitHub org or username? (detect via `gh api user -q .login` as default)
+3. Default license? (suggest MIT)
+
+Example generated config:
+
+```markdown
+# Skill Publishing Convention
+
+## Defaults
+
+- skill_root: ~/motifpool/
+- github_org: motiful
+- license: MIT
+
+## Directory Structure
+
+All publishable skill repos follow:
+
+\```
+<skill_root>/<skill-name>/
+├── skill/                  ← CC reads this
+│   ├── SKILL.md
+│   ├── references/         ← optional
+│   └── scripts/            ← optional
+├── README.md
+├── LICENSE
+└── .gitignore
+\```
+
+## Symlink Convention
+
+~/.claude/skills/<skill-name> → <skill_root>/<skill-name>/skill/
+```
+
+All subsequent steps use `<skill_root>` from this config instead of hardcoded paths.
 
 ## Step 1: Gather
 
@@ -133,13 +179,13 @@ Execute these steps in order:
 ### 4a. Create repo structure
 
 ```
-~/motifpool/<skill-name>/          # repo root
+<skill_root>/<skill-name>/         # repo root (skill_root from Step 0 config)
 ├── skill/                         # skill content (CC reads this)
 │   ├── SKILL.md
 │   ├── references/                # if needed
 │   └── scripts/                   # if needed
 ├── README.md                      # GitHub-facing description
-├── LICENSE                        # MIT by default
+├── LICENSE                        # from config, default MIT
 └── .gitignore
 ```
 
@@ -157,8 +203,8 @@ A [Claude Code](https://claude.com/claude-code) skill that <description>.
 ## Install
 
 ```bash
-git clone https://github.com/<org>/<skill-name> ~/motifpool/<skill-name>
-ln -s ~/motifpool/<skill-name>/skill ~/.claude/skills/<skill-name>
+git clone https://github.com/<org>/<skill-name> <skill_root>/<skill-name>
+ln -s <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
 ```
 
 ## Usage
@@ -180,7 +226,7 @@ MIT
 ### 4d. Git init + remote push
 
 ```bash
-cd ~/motifpool/<skill-name>
+cd <skill_root>/<skill-name>
 git init
 git add -A
 git commit -m "init: <skill-name> skill"
@@ -198,12 +244,12 @@ The `<org>` defaults to the user's GitHub username. Ask if they want a different
 ### 4e. Register symlink
 
 ```bash
-ln -sfn ~/motifpool/<skill-name>/skill ~/.claude/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
 ```
 
-### 4f. Update motifpool .gitignore
+### 4f. Update skill_root .gitignore
 
-Add `<skill-name>/` to `~/motifpool/.gitignore` if not already present.
+If `<skill_root>` is a git repo (or has a `.gitignore`), add `<skill-name>/` if not already present.
 
 ### 4g. Update skill-publishing convention
 
@@ -215,10 +261,10 @@ When publishing an existing project-local skill:
 
 ```
 Source: ~/projects/foo/.claude/skills/bar/
-Target: ~/motifpool/bar/skill/
+Target: <skill_root>/bar/skill/
 ```
 
-1. Copy content: `cp -r <source>/* ~/motifpool/<name>/skill/`
+1. Copy content: `cp -r <source>/* <skill_root>/<name>/skill/`
 2. Review and clean up (remove project-specific references)
 3. Follow Steps 3-4 above
 4. Original stays in the project (independent evolution)
