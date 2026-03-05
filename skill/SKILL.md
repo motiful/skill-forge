@@ -17,10 +17,11 @@ They complement each other: skill-creator helps you *think through* the skill; s
 
 ## Respecting User Conventions
 
-Before creating or publishing a skill, check for the user's existing skill conventions:
-- `~/.claude/rules/skill-publishing.md` — global publishing workflow
-- Project-level `.claude/rules/` — project-specific skill patterns
-- Project `CLAUDE.md` — may contain skill structure preferences
+Before creating or publishing a skill, check for the user's existing conventions. Scan in priority order:
+
+1. **Forge config** — `~/.config/skill-forge/config.md` (platform-agnostic, created by Step 0)
+2. **Project instructions** — `CLAUDE.md`, `AGENTS.md`, or equivalent for the current platform
+3. **Platform rules directory** — if it exists (CC: `~/.claude/rules/`, Cursor: `~/.cursor/rules/`, etc.)
 
 If the user has established conventions (naming, structure, org, licensing), **follow them**. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
 
@@ -35,55 +36,58 @@ If the user has established conventions (naming, structure, org, licensing), **f
 ```
 0. Config  → ensure user's publishing preferences exist
 1. Gather  → understand what the skill does (examples, triggers, scope)
-2. Create  → write SKILL.md + references/ + scripts/ following CC conventions
+2. Create  → write SKILL.md + references/ + scripts/ following Agent Skills standard
 3. Validate → check frontmatter, structure, content quality
 4. Publish → git init, remote push, symlink
 ```
 
 ## Step 0: Ensure Configuration
 
-Before any publish operation, check `~/.claude/rules/skill-publishing.md`:
+Before any publish operation, read `~/.config/skill-forge/config.md`.
 
-**Found** → read user's preferences: `skill_root` path, GitHub org, default license, directory structure conventions.
+**Found** → read user's preferences: `skill_root`, git remote defaults, default license, skill install paths.
 
-**Not found** → ask user three questions, then generate the file:
+**Not found** → ask user, then generate `~/.config/skill-forge/config.md`:
 
-1. Where to store skill repos? (suggest `~/motifpool/` as default)
-2. GitHub org or username? (detect via `gh api user -q .login` as default)
+1. Where to store skill repos? (suggest `~/skills/` as default)
+2. Git remote preference? (GitHub org via `gh api user -q .login`, or other)
 3. Default license? (suggest MIT)
+4. Which AI platform(s)? (CC, Cursor, OpenClaw, etc. — determines install paths)
 
 Example generated config:
 
 ```markdown
-# Skill Publishing Convention
+# Skill Forge Config
 
 ## Defaults
 
-- skill_root: ~/motifpool/
+- skill_root: ~/skills/
+- git_remote: github
 - github_org: motiful
 - license: MIT
 
-## Directory Structure
+## Skill Install Paths
 
-All publishable skill repos follow:
+Where skills are registered on each platform the user uses:
+
+- claude_code: ~/.claude/skills/
+- cursor: ~/.cursor/skills/
+
+## Directory Structure
 
 \```
 <skill_root>/<skill-name>/
-├── skill/                  ← CC reads this
+├── skill/
 │   ├── SKILL.md
-│   ├── references/         ← optional
-│   └── scripts/            ← optional
+│   ├── references/
+│   └── scripts/
 ├── README.md
 ├── LICENSE
 └── .gitignore
 \```
-
-## Symlink Convention
-
-~/.claude/skills/<skill-name> → <skill_root>/<skill-name>/skill/
 ```
 
-All subsequent steps use `<skill_root>` from this config instead of hardcoded paths.
+All subsequent steps use values from this config. No hardcoded platform paths.
 
 ## Step 1: Gather
 
@@ -198,14 +202,20 @@ Execute these steps in order:
 
 ## What This Is
 
-A [Claude Code](https://claude.com/claude-code) skill that <description>.
+An [Agent Skills](https://agentskills.io) compatible skill that <description>.
 
 ## Install
 
 ```bash
-git clone https://github.com/<org>/<skill-name> <skill_root>/<skill-name>
-ln -s <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
+git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
 ```
+
+Then register on your platform:
+
+| Platform | Command |
+|----------|---------|
+| Claude Code | `ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>` |
+| Cursor | `ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>` |
 
 ## Usage
 
@@ -241,26 +251,32 @@ The `<org>` defaults to the user's GitHub username. Ask if they want a different
 
 **Non-GitHub remotes:** If the user's project uses a non-GitHub git remote (GitLab, Bitbucket, self-hosted), follow their existing remote conventions. Ask for the remote URL, then `git remote add origin <url> && git push -u origin main`. The rest of the pipeline (symlink, .gitignore, etc.) works identically.
 
-### 4e. Register symlink
+### 4e. Register skill on user's platforms
+
+Read the `Skill Install Paths` from `~/.config/skill-forge/config.md`. Create symlinks for each platform the user has configured:
 
 ```bash
+# Example: user has claude_code and cursor configured
 ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name>/skill ~/.cursor/skills/<skill-name>
 ```
+
+If config has no install paths yet, ask the user which platform(s) they use and update the config.
 
 ### 4f. Update skill_root .gitignore
 
 If `<skill_root>` is a git repo (or has a `.gitignore`), add `<skill-name>/` if not already present.
 
-### 4g. Update skill-publishing convention
+### 4g. Update forge config
 
-If the user has `~/.claude/rules/skill-publishing.md`, add the new skill to the "已迁移的 Skills" table.
+Add the new skill to `~/.config/skill-forge/config.md` under a "Published Skills" section (create if absent). This serves as a registry of all skills managed by forge.
 
 ## Migration: Project-Local to Published
 
 When publishing an existing project-local skill:
 
 ```
-Source: ~/projects/foo/.claude/skills/bar/
+Source: <project>/.claude/skills/bar/    (or platform equivalent)
 Target: <skill_root>/bar/skill/
 ```
 
