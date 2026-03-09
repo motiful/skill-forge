@@ -1,6 +1,10 @@
 ---
 name: skill-forge
 description: Create, validate, and publish skills to GitHub as independent repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "skill to GitHub", or wants to turn a project-local skill into a shareable GitHub repository. Handles the full pipeline from content creation to git init, GitHub repo creation, and symlink registration.
+license: MIT
+metadata:
+  author: motiful
+  version: "2.0"
 ---
 
 # Skill Forge
@@ -148,7 +152,7 @@ Execute these steps in order:
 
 ```
 <skill_root>/<skill-name>/         # repo root (skill_root from Step 0 config)
-├── skill/                         # skill content (CC reads this)
+├── skill/                         # skill content (agents read this)
 │   ├── SKILL.md
 │   ├── references/                # if needed
 │   └── scripts/                   # if needed
@@ -184,23 +188,44 @@ Local repo only. Remote push happens in Step 4h after all local setup is complet
 
 ### 4e. Register skill via symlink
 
-Ask the user about registration scope:
+All symlinks point to the same source of truth: `<skill_root>/<skill-name>/skill/`.
 
-**Global** (available across all projects):
+Ask the user: global, project-level, or both?
+
+#### Global registration
+
+Always create both symlinks. See `references/platform-registry.md` for path details.
+
 ```bash
+# Claude Code
 ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
-```
-The skill appears in the agent's skill listing everywhere.
 
-**Project-level** (current project only):
+# Cross-platform (.agents standard — Codex, Cursor, Windsurf, Gemini CLI, Copilot)
+mkdir -p ~/.agents/skills
+ln -sfn <skill_root>/<skill-name>/skill ~/.agents/skills/<skill-name>
+```
+
+#### Project-level registration
+
+Scan the project root for existing platform directories and symlink into whichever exist:
+
 ```bash
+# If <project>/.claude/ exists
 ln -sfn <skill_root>/<skill-name>/skill <project>/.claude/skills/<skill-name>
+
+# If <project>/.agents/ exists
+ln -sfn <skill_root>/<skill-name>/skill <project>/.agents/skills/<skill-name>
 ```
-The skill only appears when working in this project.
 
-Each user's preference per skill may differ — some skills are universal tools, others are project-specific. Don't assume; ask once per skill.
+If neither exists, ask the user which to create.
 
-Currently optimized for Claude Code. For other platforms (Cursor, Codex, OpenClaw), the symlink pattern is the same but install paths may vary — use web research to check the platform's current conventions when needed.
+#### Output
+
+```
+✓ ~/.claude/skills/<name> → <skill_root>/<name>/skill/
+✓ ~/.agents/skills/<name> → <skill_root>/<name>/skill/
+2 symlinks created.
+```
 
 ### 4f. Update skill_root .gitignore
 
@@ -228,20 +253,11 @@ git remote add origin <url> && git push -u origin main
 
 ### 4i. Community distribution
 
-**Most community platforms auto-index from GitHub.** Pushing a well-structured repo (valid SKILL.md + good README) is sufficient for discoverability on skills.sh, SkillsMP, agentskills.in, LobeHub, and others. No active submission needed.
+**Most community platforms auto-index from GitHub.** Pushing a well-structured repo (valid SKILL.md + good README) is sufficient for discoverability. No active submission needed.
 
-Tell the user: *"Your skill is now on GitHub. Community platforms like skills.sh auto-index public repos — anyone can install it with `npx skills add <org>/<skill-name>`. No extra submission needed."*
+See `references/platform-registry.md` for the current list of community directories and tools.
 
-**Optional: ClawHub (OpenClaw registry)**
-
-If the user wants to publish to ClawHub specifically:
-
-1. Run the Community Readiness checks from Step 3
-2. Two paths: `clawhub publish` CLI (requires `npm i -g openclaw-core clawhub`) or fork+PR on the `clawhub/registry` GitHub repo
-3. GitHub account must be 1+ week old. Review is community-driven (2-5 days)
-4. OpenClaw itself is NOT required to publish — just the CLI tools
-
-This step is optional. GitHub push already provides broad distribution.
+Tell the user: *"Your skill is now on GitHub. Community platforms auto-index public repos — anyone can install it with `npx skills add <org>/<skill-name>`. No extra submission needed."*
 
 ## Migration: Project-Local to Published
 
@@ -260,6 +276,7 @@ Target: <skill_root>/bar/skill/
 ## References
 
 - `references/skill-format.md` — SKILL.md format specification (frontmatter, structure, guidelines)
+- `references/platform-registry.md` — Platform skill paths, detection logic, community tools. Read by Step 4e at publish time
 - `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
 - `references/constraint-companion.md` — Constraint separation: rule-skill creation, self-containment

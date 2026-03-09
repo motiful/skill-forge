@@ -2,7 +2,9 @@
 
 > From idea to published, installable AI skill — in one pipeline.
 
-[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Cursor, Codex, OpenClaw, and any supporting platform.
+Say "publish this skill" and Skill Forge handles the rest — from writing SKILL.md to pushing a ready-to-install repo to GitHub.
+
+[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Cursor, Codex, Windsurf, Gemini CLI, GitHub Copilot, and more.
 
 ## The Problem
 
@@ -40,10 +42,6 @@ Every skill Skill Forge creates is evaluated for three independent capabilities:
 - **State Management** — Persistent data across sessions (config, history, registries)
 - **Constraint Companion** — MUST/NEVER rules separated into a companion rule-skill for visibility
 
-### Full Pipeline, No Dependencies
-
-Skill Forge handles the entire lifecycle — from thinking through a skill's design, to writing the SKILL.md, to validating format, to pushing to GitHub. You don't need any other skill or tool installed. It's self-contained.
-
 ## Usage
 
 Say any of:
@@ -77,7 +75,8 @@ Step 3: Validate
 
 Step 4: Publish
   ✓ git init + initial commit
-  ✓ symlink: ~/.claude/skills/self-review → ~/motifpool/self-review/skill/
+  ✓ ~/.claude/skills/self-review → ~/motifpool/self-review/skill/
+  ✓ ~/.agents/skills/self-review → ~/motifpool/self-review/skill/
   ✓ gh repo create motiful/self-review --public --source=. --push
   ✓ Published — install with: npx skills add motiful/self-review
 ```
@@ -92,8 +91,12 @@ Or manually:
 
 ```bash
 git clone https://github.com/motiful/skill-forge
-# Then symlink skill/ to your agent's skills directory
+
+# Claude Code
 ln -sfn ~/skill-forge/skill ~/.claude/skills/skill-forge
+
+# Other platforms (Cursor, Codex, Windsurf, Gemini CLI, Copilot)
+ln -sfn ~/skill-forge/skill ~/.agents/skills/skill-forge
 ```
 
 ## What's Inside
@@ -103,6 +106,7 @@ skill/
 ├── SKILL.md              — Full creation + publishing pipeline
 └── references/
     ├── skill-format.md          — SKILL.md format specification
+    ├── platform-registry.md     — Platform paths, detection logic, community tools
     ├── onboarding-pattern.md    — First-use onboarding pattern
     ├── state-management.md      — Persistent state conventions
     ├── constraint-companion.md  — Constraint separation into rule-skills
