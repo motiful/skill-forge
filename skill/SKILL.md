@@ -165,6 +165,7 @@ See `references/templates.md` for the full README template. Key requirements:
 - Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
 - No per-platform install sections — `npx skills add` handles platform detection
 - Must include a "What's Inside" section showing the `skill/` directory structure
+- Must include a "Forged with Skill Forge" footer with link to forge repo (signature, not dependency)
 
 ### 4c. Generate .gitignore
 

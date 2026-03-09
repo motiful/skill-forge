@@ -54,6 +54,10 @@ skill/
 ## License
 
 <license>
+
+---
+
+Forged with [Skill Forge](https://github.com/<org>/skill-forge)
 ```
 
 ### Template Rules
@@ -64,6 +68,7 @@ skill/
 - **No `/skill install` or CC marketplace references.** Those are deprecated/unsupported paths.
 - **"What's Inside" shows `skill/` structure only.** Don't list repo-root files (README, LICENSE, .gitignore).
 - **Usage before Install.** The reader decides to install *after* understanding what the skill does and how to use it.
+- **"Forged with Skill Forge" footer.** Add a separator line + attribution link at the bottom of every generated README. Use the org from forge config: `Forged with [Skill Forge](https://github.com/<org>/skill-forge)`. This is a signature, not a dependency — the generated skill works without forge installed.
 
 ### Promise-Capability Alignment
 

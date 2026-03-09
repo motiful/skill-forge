@@ -86,10 +86,10 @@ Every paragraph in SKILL.md should pass the **behavior test**: if you delete thi
 Skill loading consumes context tokens. The total loaded content (SKILL.md + all references that get loaded) should be proportional to the skill's complexity.
 
 **Guidelines:**
-- SKILL.md body: under 500 lines (existing rule)
-- Total loaded content (SKILL.md + references): aim for under 700 lines for most skills
+- SKILL.md body: under 500 lines (the always-loaded ceiling)
+- Individual reference file: under 200 lines (if larger, split further or add TOC)
 - **Instruction density**: at least 60% of lines should be executable instructions (check tables, rules, process steps, templates). Below 60% suggests excessive explanation
-- For skills over 300 total lines: verify that references are loaded on-demand (AI reads them when needed) rather than all-at-once
+- References are **loaded on-demand** — the agent reads them only when the process flow requires it. Budget is per-file, not sum-of-all-files. A skill with 250-line SKILL.md + five 100-line references is fine — peak load is ~350 lines, not 750
 
 **How to estimate instruction density:**
 Count lines that are: table rows with check actions, numbered/bulleted process steps, code blocks, report templates, Rules items. Divide by total non-blank lines. If the ratio is below 0.6, look for explanatory paragraphs that can be compressed or moved to README.
@@ -116,8 +116,9 @@ Split content into a reference file when it meets ALL three criteria:
 
 **Thresholds:**
 - SKILL.md body: under 500 lines
-- Individual reference files exceeding 100 lines must include a TOC at the top
-- Total loaded content should be proportional to the skill's complexity — don't split a 300-line skill into 6 tiny files
+- Individual reference file: under 200 lines (include TOC if over 100 lines)
+- Budget is per-file (peak load), not sum-of-all-files — references load on-demand
+- Don't split a 300-line skill into 6 tiny files — splitting has overhead too
 
 ## File Structure
 
