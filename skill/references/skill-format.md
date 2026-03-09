@@ -1,5 +1,15 @@
 # SKILL.md Format Specification
 
+## TOC
+
+- [Agent Skills Open Standard](#agent-skills-open-standard)
+- [Standard Frontmatter](#standard-frontmatter)
+- [CC-Specific Extensions](#cc-specific-extensions)
+- [Body](#body)
+- [Content Splitting Rules](#content-splitting-rules)
+- [File Structure](#file-structure)
+- [Cross-Platform Compatibility](#cross-platform-compatibility)
+
 ## Agent Skills Open Standard
 
 Skills follow the **Agent Skills open standard** (agentskills.io), adopted by Claude Code, Microsoft Copilot, OpenAI ChatGPT, GitHub, Cursor, Atlassian, and Figma.

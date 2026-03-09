@@ -52,6 +52,36 @@ Say any of:
 - "Forge a skill from my notes"
 - "Turn this project-local skill into a repo"
 
+### Example: Publishing self-review (Real Output)
+
+```
+$ "Publish self-review to GitHub"
+
+Step 0: Config
+  ✓ ~/.config/skill-forge/config.md found
+  ✓ skill_root: ~/motifpool/, github_org: motiful
+
+Step 1: Gather
+  ✓ Existing skill detected at ~/motifpool/self-review/skill/SKILL.md
+  ✓ Capabilities: none needed (pure methodology, no state or onboarding)
+
+Step 2: Create
+  ✓ SKILL.md already exists — using as-is
+
+Step 3: Validate
+  ✓ name: self-review (kebab-case, 11 chars)
+  ✓ description: single-line, 133 chars
+  ✓ body: 226 lines (< 500)
+  ✓ references/dimensions.md exists and is linked
+  ✓ no junk files in skill/
+
+Step 4: Publish
+  ✓ git init + initial commit
+  ✓ symlink: ~/.claude/skills/self-review → ~/motifpool/self-review/skill/
+  ✓ gh repo create motiful/self-review --public --source=. --push
+  ✓ Published — install with: npx skills add motiful/self-review
+```
+
 ## Install
 
 ```bash
@@ -61,8 +91,9 @@ npx skills add motiful/skill-forge
 Or manually:
 
 ```bash
-git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
+git clone https://github.com/motiful/skill-forge
 # Then symlink skill/ to your agent's skills directory
+ln -sfn ~/skill-forge/skill ~/.claude/skills/skill-forge
 ```
 
 ## What's Inside

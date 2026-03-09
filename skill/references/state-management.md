@@ -1,20 +1,6 @@
 # State Management Pattern
 
-## What It Is
-
-Persistent state across sessions. A skill may need to remember preferences, track history, or maintain registries between invocations. State evolves over the skill's lifetime — unlike initialization which runs once.
-
-## Relationship to Initialization
-
-| | Initialization | State Management |
-|---|---|---|
-| **When** | Once (first use) | Ongoing |
-| **Direction** | Write initial values | Read + write + update |
-| **Trigger** | Config file absent | Every invocation |
-
-A skill can have either without the other:
-- Initialization without state management → one-time setup, then auto-discovers each time
-- State management without initialization → creates state on demand, no onboarding needed
+Persistent state across sessions — preferences, history, registries. Unlike initialization (one-time), state evolves on every invocation. A skill can have either without the other.
 
 ## Storage Format
 

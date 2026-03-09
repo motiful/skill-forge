@@ -37,11 +37,7 @@ If the user has established conventions (naming, structure, org, licensing), **f
 
 ### Positioning
 
-SkillForge creates **independent, publishable skill repositories**. Each skill gets its own git repo, its own README, its own lifecycle. This is the right tool when the goal is to maintain, share, or publish a skill beyond a single project.
-
-If the user just wants a quick project-internal skill (lives in `.claude/skills/` of one project, not shared), they don't need SkillForge — the platform's built-in skill creator is sufficient. Guide them there instead.
-
-**Reassurance for first-time users**: SkillForge isn't "taking your skill away" from your project. It's giving your skill its own home so it can be installed anywhere, versioned independently, and shared with others. Your project can still use it via a symlink.
+SkillForge creates **independent, publishable skill repositories**. If the user just wants a quick project-internal skill (not shared), guide them to the platform's built-in skill creator instead.
 
 ### Config check
 
@@ -172,10 +168,7 @@ See `references/templates.md` for the full README template. Key requirements:
 
 ### 4c. Generate .gitignore
 
-```
-.DS_Store
-*.skill
-```
+Use the template from `references/templates.md`.
 
 ### 4d. Git init (local)
 

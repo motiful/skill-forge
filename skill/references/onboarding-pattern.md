@@ -1,10 +1,6 @@
 # First-Use Onboarding Pattern
 
-## What It Is
-
-A one-time setup flow that runs when a skill is first invoked. The flow gathers information the skill cannot auto-discover from the current project context, sets up necessary state, and guides the user into the skill's workflow.
-
-The config file (`~/.config/<skill-name>/config.md`) is the **initialization marker** — its existence means "onboarding complete." The config stores whatever the onboarding flow collected; the flow itself is the capability.
+One-time setup flow on first invocation. Config file (`~/.config/<skill-name>/config.md`) is the **initialization marker** — exists means "onboarding complete."
 
 ## Detection Mechanism
 

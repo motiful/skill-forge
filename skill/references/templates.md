@@ -1,5 +1,11 @@
 # Templates
 
+## TOC
+
+- [README.md Template](#readmemd-template)
+- [LICENSE Template (MIT)](#license-template-mit)
+- [.gitignore Template](#gitignore-template)
+
 ## README.md Template
 
 The README follows a **value-first** structure: tell the reader what problem you solve before telling them how to install.
