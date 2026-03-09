@@ -7,14 +7,6 @@ description: Create, validate, and publish skills to GitHub as independent repos
 
 Full pipeline for creating and publishing skills as independent GitHub repositories.
 
-## Relationship with Other Tools
-
-**skill-creator** (CC built-in) handles skill *design methodology* — it guides users through what a skill should do, how to structure the content, and generates initial SKILL.md scaffolding. It's always available without installation.
-
-**skill-forge** handles *format validation + publishing* — it takes a skill (whether created by skill-creator, hand-written, or migrated from a project) and turns it into a published GitHub repo with proper structure, symlinks, and registration.
-
-They complement each other: skill-creator helps you *think through* the skill; skill-forge helps you *ship* it. You can use either independently.
-
 ## Respecting User Conventions
 
 Before creating or publishing a skill, check for the user's existing conventions. Scan in priority order:
@@ -34,27 +26,30 @@ If the user has established conventions (naming, structure, org, licensing), **f
 ## Pipeline
 
 ```
-0. Config  → ensure user's publishing preferences exist
-1. Gather  → understand what the skill does (examples, triggers, scope)
+0. Config  → set up ~/skills/ root, detect preferences (auto-defaults)
+1. Gather  → auto-detect existing content, then ask if needed
 2. Create  → write SKILL.md + references/ + scripts/ following Agent Skills standard
 3. Validate → check frontmatter, structure, content quality
-4. Publish → git init, remote push, symlink
+4. Publish → git init (local) → symlink → push → optional community publishing
 ```
 
 ## Step 0: Ensure Configuration
 
-Before any publish operation, read `~/.config/skill-forge/config.md`.
+### Positioning
 
-**Found** → read user's preferences: `skill_root`, git remote defaults, default license, skill install paths.
+SkillForge creates **independent, publishable skill repositories**. Each skill gets its own git repo, its own README, its own lifecycle. This is the right tool when the goal is to maintain, share, or publish a skill beyond a single project.
 
-**Not found** → ask user, then generate `~/.config/skill-forge/config.md`:
+If the user just wants a quick project-internal skill (lives in `.claude/skills/` of one project, not shared), they don't need SkillForge — the platform's built-in skill creator is sufficient. Guide them there instead.
 
-1. Where to store skill repos? (suggest `~/skills/` as default)
-2. Git remote preference? (GitHub org via `gh api user -q .login`, or other)
-3. Default license? (suggest MIT)
-4. Which AI platform(s)? (CC, Cursor, OpenClaw, etc. — determines install paths)
+**Reassurance for first-time users**: SkillForge isn't "taking your skill away" from your project. It's giving your skill its own home so it can be installed anywhere, versioned independently, and shared with others. Your project can still use it via a symlink.
 
-Example generated config:
+### Config check
+
+Read `~/.config/skill-forge/config.md`.
+
+**Found** → read user's preferences and proceed.
+
+**Not found** → create config with sensible defaults, confirm with user:
 
 ```markdown
 # Skill Forge Config
@@ -62,107 +57,62 @@ Example generated config:
 ## Defaults
 
 - skill_root: ~/skills/
-- git_remote: github
-- github_org: motiful
+- github_org: <auto-detect via `gh api user -q .login`, ask if `gh` unavailable>
 - license: MIT
-
-## Skill Install Paths
-
-Where skills are registered on each platform the user uses:
-
-- claude_code: ~/.claude/skills/
-- cursor: ~/.cursor/skills/
-
-## Directory Structure
-
-\```
-<skill_root>/<skill-name>/
-├── skill/
-│   ├── SKILL.md
-│   ├── references/
-│   └── scripts/
-├── README.md
-├── LICENSE
-└── .gitignore
-\```
 ```
 
-All subsequent steps use values from this config. No hardcoded platform paths.
+**`skill_root`** defaults to `~/skills/`. Tell the user: *"Your skills will live in `~/skills/` — each skill gets its own folder and git repo there. You can change this anytime in `~/.config/skill-forge/config.md`."*
+
+Detect what you can (`github_org` via `gh`, platform from the current agent). Only ask when auto-detection fails. Don't interrogate — detect, default, confirm.
 
 ## Step 1: Gather
 
-Ask the user:
+### Context Detection (automatic)
+
+Before asking anything, detect what's already available:
+
+1. **Current project scan** — Look for existing skill content:
+   - `.claude/skills/*/SKILL.md` (or platform equivalent)
+   - `skill/SKILL.md` in the working directory
+   - Any `SKILL.md` file the user might be working on
+
+2. **Conversation context** — Has the user been discussing a skill idea? Are there notes, specs, or requirements already in the conversation?
+
+3. **Explicit references** — Did the user point to specific files or directories?
+
+**If content found** → summarize what was detected, confirm with the user: *"I found an existing skill at `<path>`. I'll use this as the basis — anything you want to change?"*
+
+**If nothing found** → then ask:
 - What does this skill do? (1-2 sentences)
 - When should it trigger? (specific phrases, file types, scenarios)
-- Any existing content to migrate? (project-local skill, notes, docs)
 
-If migrating from a project-local skill, read the existing files first.
+### Capability Detection
+
+Every skill potentially needs three independent capabilities. Detect which ones apply:
+
+| Capability | Detection Question | If Yes |
+|------------|-------------------|--------|
+| **Onboarding** | Does this skill need first-use setup? (dependency checks, user preferences, guided introduction) | See `references/onboarding-pattern.md` |
+| **State Management** | Does this skill need to remember things across sessions? (preferences, history, registries) | See `references/state-management.md` |
+| **Constraint Companion** | Does this skill have user-customizable constraints? (MUST/NEVER rules, domain boundaries) | See `references/constraint-companion.md` |
+
+A skill may need any combination (all three, one, or none). Each is independent — detect and apply separately.
 
 ## Step 2: Create
 
-### SKILL.md Format (Agent Skills Open Standard + CC Extensions)
+Write SKILL.md following the Agent Skills open standard. See `references/skill-format.md` for the complete format specification (frontmatter, CC extensions, body conventions, file structure, content guidelines).
 
-Skills follow the **Agent Skills open standard** (agentskills.io), adopted by Claude Code, Microsoft Copilot, OpenAI ChatGPT, GitHub, Cursor, Atlassian, and Figma.
+Key principle: write for another AI agent, not a human. Keep body under 500 lines — use `references/` files for detailed content.
 
-**Standard frontmatter** (works on all Agent Skills platforms):
-```yaml
----
-name: kebab-case-name       # required, max 64 chars, lowercase alphanumeric + hyphens
-description: >-             # required, max 1024 chars, no angle brackets
-  What it does + when to trigger.
-  Include all trigger conditions here, NOT in the body.
-  The description IS the trigger mechanism.
-license: MIT                # optional
-compatibility: node>=18     # optional, system requirements
-metadata:                   # optional, custom key-value pairs
-  author: name
-  version: "1.0"
----
-```
+### Baking In Detected Capabilities
 
-**CC-specific extensions** (only use if not targeting other platforms):
-```yaml
-disable-model-invocation: true   # only user can invoke via /skill-name
-user-invocable: false            # only Claude auto-triggers, not in / menu
-allowed-tools: Read, Grep, Bash  # restrict tool access when active
-model: claude-opus-4-6           # override model for this skill
-context: fork                    # run in isolated subagent
-agent: Explore                   # subagent type (Explore, Plan, general-purpose)
-argument-hint: "[file] [format]" # show expected args in autocomplete
-```
+For each capability detected in Step 1, bake the corresponding pattern into the generated SKILL.md:
 
-**Body** supports string substitutions: `$ARGUMENTS`, `$0`, `$1`, `${CLAUDE_SKILL_DIR}`.
+- **Onboarding** → Add a Step 0 section with the initialization check and onboarding flow
+- **State Management** → Add config read/write instructions for persistent state
+- **Constraint Companion** → Create a separate `<name>-rules` skill alongside the main skill
 
-Body: instructions for the AI agent. Keep under 500 lines. Use progressive disclosure — put details in `references/` files, reference them from SKILL.md.
-
-### File Structure
-
-```
-skill-name/
-├── skill/
-│   ├── SKILL.md              # required
-│   ├── references/           # optional, loaded on demand
-│   └── scripts/              # optional, executable utilities
-├── README.md                 # required for GitHub
-├── LICENSE                   # required for GitHub (default: MIT)
-└── .gitignore
-```
-
-### Content Guidelines
-
-- Write for another AI agent, not a human. Include non-obvious procedural knowledge.
-- Only add what the AI doesn't already know. Don't explain basic concepts.
-- Prefer concise examples over verbose explanations.
-- References: one level deep from SKILL.md. Large files (>100 lines) get a TOC.
-- Delete empty directories (don't create scripts/ or references/ if unused).
-
-### Cross-Platform Compatibility
-
-Skills follow the Agent Skills open standard. For maximum portability:
-- Use only standard frontmatter fields (name, description, license, compatibility, metadata)
-- Avoid CC-specific extensions unless the skill truly needs them
-- README.md serves as the human-readable + other-AI-tool-readable entry point
-- Skill's core knowledge in SKILL.md body is platform-agnostic markdown
+These capabilities are **transparent to the end user** — they work without the end user having skill-forge or any methodology skills installed. Forge bakes them in at creation time; the generated skill is self-contained.
 
 ## Step 3: Validate
 
@@ -170,11 +120,29 @@ Before publishing, check:
 
 | Check | Criteria |
 |-------|----------|
-| Frontmatter | `name` and `description` present, name is kebab-case, description < 1024 chars |
+| Frontmatter fields | Only standard top-level fields: `name`, `description`, `license`, `metadata`, `compatibility`, `allowed-tools`. Put CC-specific or custom fields inside `metadata` |
+| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens |
+| `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC) |
 | Body | Under 500 lines, has meaningful content (not just TODOs) |
 | References | All files referenced in SKILL.md actually exist |
 | No junk files | No README.md, CHANGELOG.md, or docs inside `skill/` (those go in repo root) |
 | Triggers | Description covers all intended trigger scenarios |
+| Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name (e.g., a skill called "self-review" that also uses "review" as a domain concept with different meaning), terms used with different meanings in different sections, terms that conflict with platform concepts (e.g., using "tool" in a way that conflicts with the agent platform's "tool" concept). Report conflicts — don't auto-fix, as naming is a design decision |
+
+If `skills-ref` CLI is available, run `skills-ref validate` for automated checking. If not available, validate manually against the checks above.
+
+### Community Readiness (optional)
+
+If the user wants maximum discoverability (most platforms auto-index from GitHub, so good structure = good distribution):
+
+| Check | Criteria |
+|-------|----------|
+| README quality | Value-first structure: problem/solution before install. See `references/templates.md` |
+| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
+| No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
+| LICENSE exists | Required for community platforms |
+| Description clarity | Description alone should tell a stranger what this skill does and when to use it |
+| Security | If skill contains scripts, document what they do and what permissions they need |
 
 ## Step 4: Publish
 
@@ -195,47 +163,12 @@ Execute these steps in order:
 
 ### 4b. Generate README.md
 
-```markdown
-# <Skill Name>
-
-> <one-line description from SKILL.md frontmatter>
-
-## What This Is
-
-An [Agent Skills](https://agentskills.io) compatible skill that <description>.
-
-## Install
-
-### Claude Code
-
-```bash
-# From marketplace (if published)
-/skill install <org>/<skill-name>
-
-# Or manual
-git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
-ln -s ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>
-```
-
-### Cursor
-
-```bash
-git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
-ln -s ~/skills/<skill-name>/skill ~/.cursor/skills/<skill-name>
-```
-
-### Other Platforms
-
-Clone the repo and symlink/copy `skill/` to your agent's skills directory.
-
-## Usage
-
-<brief usage notes extracted from SKILL.md>
-
-## License
-
-MIT
-```
+See `references/templates.md` for the full README template. Key requirements:
+- **Value-first structure**: Problem → What It Does → Usage → Install → What's Inside
+- Must mention [Agent Skills](https://agentskills.io) compatibility
+- Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
+- No per-platform install sections — `npx skills add` handles platform detection
+- Must include a "What's Inside" section showing the `skill/` directory structure
 
 ### 4c. Generate .gitignore
 
@@ -244,7 +177,7 @@ MIT
 *.skill
 ```
 
-### 4d. Git init + remote push
+### 4d. Git init (local)
 
 ```bash
 cd <skill_root>/<skill-name>
@@ -253,34 +186,27 @@ git add -A
 git commit -m "init: <skill-name> skill"
 ```
 
-**GitHub (default):**
+Local repo only. Remote push happens in Step 4h after all local setup is complete.
+
+### 4e. Register skill via symlink
+
+Ask the user about registration scope:
+
+**Global** (available across all projects):
 ```bash
-gh repo create <org>/<skill-name> --public --source=. --push
-```
-
-The `<org>` defaults to the user's GitHub username. Ask if they want a different org.
-
-**Non-GitHub remotes:** If the user's project uses a non-GitHub git remote (GitLab, Bitbucket, self-hosted), follow their existing remote conventions. Ask for the remote URL, then `git remote add origin <url> && git push -u origin main`. The rest of the pipeline (symlink, .gitignore, etc.) works identically.
-
-### 4e. Register skill on user's platforms
-
-Read the `Skill Install Paths` from `~/.config/skill-forge/config.md`. For each platform the user has configured:
-
-**Symlink registration** (always available):
-```bash
-# Example: user has claude_code and cursor configured
 ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
-ln -sfn <skill_root>/<skill-name>/skill ~/.cursor/skills/<skill-name>
 ```
+The skill appears in the agent's skill listing everywhere.
 
-**Platform-native publishing** (if user wants marketplace distribution):
-- CC: prepare `.claude-plugin/` metadata for marketplace submission
-- Cursor: follow Cursor's skill registry process
-- Other: follow platform-specific publishing docs
+**Project-level** (current project only):
+```bash
+ln -sfn <skill_root>/<skill-name>/skill <project>/.claude/skills/<skill-name>
+```
+The skill only appears when working in this project.
 
-Symlink registration is the minimum. Marketplace publishing is optional and additive.
+Each user's preference per skill may differ — some skills are universal tools, others are project-specific. Don't assume; ask once per skill.
 
-If config has no install paths yet, ask the user which platform(s) they use and update the config.
+Currently optimized for Claude Code. For other platforms (Cursor, Codex, OpenClaw), the symlink pattern is the same but install paths may vary — use web research to check the platform's current conventions when needed.
 
 ### 4f. Update skill_root .gitignore
 
@@ -289,6 +215,39 @@ If `<skill_root>` is a git repo (or has a `.gitignore`), add `<skill-name>/` if 
 ### 4g. Update forge config
 
 Add the new skill to `~/.config/skill-forge/config.md` under a "Published Skills" section (create if absent). This serves as a registry of all skills managed by forge.
+
+### 4h. Push to remote
+
+All local setup is complete. Now push.
+
+**GitHub (default):**
+```bash
+gh repo create <org>/<skill-name> --public --source=. --push
+```
+
+The `<org>` comes from the forge config. Ask if the user wants a different org or visibility (public/private).
+
+**Non-GitHub remotes:** Follow the user's existing conventions. Ask for the remote URL:
+```bash
+git remote add origin <url> && git push -u origin main
+```
+
+### 4i. Community distribution
+
+**Most community platforms auto-index from GitHub.** Pushing a well-structured repo (valid SKILL.md + good README) is sufficient for discoverability on skills.sh, SkillsMP, agentskills.in, LobeHub, and others. No active submission needed.
+
+Tell the user: *"Your skill is now on GitHub. Community platforms like skills.sh auto-index public repos — anyone can install it with `npx skills add <org>/<skill-name>`. No extra submission needed."*
+
+**Optional: ClawHub (OpenClaw registry)**
+
+If the user wants to publish to ClawHub specifically:
+
+1. Run the Community Readiness checks from Step 3
+2. Two paths: `clawhub publish` CLI (requires `npm i -g openclaw-core clawhub`) or fork+PR on the `clawhub/registry` GitHub repo
+3. GitHub account must be 1+ week old. Review is community-driven (2-5 days)
+4. OpenClaw itself is NOT required to publish — just the CLI tools
+
+This step is optional. GitHub push already provides broad distribution.
 
 ## Migration: Project-Local to Published
 
@@ -306,4 +265,8 @@ Target: <skill_root>/bar/skill/
 
 ## References
 
-- `references/templates.md` — README and LICENSE templates
+- `references/skill-format.md` — SKILL.md format specification (frontmatter, structure, guidelines)
+- `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
+- `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
+- `references/constraint-companion.md` — Constraint separation: rule-skill creation, self-containment
+- `references/templates.md` — README, LICENSE, and .gitignore templates

@@ -1,45 +1,48 @@
 # Skill Forge
 
-> Create, validate, and publish skills as independent repos — for any AI agent platform.
+> From idea to published, installable AI skill — in one pipeline.
 
-## What This Is
+[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Cursor, Codex, OpenClaw, and any supporting platform.
 
-An [Agent Skills](https://agentskills.io) compatible skill that handles the full pipeline from skill creation to publication. Follows the Agent Skills open standard adopted by Claude Code, Cursor, Microsoft Copilot, GitHub, and others.
+## The Problem
 
-Skill Forge takes a skill idea (or an existing project-local skill) and automates: content creation following the Agent Skills standard, validation, git init, remote push, and registration on your platform(s).
+You wrote a great skill. It works locally. But:
 
-## Install
+- It's trapped in one project's skills directory — not a proper, installable package
+- You can't share it across machines, let alone with other people
+- It doesn't meet any platform's install standard — no README, no LICENSE, no proper structure
+- There's no versioning, no discoverability, no community presence
+- Publishing means figuring out GitHub repo setup, README conventions, symlink registration, and community platform requirements — all manually
 
-### Claude Code
+Your skill is trapped. It can't be maintained globally, iterated on independently, or shared with the community.
 
-```bash
-# From marketplace (if published)
-/skill install motiful/skill-forge
+## What Skill Forge Does
 
-# Or manual
-git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
-ln -s ~/skills/skill-forge/skill ~/.claude/skills/skill-forge
-```
-
-### Cursor
-
-```bash
-git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
-ln -s ~/skills/skill-forge/skill ~/.cursor/skills/skill-forge
-```
-
-### Other Platforms
-
-Clone the repo and symlink/copy `skill/` to your agent's skills directory.
-
-## What's Inside
+Takes a skill idea (or an existing project-local skill) and runs the full pipeline:
 
 ```
-skill/
-├── SKILL.md              — Main skill instructions (creation + publishing pipeline)
-└── references/
-    └── templates.md      — README, LICENSE, .gitignore templates
+Config → Gather → Create → Validate → Publish
 ```
+
+0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences (auto-defaults, minimal questions)
+1. **Gather** — Auto-detect existing skill content from project and conversation. Detect capabilities needed (onboarding, state management, constraint companion)
+2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in
+3. **Validate** — Structure, frontmatter, `skills-ref validate` compatibility, content quality, optional community readiness checks
+4. **Publish** — `git init`, register symlinks, push to GitHub. Pushing to GitHub auto-indexes on skills.sh, SkillsMP, and other community platforms
+
+The result: a standalone repo that anyone can install with one command.
+
+### Built-in Capabilities
+
+Every skill Skill Forge creates is evaluated for three independent capabilities:
+
+- **Onboarding** — First-use setup (preferences, dependency checks, guided introduction)
+- **State Management** — Persistent data across sessions (config, history, registries)
+- **Constraint Companion** — MUST/NEVER rules separated into a companion rule-skill for visibility
+
+### Full Pipeline, No Dependencies
+
+Skill Forge handles the entire lifecycle — from thinking through a skill's design, to writing the SKILL.md, to validating format, to pushing to GitHub. You don't need any other skill or tool installed. It's self-contained.
 
 ## Usage
 
@@ -49,9 +52,31 @@ Say any of:
 - "Forge a skill from my notes"
 - "Turn this project-local skill into a repo"
 
-## Cross-Platform
+## Install
 
-Skill Forge creates skills that work on any Agent Skills compatible platform. On first use, it asks which platform(s) you use and stores preferences in `~/.config/skill-forge/config.md`.
+```bash
+npx skills add motiful/skill-forge
+```
+
+Or manually:
+
+```bash
+git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
+# Then symlink skill/ to your agent's skills directory
+```
+
+## What's Inside
+
+```
+skill/
+├── SKILL.md              — Full creation + publishing pipeline
+└── references/
+    ├── skill-format.md          — SKILL.md format specification
+    ├── onboarding-pattern.md    — First-use onboarding pattern
+    ├── state-management.md      — Persistent state conventions
+    ├── constraint-companion.md  — Constraint separation into rule-skills
+    └── templates.md             — README, LICENSE, .gitignore templates
+```
 
 ## License
 
