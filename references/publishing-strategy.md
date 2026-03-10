@@ -41,6 +41,8 @@ One skill, one GitHub repo. This is Skill-Forge's default output.
 
 Multiple skills in one GitHub repo. Used by organizations with a shared product domain.
 
+**Note:** Consider whether the Hybrid model (below) better fits your needs. Multi-skill repos lock skills to a single repo — they can't appear in other collections without duplication. If your skills might be consumed in different combinations, use independent repos + catalog instead. See `references/skill-composition.md` for detailed composition guidance.
+
 **Structure:**
 ```
 <org>/<collection-name>/
@@ -81,9 +83,9 @@ npx skills add <org>/<collection>                   # interactive picker
 
 **Caveat:** Users may be cautious installing "all skills from an org." Individual skill discovery is harder — users see the collection, not individual skills.
 
-## Hybrid Model
+## Hybrid Model (Recommended for multiple skills)
 
-Independent repos for each skill + a catalog repo that lists them all. Best of both worlds.
+Independent repos for each skill + catalog repos for themed collections. The recommended default for publishing multiple skills.
 
 **Structure:**
 
@@ -93,38 +95,31 @@ Independent repos (primary):
   <org>/skill-forge
   <org>/booth
 
-Catalog repo (secondary):
-  <org>/skills
-  └── README.md            ← lists all skills with descriptions + install commands
+Catalog repos (secondary):
+  <org>/authoring-toolkit
+  ├── README.md            ← what this collection solves
+  ├── install.sh           ← one-command installer
+  └── LICENSE
 ```
 
-The catalog repo contains **no skill code** — it's a human-readable directory that links to independent repos.
+Each catalog is a **view over independent skill repos**, not a container. The same skill can appear in multiple catalogs — this enables multi-to-multi distribution.
 
 **Best for:**
-- Authors with diverse, multi-domain skills (not all related to one product)
+- Skills that may be consumed in different combinations
 - Maximizing both individual discoverability and collective brand presence
-- Skills that each stand alone but benefit from being listed together
+- Same skill needed in multiple product domains
+- Skills with different release cycles or maintainers
 
 **Advantages:**
 - Each skill has its own GitHub presence (stars, issues, README)
+- Skills can appear in multiple themed catalogs (multi-to-multi)
 - Users discover individual skills via search → low friction install
-- Users discover the org via catalog → see the full collection
-- No maintenance burden on the catalog (it's just a README)
+- Users discover collections via catalog → curated experience
+- AI agents read catalog README to understand what to install
 
-**Catalog README template:**
-```markdown
-# <org> Skills
+**Catalog naming:** `<problem-domain>-toolkit` or `<problem-domain>-kit`. Not `<org>-skills` (too vague).
 
-> All agent skills by <org>.
-
-| Skill | Description | Install |
-|-------|-------------|---------|
-| [self-review](https://github.com/<org>/self-review) | 4-pillar alignment audit | `npx skills add <org>/self-review` |
-| [skill-forge](https://github.com/<org>/skill-forge) | Create and publish skills | `npx skills add <org>/skill-forge` |
-| ... | ... | ... |
-
-All skills are [Agent Skills](https://agentskills.io) compatible.
-```
+For catalog templates (README + install.sh), see `references/skill-composition.md`.
 
 ## Decision Framework
 
@@ -134,17 +129,18 @@ How many skills are you publishing?
 1. Just one skill?
    → Single-skill repo (default)
 
-2. Multiple skills, same product domain?
-   (e.g., all related to WordPress, all related to your API)
-   → Multi-skill repo
+2. Multiple skills?
+   → Do these skills ALWAYS get consumed together, never individually?
+     YES → Multi-skill repo (simpler, but skills are locked to this repo)
+     NO  → Independent repos + catalog (recommended)
+           Each skill gets its own repo. Catalog bundles them.
 
-3. Multiple skills, diverse topics?
-   (e.g., audit tool + publishing tool + browser tool)
-   → Hybrid: independent repos + catalog
-
-4. Already have independent repos, want collective presence?
-   → Add a catalog repo alongside existing repos
+3. Already have independent repos, want themed collections?
+   → Create catalog repos (README + install.sh)
+     Same skill can appear in multiple catalogs.
 ```
+
+For detailed composition guidance (catalog templates, context budget, tooling), see `references/skill-composition.md`.
 
 ## Directory Standards
 
