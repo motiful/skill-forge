@@ -125,7 +125,7 @@ Before publishing, check:
 | `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC) |
 | Body | Under 500 lines, has meaningful content (not just TODOs) |
 | References | All files referenced in SKILL.md actually exist |
-| No junk files | No README.md, CHANGELOG.md, or docs inside `skill/` (those go in repo root) |
+| No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, scripts/ at root alongside README.md and LICENSE is the expected structure |
 | Triggers | Description covers all intended trigger scenarios |
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name (e.g., a skill called "self-review" that also uses "review" as a domain concept with different meaning), terms used with different meanings in different sections, terms that conflict with platform concepts (e.g., using "tool" in a way that conflicts with the agent platform's "tool" concept). Report conflicts — don't auto-fix, as naming is a design decision |
 

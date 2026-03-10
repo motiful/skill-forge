@@ -6,7 +6,7 @@ This file is read by Step 4e at publish time. It tells the agent where to create
 
 ## Registration Paths
 
-All symlinks point to the same source of truth: `<skill_root>/<skill-name>/skill/`.
+All symlinks point to the same source of truth: `<skill_root>/<skill-name>/`.
 
 ### Claude Code
 

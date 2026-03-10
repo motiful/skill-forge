@@ -60,7 +60,7 @@ Step 0: Config
   ✓ skill_root: ~/motifpool/, github_org: motiful
 
 Step 1: Gather
-  ✓ Existing skill detected at ~/motifpool/self-review/skill/SKILL.md
+  ✓ Existing skill detected at ~/motifpool/self-review/SKILL.md
   ✓ Capabilities: none needed (pure methodology, no state or onboarding)
 
 Step 2: Create
@@ -71,12 +71,12 @@ Step 3: Validate
   ✓ description: single-line, 133 chars
   ✓ body: 226 lines (< 500)
   ✓ references/dimensions.md exists and is linked
-  ✓ no junk files in skill/
+  ✓ no junk files in skill content
 
 Step 4: Publish
   ✓ git init + initial commit
-  ✓ ~/.claude/skills/self-review → ~/motifpool/self-review/skill/
-  ✓ ~/.agents/skills/self-review → ~/motifpool/self-review/skill/
+  ✓ ~/.claude/skills/self-review → ~/motifpool/self-review/
+  ✓ ~/.agents/skills/self-review → ~/motifpool/self-review/
   ✓ gh repo create motiful/self-review --public --source=. --push
   ✓ Published — install with: npx skills add motiful/self-review
 ```
@@ -93,26 +93,30 @@ Or manually:
 git clone https://github.com/motiful/skill-forge
 
 # Claude Code
-ln -sfn ~/skill-forge/skill ~/.claude/skills/skill-forge
+ln -sfn ~/skill-forge ~/.claude/skills/skill-forge
 
 # Other platforms (Cursor, Codex, Windsurf, Gemini CLI, Copilot)
-ln -sfn ~/skill-forge/skill ~/.agents/skills/skill-forge
+ln -sfn ~/skill-forge ~/.agents/skills/skill-forge
 ```
 
 ## What's Inside
 
 ```
-skill/
-├── SKILL.md              — Full creation + publishing pipeline
-└── references/
-    ├── skill-format.md          — SKILL.md format specification
-    ├── platform-registry.md     — Platform paths, detection logic, community tools
-    ├── onboarding-pattern.md    — First-use onboarding pattern
-    ├── state-management.md      — Persistent state conventions
-    ├── constraint-companion.md  — Constraint separation into rule-skills
-    └── templates.md             — README, LICENSE, .gitignore templates
+SKILL.md              — Full creation + publishing pipeline
+references/
+├── skill-format.md          — SKILL.md format specification
+├── publishing-strategy.md   — Single/multi/hybrid repo models
+├── platform-registry.md     — Platform paths, detection logic, community tools
+├── onboarding-pattern.md    — First-use onboarding pattern
+├── state-management.md      — Persistent state conventions
+├── constraint-companion.md  — Rule-Skill user customization
+└── templates.md             — README, LICENSE, .gitignore templates
 ```
 
 ## License
 
 MIT
+
+---
+
+Forged with [Skill Forge](https://github.com/motiful/skill-forge)

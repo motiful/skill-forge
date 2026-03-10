@@ -125,15 +125,15 @@ Split content into a reference file when it meets ALL three criteria:
 
 ```
 skill-name/
-├── skill/
-│   ├── SKILL.md              # required
-│   ├── references/           # optional, loaded on demand
-│   └── scripts/              # optional, executable utilities
-├── README.md                 # required for GitHub
-├── LICENSE                   # required for GitHub (default: MIT)
+├── SKILL.md              # required (at repo root for npx skills add discovery)
+├── references/           # optional, loaded on demand
+├── scripts/              # optional, executable utilities
+├── README.md             # required for GitHub
+├── LICENSE               # required for GitHub (default: MIT)
 └── .gitignore
 ```
 
+- SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
 - References: one level deep from SKILL.md. Large files (>100 lines) get a TOC
 - Delete empty directories (don't create scripts/ or references/ if unused)
 

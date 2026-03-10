@@ -41,19 +41,18 @@ Or manually:
 git clone https://github.com/<org>/<skill-name> ~/skills/<skill-name>
 
 # Claude Code
-ln -sfn ~/skills/<skill-name>/skill ~/.claude/skills/<skill-name>
+ln -sfn ~/skills/<skill-name> ~/.claude/skills/<skill-name>
 
 # Other platforms (Cursor, Codex, Windsurf, etc.)
-ln -sfn ~/skills/<skill-name>/skill ~/.agents/skills/<skill-name>
+ln -sfn ~/skills/<skill-name> ~/.agents/skills/<skill-name>
 ```
 
 ## What's Inside
 
 ```
-skill/
-├── SKILL.md              — <short description>
-└── references/            — <if applicable>
-    └── ...
+SKILL.md              — <short description>
+references/            — <if applicable>
+└── ...
 ```
 
 ## License
@@ -71,7 +70,7 @@ Forged with [Skill Forge](https://github.com/<org>/skill-forge)
 - **Install is second citizen.** Important but not the lead. `npx skills add` is the primary method; manual clone is the fallback.
 - **No per-platform install sections.** `npx skills add` handles platform detection. Manual fallback is one generic block.
 - **No `/skill install` or CC marketplace references.** Those are deprecated/unsupported paths.
-- **"What's Inside" shows `skill/` structure only.** Don't list repo-root files (README, LICENSE, .gitignore).
+- **"What's Inside" shows skill content only.** List SKILL.md, references/, scripts/ — don't list repo-root files (README, LICENSE, .gitignore).
 - **Usage before Install.** The reader decides to install *after* understanding what the skill does and how to use it.
 - **"Forged with Skill Forge" footer.** Add a separator line + attribution link at the bottom of every generated README. Use the org from forge config: `Forged with [Skill Forge](https://github.com/<org>/skill-forge)`. This is a signature, not a dependency — the generated skill works without forge installed.
 
@@ -111,7 +110,7 @@ The SKILL.md `description` (for agents) and README intro (for humans) serve diff
 | What It Does | Compact — a pipeline diagram, bullet list, or table. Not paragraphs |
 | Usage | Trigger phrases + one real example with output |
 | Install | Primary: 1 command. Manual: 3-5 lines max |
-| What's Inside | Tree view of skill/ only |
+| What's Inside | Tree view of skill content (SKILL.md, references/, scripts/) |
 
 If a section exceeds one screen, split the detail into a separate doc and link to it.
 
