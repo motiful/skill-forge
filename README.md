@@ -105,7 +105,8 @@ ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
 SKILL.md              — Full creation + publishing pipeline
 references/
 ├── skill-format.md          — SKILL.md format specification
-├── publishing-strategy.md   — Single/multi/hybrid repo models
+├── publishing-strategy.md   — Skill/Kit/Collection publishing models
+├── skill-composition.md     — Composition philosophy: context budget, ecosystem
 ├── platform-registry.md     — Platform paths, detection logic, community tools
 ├── onboarding-pattern.md    — First-use onboarding pattern
 ├── state-management.md      — Persistent state conventions

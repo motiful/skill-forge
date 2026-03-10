@@ -6,7 +6,7 @@ Trigger: "update skill-forge", "refresh platform info", or during self-review of
 
 ## Updating Platform Registry
 
-1. Open `skill/references/platform-registry.md`
+1. Open `references/platform-registry.md`
 2. For each platform in the Per-Platform Reference table, check its Docs link for path changes
 3. Search: "agent skills directory [platform name] 2026" for any new platforms
 4. Check: has any platform added or removed `.agents/skills/` support?
