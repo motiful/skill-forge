@@ -2,7 +2,7 @@
 
 > From idea to published, installable AI skill — in one pipeline.
 
-Say "publish this skill" and Skill Forge handles the rest — from writing SKILL.md to pushing a ready-to-install repo to GitHub.
+Say "publish this skill" to your AI coding assistant and Skill Forge handles the rest — from writing SKILL.md to pushing a ready-to-install repo to GitHub.
 
 [Agent Skills](https://agentskills.io) compatible — works with Claude Code, Cursor, Codex, Windsurf, Gemini CLI, GitHub Copilot, and more.
 
@@ -27,20 +27,16 @@ Config → Gather → Create → Validate → Publish
 ```
 
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences (auto-defaults, minimal questions)
-1. **Gather** — Auto-detect existing skill content from project and conversation. Detect capabilities needed (onboarding, state management, constraint companion)
+1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints?)
 2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in
-3. **Validate** — Structure, frontmatter, `skills-ref validate` compatibility, content quality, optional community readiness checks
-4. **Publish** — `git init`, register symlinks, push to GitHub. Pushing to GitHub auto-indexes on skills.sh, SkillsMP, and other community platforms
+3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
+4. **Publish** — `git init`, register symlinks, push to GitHub. Community platforms auto-index public repos
 
 The result: a standalone repo that anyone can install with one command.
 
-### Built-in Capabilities
+### Publishing Multiple Skills?
 
-Every skill Skill Forge creates is evaluated for three independent capabilities:
-
-- **Onboarding** — First-use setup (preferences, dependency checks, guided introduction)
-- **State Management** — Persistent data across sessions (config, history, registries)
-- **Constraint Companion** — MUST/NEVER rules separated into a companion rule-skill for visibility
+Skill Forge also guides you through organizing multiple skills — whether as independent repos bundled into a themed **Kit** (`authoring-kit`, `quality-kit`), or as a single-repo **Collection**. See the publishing strategy reference for details.
 
 ## Usage
 
@@ -57,10 +53,10 @@ $ "Publish self-review to GitHub"
 
 Step 0: Config
   ✓ ~/.config/skill-forge/config.md found
-  ✓ skill_root: ~/motifpool/, github_org: motiful
+  ✓ skill_root: ~/skills/, github_org: motiful
 
 Step 1: Gather
-  ✓ Existing skill detected at ~/motifpool/self-review/SKILL.md
+  ✓ Existing skill detected at ~/skills/self-review/SKILL.md
   ✓ Capabilities: none needed (pure methodology, no state or onboarding)
 
 Step 2: Create
@@ -75,11 +71,17 @@ Step 3: Validate
 
 Step 4: Publish
   ✓ git init + initial commit
-  ✓ ~/.claude/skills/self-review → ~/motifpool/self-review/
-  ✓ ~/.agents/skills/self-review → ~/motifpool/self-review/
+  ✓ ~/.claude/skills/self-review → ~/skills/self-review/
+  ✓ ~/.agents/skills/self-review → ~/skills/self-review/
   ✓ gh repo create motiful/self-review --public --source=. --push
   ✓ Published — install with: npx skills add motiful/self-review
 ```
+
+## Prerequisites
+
+- **Git** (required)
+- **Node.js** (required for `npx skills add`)
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — recommended for one-command publishing. Without it, you'll set up the remote manually
 
 ## Install
 
@@ -104,20 +106,16 @@ ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
 ```
 SKILL.md              — Full creation + publishing pipeline
 references/
-├── skill-format.md          — SKILL.md format specification
-├── publishing-strategy.md   — Skill/Kit/Collection publishing models
-├── skill-composition.md     — Composition philosophy: context budget, ecosystem
-├── platform-registry.md     — Platform paths, detection logic, community tools
-├── onboarding-pattern.md    — First-use onboarding pattern
-├── state-management.md      — Persistent state conventions
-├── constraint-companion.md  — Rule-Skill user customization
+├── skill-format.md          — How to write a valid SKILL.md
+├── publishing-strategy.md   — One skill, multiple skills, or a themed Kit
+├── skill-composition.md     — Why skills need composition (like npm needs dependencies)
+├── platform-registry.md     — Where each platform looks for skills
+├── onboarding-pattern.md    — Adding first-use setup to a skill
+├── state-management.md      — Persistent config and state across sessions
+├── constraint-companion.md  — Separating enforceable rules into a companion skill
 └── templates.md             — README, LICENSE, .gitignore templates
 ```
 
 ## License
 
-MIT
-
----
-
-Forged with [Skill Forge](https://github.com/motiful/skill-forge)
+[MIT](LICENSE)
