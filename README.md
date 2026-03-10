@@ -90,13 +90,13 @@ npx skills add motiful/skill-forge
 Or manually:
 
 ```bash
-git clone https://github.com/motiful/skill-forge
+git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
 
 # Claude Code
-ln -sfn ~/skill-forge ~/.claude/skills/skill-forge
+ln -sfn ~/skills/skill-forge ~/.claude/skills/skill-forge
 
 # Other platforms (Cursor, Codex, Windsurf, Gemini CLI, Copilot)
-ln -sfn ~/skill-forge ~/.agents/skills/skill-forge
+ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
 ```
 
 ## What's Inside
