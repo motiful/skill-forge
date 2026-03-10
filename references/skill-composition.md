@@ -18,52 +18,60 @@ The npm/pip ecosystems proved that dependency management is the unlock for expon
 
 **Current ecosystem state (March 2026):** The Agent Skills spec has no `dependencies` field. Four open proposals exist (agentskills/agentskills #100, #110, #90→#160, #210). No tool has won the "npm for skills" position. The slot is open.
 
-## Decision: Monorepo vs Independent + Catalog
+## Terminology
+
+Three terms, no jargon:
+
+| Term | Definition | Repo naming |
+|------|-----------|------------|
+| **Skill** | One capability, one repo. The atomic unit. | `<org>/<skill-name>` |
+| **Kit** | A curated bundle of skills for a specific workflow. | `<org>/<domain>-kit` |
+| **Catalog** | An org-level directory listing all available skills. | `<org>/skills` |
+
+Use these terms in conversation with the user. Avoid "monorepo" and "hybrid" — they are implementation details, not user-facing concepts.
+
+## Decision: Kit vs Collection
 
 When a user publishes multiple related skills, ask which model fits:
 
-### Independent repos + Catalog (recommended default)
+### Kit (recommended default)
 
-Each skill is its own repo. A catalog repo bundles them for a specific audience or scenario.
+Each skill is its own repo. A Kit bundles them for a specific audience or workflow.
 
 **Choose when:**
 - Skills can be consumed in different combinations
-- You want the same skill in multiple catalogs (multi-to-multi distribution)
+- You want the same skill in multiple Kits (multi-to-multi distribution)
 - Skills have different release cycles or maintainers
 - You want each skill to have its own GitHub presence (stars, issues, SEO)
-- You're building a skill ecosystem, not just a product
 
 **Trade-off:** Users run `install.sh` (or multiple `npx skills add` commands) instead of one. Acceptable today; solved by dependency tooling in the future.
 
-### Monorepo
+### Collection
 
-All skills in one repo under `skills/<name>/SKILL.md`.
+All skills in one repo under `skills/<name>/SKILL.md`. For users who prefer simplicity over flexibility.
 
 **Choose when:**
 - Skills are ALWAYS consumed together (no standalone use case)
 - Single team, single release cycle
-- Small collection (< 5 skills) with no growth expectation
 - You value one-command install over distribution flexibility
 
-**Trade-off:** Skills are locked to this repo. They can't appear in other catalogs without duplication. Multi-to-multi distribution is impossible.
+**Trade-off:** Skills are locked to this repo. They can't appear in multiple Kits without duplication.
 
 ### Decision prompt for skill-forge
 
 ```
 How do you want to organize these skills?
 
-1. Independent repos + catalog
+1. Kit — each skill gets its own repo, bundled by workflow
    Best for: skills that can be mixed and matched
-   Each skill gets its own repo. A catalog bundles them.
 
-2. Monorepo
+2. Collection — all skills in one repo
    Best for: tightly coupled skills always used together
-   All skills in one repo.
 
-(Default: independent + catalog)
+(Default: Kit)
 ```
 
-This is a recommendation, not a mandate. The user decides.
+Present both options. The user decides. If they choose Collection, support it fully — don't push them to switch.
 
 ## Catalog Pattern
 
@@ -137,15 +145,15 @@ Or install individually — each skill works on its own.
 - NOT `<org>-skills` (too vague) or `<org>/<org>` (zero information)
 - The name should tell a stranger what workflow this collection supports
 
-### Key property: skills are first-class, catalogs are views
+### Key property: skills are first-class, Kits are views
 
-The same skill can appear in multiple catalogs. Catalogs are views over the skill graph, not containers. This enables multi-to-multi distribution:
+The same skill can appear in multiple Kits. Kits are views over the skill graph, not containers. This enables multi-to-multi distribution:
 
 ```
 skill-a ──→ catalog-X (for workflow X)
-skill-b ──→ catalog-X
-skill-b ──→ catalog-Y (for workflow Y)
-skill-c ──→ catalog-Y
+skill-b ──→ kit-X
+skill-b ──→ kit-Y (for workflow Y)
+skill-c ──→ kit-Y
 ```
 
 ## Context Budget Constraint
