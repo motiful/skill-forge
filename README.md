@@ -46,7 +46,7 @@ Say any of:
 - "Forge a skill from my notes"
 - "Turn this project-local skill into a repo"
 
-### Example: Publishing self-review (Real Output)
+### Example: Publishing self-review
 
 ```
 $ "Publish self-review to GitHub"

@@ -283,6 +283,6 @@ Target: <skill_root>/bar/
 - `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
 - `references/constraint-companion.md` — Rule-Skill user customization: detection, decision tree, companion packaging
-- `references/publishing-strategy.md` — Single-skill vs multi-skill repos, hybrid model, directory standards
+- `references/publishing-strategy.md` — Skill/Kit/Collection publishing models, decision framework, directory standards
 - `references/skill-composition.md` — Composition philosophy: context budget constraint, tooling landscape
 - `references/templates.md` — README, LICENSE, and .gitignore templates
