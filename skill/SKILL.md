@@ -146,16 +146,19 @@ If the user wants maximum discoverability (most platforms auto-index from GitHub
 
 ## Step 4: Publish
 
+Before creating the repo, determine the publishing strategy. See `references/publishing-strategy.md` for detailed guidance.
+
+**Quick decision:** Is this skill part of a multi-skill collection for a shared product domain? If yes → multi-skill repo (`skills/<name>/SKILL.md`). If no → single-skill repo (SKILL.md at root). Most skills are single-skill repos.
+
 Execute these steps in order:
 
 ### 4a. Create repo structure
 
 ```
 <skill_root>/<skill-name>/         # repo root (skill_root from Step 0 config)
-├── skill/                         # skill content (agents read this)
-│   ├── SKILL.md
-│   ├── references/                # if needed
-│   └── scripts/                   # if needed
+├── SKILL.md                       # skill content (at root for npx skills add discovery)
+├── references/                    # if needed
+├── scripts/                       # if needed
 ├── README.md                      # GitHub-facing description
 ├── LICENSE                        # from config, default MIT
 └── .gitignore
@@ -168,7 +171,7 @@ See `references/templates.md` for the full README template. Key requirements:
 - Must mention [Agent Skills](https://agentskills.io) compatibility
 - Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
 - No per-platform install sections — `npx skills add` handles platform detection
-- Must include a "What's Inside" section showing the `skill/` directory structure
+- Must include a "What's Inside" section showing the skill files (SKILL.md, references/, scripts/)
 - Must include a "Forged with Skill Forge" footer with link to forge repo (signature, not dependency)
 
 ### 4c. Generate .gitignore
@@ -188,7 +191,7 @@ Local repo only. Remote push happens in Step 4h after all local setup is complet
 
 ### 4e. Register skill via symlink
 
-All symlinks point to the same source of truth: `<skill_root>/<skill-name>/skill/`.
+All symlinks point to the same source of truth: `<skill_root>/<skill-name>/`.
 
 Ask the user: global, project-level, or both?
 
@@ -198,11 +201,11 @@ Always create both symlinks. See `references/platform-registry.md` for path deta
 
 ```bash
 # Claude Code
-ln -sfn <skill_root>/<skill-name>/skill ~/.claude/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name> ~/.claude/skills/<skill-name>
 
 # Cross-platform (.agents standard — Codex, Cursor, Windsurf, Gemini CLI, Copilot)
 mkdir -p ~/.agents/skills
-ln -sfn <skill_root>/<skill-name>/skill ~/.agents/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name> ~/.agents/skills/<skill-name>
 ```
 
 #### Project-level registration
@@ -211,10 +214,10 @@ Scan the project root for existing platform directories and symlink into whichev
 
 ```bash
 # If <project>/.claude/ exists
-ln -sfn <skill_root>/<skill-name>/skill <project>/.claude/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name> <project>/.claude/skills/<skill-name>
 
 # If <project>/.agents/ exists
-ln -sfn <skill_root>/<skill-name>/skill <project>/.agents/skills/<skill-name>
+ln -sfn <skill_root>/<skill-name> <project>/.agents/skills/<skill-name>
 ```
 
 If neither exists, ask the user which to create.
@@ -222,8 +225,8 @@ If neither exists, ask the user which to create.
 #### Output
 
 ```
-✓ ~/.claude/skills/<name> → <skill_root>/<name>/skill/
-✓ ~/.agents/skills/<name> → <skill_root>/<name>/skill/
+✓ ~/.claude/skills/<name> → <skill_root>/<name>/
+✓ ~/.agents/skills/<name> → <skill_root>/<name>/
 2 symlinks created.
 ```
 
@@ -265,10 +268,10 @@ When publishing an existing project-local skill:
 
 ```
 Source: <project>/.claude/skills/bar/    (or platform equivalent)
-Target: <skill_root>/bar/skill/
+Target: <skill_root>/bar/
 ```
 
-1. Copy content: `cp -r <source>/* <skill_root>/<name>/skill/`
+1. Copy content: `cp -r <source>/* <skill_root>/<name>/`
 2. Review and clean up (remove project-specific references)
 3. Follow Steps 3-4 above
 4. Original stays in the project (independent evolution)
@@ -279,5 +282,6 @@ Target: <skill_root>/bar/skill/
 - `references/platform-registry.md` — Platform skill paths, detection logic, community tools. Read by Step 4e at publish time
 - `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
-- `references/constraint-companion.md` — Constraint separation: rule-skill creation, self-containment
+- `references/constraint-companion.md` — Rule-Skill user customization: detection, decision tree, companion packaging
+- `references/publishing-strategy.md` — Single-skill vs multi-skill repos, hybrid model, directory standards
 - `references/templates.md` — README, LICENSE, and .gitignore templates

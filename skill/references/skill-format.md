@@ -80,6 +80,7 @@ Every paragraph in SKILL.md should pass the **behavior test**: if you delete thi
 2. Ask: "Does this tell the AI **what to do**, **when to do it**, or **how to judge the result**?"
 3. If yes → keep
 4. If it explains **why** without a corresponding **what** → translate to a Rule or move to README
+5. **Exception for domain-agnostic skills**: if the skill is designed to work across domains (code, video, research, content), domain examples that show *how to apply a check in a non-obvious domain* pass the behavior test — they define execution scope, not explain concepts.
 
 ### Context Budget
 
@@ -92,7 +93,7 @@ Skill loading consumes context tokens. The total loaded content (SKILL.md + all 
 - References are **loaded on-demand** — the agent reads them only when the process flow requires it. Budget is per-file, not sum-of-all-files. A skill with 250-line SKILL.md + five 100-line references is fine — peak load is ~350 lines, not 750
 
 **How to estimate instruction density:**
-Count lines that are: table rows with check actions, numbered/bulleted process steps, code blocks, report templates, Rules items. Divide by total non-blank lines. If the ratio is below 0.6, look for explanatory paragraphs that can be compressed or moved to README.
+Count lines that are: table rows with check actions, numbered/bulleted process steps, code blocks, report templates, Rules items. For domain-agnostic skills, also count domain examples that define execution scope (e.g., showing how a check applies to video or research projects). Divide by total non-blank lines. If the ratio is below 0.6, look for explanatory paragraphs that can be compressed or moved to README.
 
 ## Content Splitting Rules
 
@@ -143,3 +144,23 @@ For maximum portability:
 - Avoid CC-specific extensions unless the skill truly needs them
 - README.md serves as the human-readable + other-AI-tool-readable entry point
 - Skill's core knowledge in SKILL.md body is platform-agnostic markdown
+
+## Skill Relationships
+
+### Self-Containment
+
+Each skill must function when installed alone — this is the Agent Skills spec norm. **"Functions alone" ≠ "exists alone."** Skills can be bundled, referenced, and recommended together. Multi-skill repos are common (WordPress ships 13 skills, Vercel ships 5). The only engineering requirement: each skill must be functional when installed individually.
+
+### Referencing Other Skills
+
+Skills can freely reference and recommend other skills, methodologies, and tools. This is encouraged — it's how the ecosystem grows.
+
+**Do:**
+- Mention companion or related skills in README with install commands
+- Reference methodologies in SKILL.md body (e.g., "consider using rules-as-skills for this")
+- Bundle related skills in the same repo for convenience
+- Recommend skills that enhance your skill's capabilities
+
+**Don't:**
+- Auto-install other skills without user consent
+- Make your skill crash or error when a referenced skill isn't installed
