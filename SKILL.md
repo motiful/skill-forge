@@ -148,7 +148,7 @@ If the user wants maximum discoverability (most platforms auto-index from GitHub
 
 Before creating the repo, determine the publishing strategy. See `references/publishing-strategy.md` for detailed guidance.
 
-**Quick decision:** Publishing one skill → single-skill repo (SKILL.md at root). Publishing multiple skills → see `references/publishing-strategy.md` for the decision framework. For composition patterns (catalogs, install bundles), see `references/skill-composition.md`.
+**Quick decision:** Publishing one skill → Skill repo (SKILL.md at root). Publishing multiple skills → see `references/publishing-strategy.md` for the decision framework (Kit vs Collection). For the philosophy behind composition, see `references/skill-composition.md`.
 
 Execute these steps in order:
 
@@ -284,5 +284,5 @@ Target: <skill_root>/bar/
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
 - `references/constraint-companion.md` — Rule-Skill user customization: detection, decision tree, companion packaging
 - `references/publishing-strategy.md` — Single-skill vs multi-skill repos, hybrid model, directory standards
-- `references/skill-composition.md` — Multi-skill composition: catalog pattern, context budget, tooling landscape
+- `references/skill-composition.md` — Composition philosophy: context budget constraint, tooling landscape
 - `references/templates.md` — README, LICENSE, and .gitignore templates
