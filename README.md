@@ -4,7 +4,7 @@
 
 Say "publish this skill" to your AI coding assistant and Skill Forge handles the rest — from writing SKILL.md to pushing a ready-to-install repo to GitHub.
 
-[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Cursor, Codex, Windsurf, Gemini CLI, GitHub Copilot, and more.
+[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other Agent Skills adopters.
 
 ## The Problem
 
@@ -30,13 +30,13 @@ Config → Gather → Create → Validate → Publish
 1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints?)
 2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in
 3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
-4. **Publish** — `git init`, register symlinks, push to GitHub. Community platforms auto-index public repos
+4. **Publish** — show one short confirmation of what will be created and connected, then push to GitHub and optionally connect it to the tools already active on this machine. The result is directly installable by repo path; broader directory visibility depends on downstream indexing or install telemetry
 
 The result: a standalone repo that anyone can install with one command.
 
-### Publishing Multiple Skills?
+### Advanced: Publishing Multiple Skills
 
-Skill Forge also guides you through organizing multiple skills — whether as independent repos bundled into a themed **Kit** (`authoring-kit`, `quality-kit`), or as a single-repo **Collection**. See the publishing strategy reference for details.
+Most users can ignore this. If you later need to publish several related skills, Skill Forge also covers the packaging options. See the publishing strategy reference for details.
 
 ## Usage
 
@@ -47,6 +47,8 @@ Say any of:
 - "Turn this project-local skill into a repo"
 
 ### Example: Publishing self-review
+
+This is a sample flow, not a transcript from one specific machine. Exact registration depends on which skill roots already exist and which targets you explicitly choose.
 
 ```
 $ "Publish self-review to GitHub"
@@ -69,10 +71,14 @@ Step 3: Validate
   ✓ references/dimensions.md exists and is linked
   ✓ no junk files in skill content
 
-Step 4: Publish
+Step 4: Review and confirm
+  ✓ showed what would be created, where it would be published, and which active tools would be connected
+  ✓ user confirmed the side effects
+
+Step 5: Publish
   ✓ git init + initial commit
-  ✓ ~/.claude/skills/self-review → ~/skills/self-review/
-  ✓ ~/.agents/skills/self-review → ~/skills/self-review/
+  ✓ detected the active tool locations on this machine
+  ✓ connected self-review to the approved tools
   ✓ gh repo create motiful/self-review --public --source=. --push
   ✓ Published — install with: npx skills add motiful/self-review
 ```
@@ -89,16 +95,30 @@ Step 4: Publish
 npx skills add motiful/skill-forge
 ```
 
-Or manually:
+Publishing note: pushing a skill repo to GitHub makes it directly installable by repo path. Directory listings and leaderboards are downstream and may lag or depend on install activity.
+
+Common manual registration examples:
 
 ```bash
 git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
 
+# Register only in roots you actually use.
+# If a root does not exist yet, create it only intentionally.
+
 # Claude Code
 ln -sfn ~/skills/skill-forge ~/.claude/skills/skill-forge
 
-# Other platforms (Cursor, Codex, Windsurf, Gemini CLI, Copilot)
+# Codex
 ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
+
+# VS Code / GitHub Copilot
+ln -sfn ~/skills/skill-forge ~/.copilot/skills/skill-forge
+
+# Cursor (if your setup ignores the symlink, use a real copy in ~/.cursor/skills/skill-forge)
+ln -sfn ~/skills/skill-forge ~/.cursor/skills/skill-forge
+
+# Windsurf
+ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 ```
 
 ## What's Inside
@@ -110,12 +130,17 @@ references/
 ├── publishing-strategy.md   — One skill, multiple skills, or a themed Kit
 ├── skill-composition.md     — Why skills need composition (like npm needs dependencies)
 ├── platform-registry.md     — Where each platform looks for skills
+├── readme-quality.md        — README writing, claims, and example rules
 ├── onboarding-pattern.md    — Adding first-use setup to a skill
 ├── state-management.md      — Persistent config and state across sessions
 ├── constraint-companion.md  — Separating enforceable rules into a companion skill
-└── templates.md             — README, LICENSE, .gitignore templates
+└── templates.md             — README, LICENSE, .gitignore skeletons
 ```
 
 ## License
 
 [MIT](LICENSE)
+
+---
+
+Forged with [Skill Forge](https://github.com/motiful/skill-forge)

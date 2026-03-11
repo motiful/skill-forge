@@ -37,7 +37,7 @@ metadata:                   # optional, custom key-value pairs
 
 ## CC-Specific Extensions
 
-Claude Code supports additional frontmatter fields. However, `skills-ref validate` **rejects** non-standard top-level fields. For cross-platform compatibility, put CC-specific settings inside `metadata`:
+Claude Code supports additional frontmatter fields. For cross-platform compatibility, keep CC-specific settings inside `metadata`. This also keeps the optional `skills-ref validate` check green:
 
 ```yaml
 metadata:
@@ -55,7 +55,7 @@ metadata:
 allowed-tools: Read, Grep, Bash  # restrict tool access when active
 ```
 
-If you're building a CC-only skill and don't care about `skills-ref` validation, you can use the original top-level fields — CC runtime ignores unknown fields gracefully. But for publishable skills, always use `metadata`.
+If you're building a CC-only skill and don't care about cross-platform portability, you can use the original top-level fields — CC runtime ignores unknown fields gracefully. For publishable cross-platform skills, keep custom fields inside `metadata`. If the user has `skills-ref` installed, this also ensures the optional validator passes cleanly.
 
 ## Body
 
@@ -88,7 +88,7 @@ Skill loading consumes context tokens. The total loaded content (SKILL.md + all 
 
 **Guidelines:**
 - SKILL.md body: under 500 lines (the always-loaded ceiling)
-- Individual reference file: under 200 lines (if larger, split further or add TOC)
+- Individual reference file: under 100 lines needs no TOC; 100-300 lines is acceptable with a TOC; above 300 lines should split by default
 - **Instruction density**: at least 60% of lines should be executable instructions (check tables, rules, process steps, templates). Below 60% suggests excessive explanation
 - References are **loaded on-demand** — the agent reads them only when the process flow requires it. Budget is per-file, not sum-of-all-files. A skill with 250-line SKILL.md + five 100-line references is fine — peak load is ~350 lines, not 750
 
@@ -109,6 +109,11 @@ Split content into a reference file when it meets ALL three criteria:
 
 **Do NOT split** when content is small (<80 lines), tightly coupled to the process flow (report templates, decision tables), or would require the reader to constantly jump back to SKILL.md.
 
+**Split early** when a file mixes multiple responsibilities, even if it is under 300 lines. Mixed examples:
+- literal templates + writing rules
+- validation logic + publishing strategy
+- setup policy + troubleshooting appendix
+
 **Index quality checklist:**
 - Every reference pointer in SKILL.md states what the reference contains and when to read it
 - Conditional references have explicit gateways: "If X applies → see references/Y.md"
@@ -117,9 +122,12 @@ Split content into a reference file when it meets ALL three criteria:
 
 **Thresholds:**
 - SKILL.md body: under 500 lines
-- Individual reference file: under 200 lines (include TOC if over 100 lines)
+- Reference file under 100 lines: TOC not needed
+- Reference file 100-300 lines: add a TOC, no split needed purely for length
+- Reference file above 300 lines: split by default
+- Multi-responsibility reference files: split regardless of length
 - Budget is per-file (peak load), not sum-of-all-files — references load on-demand
-- Don't split a 300-line skill into 6 tiny files — splitting has overhead too
+- Don't split a 250-line single-purpose reference into 6 tiny files — splitting has overhead too
 
 ## File Structure
 
@@ -134,7 +142,7 @@ skill-name/
 ```
 
 - SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
-- References: one level deep from SKILL.md. Large files (>100 lines) get a TOC
+- References: one level deep from SKILL.md. Add a TOC at 100+ lines
 - Delete empty directories (don't create scripts/ or references/ if unused)
 
 ## Cross-Platform Compatibility

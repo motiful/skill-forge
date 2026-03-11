@@ -34,7 +34,7 @@ If the user has established conventions (naming, structure, org, licensing), **f
 1. Gather  → auto-detect existing content, then ask if needed
 2. Create  → write SKILL.md + references/ + scripts/ following Agent Skills standard
 3. Validate → check frontmatter, structure, content quality
-4. Publish → git init (local) → symlink → push → optional community publishing
+4. Publish → shape the public artifact → publish remotely → optionally register locally
 ```
 
 ## Step 0: Ensure Configuration
@@ -49,7 +49,7 @@ Read `~/.config/skill-forge/config.md`.
 
 **Found** → read user's preferences and proceed.
 
-**Not found** → create config with sensible defaults, confirm with user:
+**Not found** → detect sensible defaults first, then ask for explicit confirmation before writing the file:
 
 ```markdown
 # Skill Forge Config
@@ -63,7 +63,7 @@ Read `~/.config/skill-forge/config.md`.
 
 **`skill_root`** defaults to `~/skills/`. Tell the user: *"Your skills will live in `~/skills/` — each skill gets its own folder and git repo there. You can change this anytime in `~/.config/skill-forge/config.md`."*
 
-Detect what you can (`github_org` via `gh`, platform from the current agent). Only ask when auto-detection fails. Don't interrogate — detect, default, confirm.
+Detect what you can (`github_org` via `gh`, platform from the current agent). Show the exact config path and values you plan to write, then ask once before writing. Don't interrogate — detect, summarize, confirm.
 
 ## Step 1: Gather
 
@@ -74,13 +74,16 @@ Before asking anything, detect what's already available:
 1. **Current project scan** — Look for existing skill content:
    - `.claude/skills/*/SKILL.md` (or platform equivalent)
    - `skill/SKILL.md` in the working directory
+   - If Step 0 found forge config: `<skill_root>/*/SKILL.md` (one level deep only; prefer exact name matches or user-referenced paths)
    - Any `SKILL.md` file the user might be working on
 
 2. **Conversation context** — Has the user been discussing a skill idea? Are there notes, specs, or requirements already in the conversation?
 
 3. **Explicit references** — Did the user point to specific files or directories?
 
-**If content found** → summarize what was detected, confirm with the user: *"I found an existing skill at `<path>`. I'll use this as the basis — anything you want to change?"*
+**If one clear match is found** → proceed with it automatically and include the chosen source path in the Step 4 confirmation summary.
+
+If multiple likely matches are found, summarize the candidate paths and ask which one to use.
 
 **If nothing found** → then ask:
 - What does this skill do? (1-2 sentences)
@@ -129,16 +132,17 @@ Before publishing, check:
 | Triggers | Description covers all intended trigger scenarios |
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name (e.g., a skill called "self-review" that also uses "review" as a domain concept with different meaning), terms used with different meanings in different sections, terms that conflict with platform concepts (e.g., using "tool" in a way that conflicts with the agent platform's "tool" concept). Report conflicts — don't auto-fix, as naming is a design decision |
 
-If `skills-ref` CLI is available, run `skills-ref validate` for automated checking. If not available, validate manually against the checks above.
+The manual checks above are the core validation path. If the user already has `skills-ref` installed, run `skills-ref validate <path>` as a final pre-publish sanity check. If not installed, skip it without adding setup work. Treat it as optional reassurance, not a dependency.
 
 ### Community Readiness (optional)
 
-If the user wants maximum discoverability (most platforms auto-index from GitHub, so good structure = good distribution):
+If the user wants maximum discoverability (good structure, disciplined claims, and clean install paths make downstream distribution easier):
 
 | Check | Criteria |
 |-------|----------|
-| README quality | Value-first structure: problem/solution before install. See `references/templates.md` |
+| README quality | Value-first structure, claim discipline, and example clarity. See `references/readme-quality.md` and `references/templates.md` |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
+| Discoverability claims | README may promise direct install by repo path; do not imply GitHub publication guarantees immediate listing, search placement, or leaderboard visibility unless the platform docs explicitly say so |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
 | LICENSE exists | Required for community platforms |
 | Description clarity | Description alone should tell a stranger what this skill does and when to use it |
@@ -150,9 +154,17 @@ Before creating the repo, determine the publishing strategy. See `references/pub
 
 **Quick decision:** Publishing one skill → Skill repo (SKILL.md at root). Publishing multiple skills → see `references/publishing-strategy.md` for the decision framework (Kit vs Collection). For the philosophy behind composition, see `references/skill-composition.md`.
 
-Execute these steps in order:
+Think about Step 4 in three layers, in this order:
 
-### 4a. Create repo structure
+1. **Public Artifact** — what gets published and how strangers will evaluate/install it
+2. **Remote Publish** — git + remote hosting
+3. **Local Registration** — optional convenience on the current machine
+
+Do not let local registration convenience redefine the public artifact.
+
+### 4a. Public Artifact
+
+#### Repo structure
 
 ```
 <skill_root>/<skill-name>/         # repo root (skill_root from Step 0 config)
@@ -164,21 +176,42 @@ Execute these steps in order:
 └── .gitignore
 ```
 
-### 4b. Generate README.md
+#### README.md
 
-See `references/templates.md` for the full README template. Key requirements:
+See `references/templates.md` for the file skeletons and `references/readme-quality.md` for writing/validation rules. Key requirements:
 - **Value-first structure**: Problem → What It Does → Usage → Install → What's Inside
 - Must mention [Agent Skills](https://agentskills.io) compatibility
 - Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
-- No per-platform install sections — `npx skills add` handles platform detection
+- Manual fallback may show common agent examples, but do not imply every reader should register every platform
 - Must include a "What's Inside" section showing the skill files (SKILL.md, references/, scripts/)
 - Must include a "Forged with Skill Forge" footer with link to forge repo (signature, not dependency)
 
-### 4c. Generate .gitignore
+#### .gitignore
 
 Use the template from `references/templates.md`.
 
-### 4d. Git init (local)
+### 4b. Preflight Confirmation
+
+Before any side effect outside the current repo artifact, summarize the exact actions and get explicit confirmation once.
+
+The preflight must include:
+- config files to create or update (`~/.config/skill-forge/config.md`, `<skill_root>/.gitignore`, repo-local `.gitignore` changes if any)
+- local repo actions (`git init`, initial commit, target repo path)
+- remote target (`<org>/<skill-name>`, visibility, hosting service)
+- detected registration roots that will be linked
+- any new platform roots that will be created because the user explicitly named that platform
+
+After the user confirms, execute Remote Publish and Local Registration without further mode-selection questions unless new ambiguity appears.
+
+For user-visible messages, use task language rather than internal workflow language:
+- say "Before I publish this, here's what I'll create/update" instead of "preflight"
+- say "connect it to the tools already active on this machine" instead of "link into detected registration roots"
+- say "GitHub repo and visibility" instead of "remote target"
+- avoid surfacing "mode", "Kit", or "Collection" unless the user's request actually requires those concepts
+
+### 4c. Remote Publish
+
+#### Git init (local)
 
 ```bash
 cd <skill_root>/<skill-name>
@@ -187,58 +220,17 @@ git add -A
 git commit -m "init: <skill-name> skill"
 ```
 
-Local repo only. Remote push happens in Step 4h after all local setup is complete.
+This prepares the publishable repo. It does not imply any local registration yet.
 
-### 4e. Register skill via symlink
-
-All symlinks point to the same source of truth: `<skill_root>/<skill-name>/`.
-
-Ask the user: global, project-level, or both?
-
-#### Global registration
-
-Always create both symlinks. See `references/platform-registry.md` for path details.
-
-```bash
-# Claude Code
-ln -sfn <skill_root>/<skill-name> ~/.claude/skills/<skill-name>
-
-# Cross-platform (.agents standard — Codex, Cursor, Windsurf, Gemini CLI, Copilot)
-mkdir -p ~/.agents/skills
-ln -sfn <skill_root>/<skill-name> ~/.agents/skills/<skill-name>
-```
-
-#### Project-level registration
-
-Scan the project root for existing platform directories and symlink into whichever exist:
-
-```bash
-# If <project>/.claude/ exists
-ln -sfn <skill_root>/<skill-name> <project>/.claude/skills/<skill-name>
-
-# If <project>/.agents/ exists
-ln -sfn <skill_root>/<skill-name> <project>/.agents/skills/<skill-name>
-```
-
-If neither exists, ask the user which to create.
-
-#### Output
-
-```
-✓ ~/.claude/skills/<name> → <skill_root>/<name>/
-✓ ~/.agents/skills/<name> → <skill_root>/<name>/
-2 symlinks created.
-```
-
-### 4f. Update skill_root .gitignore
+#### Update skill_root .gitignore
 
 If `<skill_root>` is a git repo (or has a `.gitignore`), add `<skill-name>/` if not already present.
 
-### 4g. Update forge config
+#### Update forge config
 
 Add the new skill to `~/.config/skill-forge/config.md` under a "Published Skills" section (create if absent). This serves as a registry of all skills managed by forge.
 
-### 4h. Push to remote
+#### Push to remote
 
 All local setup is complete. Now push.
 
@@ -247,20 +239,74 @@ All local setup is complete. Now push.
 gh repo create <org>/<skill-name> --public --source=. --push
 ```
 
-The `<org>` comes from the forge config. Ask if the user wants a different org or visibility (public/private).
+The `<org>` comes from the forge config. Include the exact org, repo name, and visibility in the Step 4 preflight. Do not run `gh repo create` until the user confirms.
 
 **Non-GitHub remotes:** Follow the user's existing conventions. Ask for the remote URL:
 ```bash
 git remote add origin <url> && git push -u origin main
 ```
 
-### 4i. Community distribution
+#### Community distribution
 
-**Most community platforms auto-index from GitHub.** Pushing a well-structured repo (valid SKILL.md + good README) is sufficient for discoverability. No active submission needed.
+**GitHub publication makes the repo directly installable.** Pushing a well-structured repo (valid SKILL.md + good README) is sufficient for direct installs such as `npx skills add <org>/<skill-name>`.
+
+Community directory visibility is downstream behavior. Some directories or leaderboards surface skills only after their own indexing or install telemetry. Do not promise immediate listing just because the repo is public.
 
 See `references/platform-registry.md` for the current list of community directories and tools.
 
-Tell the user: *"Your skill is now on GitHub. Community platforms auto-index public repos — anyone can install it with `npx skills add <org>/<skill-name>`. No extra submission needed."*
+Tell the user: *"Your skill is now on GitHub. Anyone who knows `<org>/<skill-name>` can install it with `npx skills add <org>/<skill-name>`. Community directories may surface it later based on their own indexing or install telemetry."*
+
+### 4d. Local Registration (Optional Convenience)
+
+Use `<skill_root>/<skill-name>/` as the source of truth. Local registration is a convenience layer for the current machine, not part of the public artifact contract.
+
+**Do not ask the user to choose a registration mode.** Detect roots automatically, include the planned links in the Step 4 preflight, and act after explicit confirmation. Only ask when you genuinely cannot infer intent.
+
+Treat only actual skill roots as strong signals. Parent directories such as `<project>/.github/`, `<project>/.claude/`, or `<project>/.agents/` are not registration evidence on their own.
+
+See `references/platform-registry.md` for the platform matrix and policy details.
+
+#### Decision Logic
+
+```
+1. Scan for existing skill roots (strong signals only)
+   Strong: ~/.claude/skills/, ~/.agents/skills/, ~/.copilot/skills/,
+           ~/.cursor/skills/, ~/.codeium/windsurf/skills/
+   Strong: <project>/.claude/skills/, <project>/.agents/skills/,
+           <project>/.github/skills/, <project>/.cursor/skills/,
+           <project>/.windsurf/skills/
+   Weak (ignore): installed CLI without skill root, generic config dirs,
+                  bare parent dirs like <project>/.github/ or <project>/.claude/
+
+2. Roots found?
+   YES → add them to the preflight summary; after confirmation, link into all detected skill roots and report what you did
+   NO  → skip registration, tell user the repo is ready
+
+3. User explicitly names a platform not yet detected?
+   → Add creation of that platform's root to the preflight; after confirmation, create and link. Only for explicitly named platforms.
+```
+
+Never link one vendor root to another vendor root. Every consumer root should point back to `<skill_root>/<skill-name>/`.
+
+#### Link Examples
+
+```bash
+# Existing root — just link
+ln -sfn <skill_root>/<skill-name> ~/.claude/skills/<skill-name>
+
+# User explicitly requested a new platform
+mkdir -p ~/.agents/skills
+ln -sfn <skill_root>/<skill-name> ~/.agents/skills/<skill-name>
+```
+
+#### Output
+
+```text
+Linked:
+✓ ~/.claude/skills/<name> → <skill_root>/<name>/
+
+No new platform directories created.
+```
 
 ## Migration: Project-Local to Published
 
@@ -279,10 +325,11 @@ Target: <skill_root>/bar/
 ## References
 
 - `references/skill-format.md` — SKILL.md format specification (frontmatter, structure, guidelines)
-- `references/platform-registry.md` — Platform skill paths, detection logic, community tools. Read by Step 4e at publish time
+- `references/platform-registry.md` — Platform skill paths, detection logic, community tools. Read by the Local Registration section at publish time
 - `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
 - `references/constraint-companion.md` — Rule-Skill user customization: detection, decision tree, companion packaging
 - `references/publishing-strategy.md` — Skill/Kit/Collection publishing models, decision framework, directory standards
 - `references/skill-composition.md` — Composition philosophy: context budget constraint, tooling landscape
-- `references/templates.md` — README, LICENSE, and .gitignore templates
+- `references/templates.md` — README, LICENSE, and .gitignore skeletons
+- `references/readme-quality.md` — README writing, claim discipline, and example rules
