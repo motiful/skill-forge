@@ -15,6 +15,7 @@ The README follows a **value-first** structure: tell the reader what problem you
 If you mention directories, marketplaces, or leaderboards around the template, frame them as downstream discovery paths, not guaranteed immediate outcomes of publishing.
 Default the template prose to English for reusable skills. Only localize when the skill itself is language-specific or culture-specific.
 If the skill recommends other skills, add a short "Works Better With" section. Keep it to 2 recommended skills max and state that the skill still works on its own.
+Do not use this section for repo-local scripts, package installs, or helper flows. Those belong in Usage, Prerequisites, or the main workflow description.
 
 ```markdown
 # <skill-name>

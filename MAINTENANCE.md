@@ -27,8 +27,8 @@ Trigger: "update skill-forge", "refresh platform info", or during self-review of
 
 ## Changelog (max 5 entries)
 
+- 2026-03-12: Collapsed the old Recommend tier back into the single-skill model. `skill-forge` now treats recommended skills as a lightweight writing pattern inside one skill plus `Works Better With` in README, not as a separate publishing type.
 - 2026-03-11: Made Rule-Skill Split self-containment explicit. Generated capability skills must say `<name>-rules` is optional, keep a real standalone fallback, and avoid implying a hidden dependency.
-- 2026-03-11: Eliminated "companion" terminology — unified under "Recommend". Renamed `constraint-companion.md` → `rule-skill-pattern.md`. "Companion Recommendations" capability → "Recommend". "Constraint Companion" capability → "Rule-Skill Split". 35 occurrences across 9 files.
-- 2026-03-11: Promoted Recommend to a first-class optional output, aligned Recommend vs Kit guidance, and locked the default authoring language to English unless the skill is language-specific or culture-specific.
+- 2026-03-11: Renamed `constraint-companion.md` → `rule-skill-pattern.md`, clarified Rule-Skill Split naming, and temporarily consolidated companion-skill language under Recommend before the 2026-03-12 simplification.
+- 2026-03-11: Aligned single-skill composition guidance, Kit guidance, and default English authoring rules; later simplified the composition taxonomy again on 2026-03-12.
 - 2026-03-11: Tightened registration evidence to actual skill roots only, separated direct installability from downstream discoverability, and aligned README/registry guidance with that policy.
-- 2026-03-11: Added a single preflight confirmation for side effects, taught Step 1 to scan the configured `skill_root`, clarified native vs shared vs configurable paths, and fixed the Codex skills docs link.

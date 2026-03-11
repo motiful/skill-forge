@@ -22,6 +22,12 @@ The skill decides which format fits its data. Both are equally readable by AI ag
 
 Platform-agnostic — outside any agent's directory.
 
+**Boundary rule:** `config.md` is for relatively stable preferences and settings. `state.md` is for forge-managed or runtime-managed data that changes over time: registries, histories, caches, last-run data, and similar evolving records.
+
+Do not store mutable registries or histories in `config.md` just because they are human-readable markdown. If the data is owned by the skill at runtime and will keep changing, it belongs in `state.md` (or the JSON equivalent if structure demands it).
+
+**Example split:** Skill Forge keeps `skill_root`, `github_org`, and `license` in `config.md`, and records its "Published Skills" registry in `state.md`.
+
 ### Project-Level State
 
 When a skill needs per-project configuration:

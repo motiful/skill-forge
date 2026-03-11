@@ -1,14 +1,10 @@
 # Skill Composition
 
-Why skills need composition, what makes it different from npm/pip, and where the ecosystem stands today.
+Why some skills need companion skills, when that should stay lightweight, and when to move to a Kit.
 
 ## Why Composition Matters
 
-Skills are code. Code has dependencies. Skills need dependencies.
-
 A single skill solves a single problem. But users face workflows that span multiple skills — and those skills may overlap across product lines. Without composition, skills either become monoliths (cramming everything into one SKILL.md) or isolated silos (each skill reinvents shared logic).
-
-The npm/pip ecosystems proved that dependency management is the unlock for exponential growth: users focus on their top-level concern, and the dependency graph handles everything underneath. Skills are on the same trajectory.
 
 **Current ecosystem state (March 2026):** The Agent Skills spec has no `dependencies` field. Four open proposals exist (agentskills/agentskills #100, #110, #90→#160, #210). No tool has won the "npm for skills" position. The slot is open.
 
@@ -41,6 +37,6 @@ As of March 2026, no tool fully solves skill composition.
 | `install.sh` (Kit) | Manual | Manual | Yes | No |
 | Discussion #210 proposal | Yes (skills.json) | Yes (proposed) | Yes | No |
 
-**Our recommendation today:** Use Recommend for 2-3 independent skills that only need lightweight "works better together" hints. Use a Kit when you are curating a coherent workflow or 4+ skills and want one-command installation. Use Collection only when the skills are effectively locked together in one repo.
+**Our recommendation today:** Default to a single skill. If another skill genuinely strengthens a step, mention it in that step and mirror it in `Works Better With`. Use a Kit when you are curating a coherent workflow or 4+ skills and want one-command installation. Use Collection only when the skills are effectively locked together in one repo.
 
 **Future:** When the spec adds dependency support (or a tool wins the "npm for skills" slot), Kits can evolve into declarative manifests. The Kit-as-install-script pattern degrades gracefully.

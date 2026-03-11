@@ -170,7 +170,7 @@ Skills can freely reference and recommend other skills, methodologies, and tools
 - Mention recommended or related skills in README with install commands
 - Reference methodologies in SKILL.md body (e.g., "consider using rules-as-skills for this")
 - Bundle related skills in the same repo for convenience
-- Recommend skills that enhance your skill's capabilities
+- Recommend companion skills that enhance one specific step in your skill
 
 **Don't:**
 - Auto-install other skills without user consent

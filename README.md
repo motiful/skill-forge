@@ -27,16 +27,48 @@ Config → Gather → Create → Validate → Publish
 ```
 
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences (auto-defaults, minimal questions)
-1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints? optional skill recommendations?)
-2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities and optional recommend tips in
+1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints?)
+2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in, and describe helpful companion skills only where they genuinely strengthen a specific step
 3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
 4. **Publish** — show one short confirmation of what will be created and connected, then push to GitHub and optionally connect it to the tools already active on this machine. The result is directly installable by repo path; broader directory visibility depends on downstream indexing or install telemetry
 
 The result: a standalone repo that anyone can install with one command.
 
+## Positioning
+
+Skill Forge optimizes for **public artifact quality**, not domain-level outcome certification.
+
+It helps users create skills that are:
+
+- installable
+- publishable
+- maintainable
+- composable
+- independently iterable
+- honestly described
+
+It does **not** claim to prove that a generated skill's domain outputs are objectively excellent, production-safe, or aesthetically strong. Those judgments still depend on the author, the domain, and real usage.
+
+Skill Forge is for skills that deserve a life beyond one project folder: their own repo, their own history, and their own maintenance surface.
+
 ### Advanced: Skill Composition
 
-Most users can ignore this. If you later need to publish several related skills, Skill Forge helps you choose between Recommend, Kit, and Collection. Use Recommend for loose "works better together" hints, Kit for curated workflow bundles, and Collection only when skills are effectively locked together.
+Most users can ignore this. The default model is simple:
+
+- publish one thing as a single skill
+- if another skill genuinely strengthens one step, mention it in that step and mirror it in a short `Works Better With` section
+- only move to `Kit` when several skills need to be delivered as one workflow
+- only use `Collection` when several skills are locked into one repo
+
+Within a single skill, the recommended-skills pattern should look like this:
+
+```markdown
+Step 4: Validate output
+
+If `readme-craft` is installed, use it here to tighten README structure and badge selection.
+Install: `npx skills add motiful/readme-craft`
+Without it, continue with the built-in README checks in this skill.
+```
 
 ## Usage
 
@@ -60,7 +92,7 @@ Step 0: Config
 Step 1: Gather
   ✓ Existing skill detected at ~/skills/self-review/SKILL.md
   ✓ Capabilities: none needed (pure methodology, no state or onboarding)
-  ✓ Recommend tips: none
+  ✓ Recommended skills: none
 
 Step 2: Create
   ✓ SKILL.md already exists — using as-is
@@ -133,8 +165,8 @@ Skill Forge still works fully on its own.
 SKILL.md              — Full creation + publishing pipeline
 references/
 ├── skill-format.md          — How to write a valid SKILL.md
-├── publishing-strategy.md   — Skill, Recommend, Kit, or Collection decisions
-├── skill-composition.md     — Why skills need composition (like npm needs dependencies)
+├── publishing-strategy.md   — Skill, Kit, or Collection decisions; where recommended skills fit
+├── skill-composition.md     — Lightweight rules for companion skills, Kits, and context budget
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing, claims, and example rules
 ├── onboarding-pattern.md    — Adding first-use setup to a skill

@@ -4,7 +4,6 @@
 
 - [Terminology](#terminology)
 - [Skill (Single Repo)](#skill-single-repo)
-- [Recommend (Loose Enhancement)](#recommend-loose-enhancement)
 - [Collection (Multi-Skill Repo)](#collection-multi-skill-repo)
 - [Kit (Workflow Bundle)](#kit-workflow-bundle)
 - [Decision Framework](#decision-framework)
@@ -15,15 +14,14 @@
 | Term | Definition | Repo naming |
 |------|-----------|------------|
 | **Skill** | One capability, one repo. The atomic unit. | `<org>/<skill-name>` |
-| **Recommend** | Independent skills that hint at each other. No bundle, no install script — just `[!TIP]` blocks in SKILL.md. | Each skill keeps its own repo |
 | **Kit** | A curated bundle of independent skills for a specific workflow. Has install.sh. | `<org>/<domain>-kit` |
 | **Collection** | Multiple skills in one repo. Simpler but skills are locked together. | `<org>/<domain>-skills` |
 
 These form a spectrum from loosest to tightest coupling:
 
 ```
-Skill → Recommend → Kit → Collection
-(standalone)   (loose enhancement)   (bundle distribution)   (same-repo lock-in)
+Skill → Kit → Collection
+(standalone)   (bundle distribution)   (same-repo lock-in)
 ```
 
 Use these terms in conversation with the user. Avoid jargon like "monorepo" or "hybrid."
@@ -51,44 +49,39 @@ One skill, one GitHub repo. This is Skill-Forge's default output.
 - Community discovery (own GitHub stars, own SEO)
 - Low install friction (user evaluates one thing)
 
-## Recommend (Loose Enhancement)
+### Recommended Skills Inside a Single Skill
 
-Independent skills that work alone but work better together. No shared repo, no install script — each skill stays in its own repo and uses `[!TIP]` blocks to point to recommended skills.
-
-**Structure:**
-
-Each skill is a standalone repo. The only connection is an inline hint:
+A single skill may mention one or two companion skills when they genuinely strengthen a specific step:
 
 ```markdown
-> [!TIP]
-> **Enhanced <capability>**: If `<recommended-skill>` is installed, it provides
-> <specific enhancement>.
-> Install: `npx skills add <org>/<recommended-skill>`
-> Without it, <what happens — must be a complete, working fallback>.
+If `<recommended-skill>` is installed, use it here for <specific enhancement>.
+Install: `npx skills add <org>/<recommended-skill>`
+Without it, <what happens — must be a complete, working fallback>.
 ```
 
 **Rules:**
 - The skill MUST work fully without the recommended skill. "Without it" must describe real behavior, not a degraded stub.
-- Maximum 2 recommend tips per skill (context budget).
-- Place the tip at the step where the recommended skill would activate, not at the top of the file.
+- Maximum 2 recommended skills per skill (context budget).
+- Place the recommendation at the step where the recommended skill would activate, not at the top of the file.
 - Mirror the same recommended skills in README with a short human-facing section (for example, "Works Better With").
 - Each skill is independently installable, discoverable, and star-able.
 
-**Best for:**
-- Skills that enhance each other but have independent value (e.g., readme-craft enhances skill-forge's Step 4, but readme-craft is useful without forge)
-- Different release cycles or maintainers
-- When a Kit would be overkill (only 2-3 skills, no shared workflow narrative)
+**Do not use this pattern for:**
+- repo-local scripts
+- repo-local package installs
+- ordinary conditional logic in the main workflow
+- opportunistic use of tools that are already present
 
-**Comparison with Kit:**
+Those belong in the skill's numbered flow, prerequisites, or onboarding logic.
 
-| | Recommend | Kit |
-|---|----------|-----|
-| Coupling | None — inline hints only | Loose — shared install.sh |
-| Install | User installs each individually | `curl install.sh` installs all |
-| Discovery | Each skill found independently | Kit README lists all |
-| When to upgrade | 2-3 skills, casual "works better together" | 4+ skills, or a coherent workflow story |
+If a repo-local enhancement is cheap, reversible, and does not install another skill, prefer direct execution over turning it into a recommendation decision point.
 
-**When forge creates a skill:** If the user's skill would benefit from recommended skills, bake in `[!TIP]` blocks following the pattern above and mirror them in README. This is the recommend capability that forge offers — it helps users express "works better together" without creating a Kit.
+**When to move to Kit instead:**
+- 4+ skills need to be delivered together
+- the recommendations add up to one coherent multi-skill workflow
+- one-command installation matters more than keeping the skills loosely connected
+
+**When forge creates a skill:** If the user's skill would benefit from recommended skills, describe them using the pattern above and mirror them in README. This stays inside the single-skill model; it is not a separate publishing tier.
 
 ## Collection (Multi-Skill Repo)
 
@@ -133,7 +126,7 @@ Present both Kit and Collection options. The user decides. If they choose Collec
 
 ## Kit (Workflow Bundle)
 
-Independent repos for each skill + a Kit repo that bundles them for a specific workflow. Use this when Recommend is too loose and Collection is too locked together.
+Independent repos for each skill + a Kit repo that bundles them for a specific workflow. Use this when a single skill plus lightweight recommended skills is too loose and Collection is too locked together.
 
 **Structure:**
 
@@ -240,14 +233,14 @@ How many skills are you publishing?
 1. Just one skill?
    → Skill (one repo, default)
    → Does it recommend other skills?
-     YES → Add [!TIP] recommend blocks (see Recommend section)
+     YES → Add recommended skills in the relevant step (see Skill section)
      NO  → Done
 
 2. Multiple skills?
    → Do they each have independent value?
      NO  → Collection (one repo, locked together)
      YES → How many, and is there a workflow story?
-       2-3 skills, casual enhancement → Recommend (each gets own repo, [!TIP] hints)
+       2-3 skills, casual enhancement → Keep separate Skill repos; use recommended skills inside each one as needed
        4+ skills, or a coherent workflow → Kit (own repos + Kit bundle repo)
 ```
 
