@@ -119,7 +119,7 @@ For each capability detected in Step 1, bake the corresponding pattern into the 
 
 - **Onboarding** → Add a Step 0 section with the initialization check and onboarding flow
 - **State Management** → Add config read/write instructions for persistent state
-- **Rule-Skill Split** → Create a separate `<name>-rules` skill alongside the main skill
+- **Rule-Skill Split** → Create a separate `<name>-rules` skill alongside the main skill, but keep the main skill usable on its own. If `<name>-rules` is absent, the generated skill must fall back to its built-in/default behavior and say that explicitly
 - **Recommend** → Add inline `[!TIP]` blocks at the step where each recommended skill helps. Keep each tip specific, include the install command, and state the full fallback behavior without it.
 
 These capabilities are **transparent to the end user** — they work without the end user having skill-forge or any methodology skills installed. Forge bakes them in at creation time; the generated skill is self-contained.

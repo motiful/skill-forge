@@ -70,14 +70,14 @@ If the constraint is already enforced by **code/tooling** (mechanical enforcemen
 
 1. **Name**: `<skill-name>-rules` (e.g., `database-rules` for `database-access`)
 2. **Move** all MUST/NEVER statements into the rule-skill
-3. **Reference**: capability skill says "Use with `<name>-rules` for enforcement"
+3. **Reference**: capability skill says "Optional: use with `<name>-rules` for user-defined constraint enforcement. Without it, the main skill still works on its own with its built-in/default behavior."
 4. **Methodology**: follows the [rules-as-skills](https://github.com/motiful/rules-as-skills) three-layer model
 
 ## Packaging
 
 In the generated capability skill:
-- **README**: "For constraint enforcement, also install `<name>-rules`" with `npx skills add <org>/<name>-rules` as primary install command
-- **SKILL.md body**: "Pairs with `<name>-rules`. If not installed, suggest to user."
+- **README**: State that `<name>-rules` is optional for user-defined constraint enforcement. Include `npx skills add <org>/<name>-rules`, and explicitly say the main skill still works on its own; without `<name>-rules`, only the built-in/default behavior applies
+- **SKILL.md body**: "Pairs optionally with `<name>-rules` for user-defined constraint enforcement. Without it, continue with the main skill's built-in/default behavior."
 
 In the generated rule-skill:
 - Standalone README with own install instructions
