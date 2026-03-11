@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: Create, validate, and publish skills to GitHub as independent repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "skill to GitHub", or wants to turn a project-local skill into a shareable GitHub repository. Handles the full pipeline from content creation to git init, GitHub repo creation, and symlink registration.
+description: Create, validate, and publish skills to GitHub as independent repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "skill to GitHub", or wants to turn a project-local skill into a shareable GitHub repository. Handles the full pipeline from content creation to git init, GitHub repo creation, and local platform registration.
 license: MIT
 metadata:
   author: motiful
@@ -91,15 +91,21 @@ If multiple likely matches are found, summarize the candidate paths and ask whic
 
 ### Capability Detection
 
-Every skill potentially needs three independent capabilities. Detect which ones apply:
+Every skill potentially needs four independent capabilities. Detect which ones apply:
 
 | Capability | Detection Question | If Yes |
 |------------|-------------------|--------|
 | **Onboarding** | Does this skill need first-use setup? (dependency checks, user preferences, guided introduction) | See `references/onboarding-pattern.md` |
 | **State Management** | Does this skill need to remember things across sessions? (preferences, history, registries) | See `references/state-management.md` |
-| **Constraint Companion** | Does this skill have user-customizable constraints? (MUST/NEVER rules, domain boundaries) | See `references/constraint-companion.md` |
+| **Rule-Skill Split** | Does this skill have user-customizable constraints? (MUST/NEVER rules, domain boundaries) | See `references/rule-skill-pattern.md` |
+| **Recommend** | Would optional recommended skills make one or two specific steps meaningfully stronger without becoming required dependencies? | See the Recommend pattern in `references/publishing-strategy.md` |
 
-A skill may need any combination (all three, one, or none). Each is independent — detect and apply separately.
+A skill may need any combination (all four, one, or none). Each is independent — detect and apply separately.
+
+> [!TIP]
+> **Enhanced constraint detection**: If `rules-as-skills` is installed, it provides a methodology for encoding hard constraints (MUST/NEVER boundaries) as portable, dynamically-loaded skills — useful when the Rule-Skill Split capability is detected above.
+> Install: `npx skills add motiful/rules-as-skills`
+> Without it, forge uses the built-in `references/rule-skill-pattern.md` pattern.
 
 ## Step 2: Create
 
@@ -113,9 +119,16 @@ For each capability detected in Step 1, bake the corresponding pattern into the 
 
 - **Onboarding** → Add a Step 0 section with the initialization check and onboarding flow
 - **State Management** → Add config read/write instructions for persistent state
-- **Constraint Companion** → Create a separate `<name>-rules` skill alongside the main skill
+- **Rule-Skill Split** → Create a separate `<name>-rules` skill alongside the main skill
+- **Recommend** → Add inline `[!TIP]` blocks at the step where each recommended skill helps. Keep each tip specific, include the install command, and state the full fallback behavior without it.
 
 These capabilities are **transparent to the end user** — they work without the end user having skill-forge or any methodology skills installed. Forge bakes them in at creation time; the generated skill is self-contained.
+
+### Recommend Guardrails
+
+If the skill being created would benefit from recommended skills, bake in `[!TIP]` recommend blocks. See the **Recommend (Loose Enhancement)** section in `references/publishing-strategy.md` for the pattern, rules, and when to use recommend vs Kit.
+
+Use Recommend only when the recommended skill is genuinely optional. A recommend block must never hide a real dependency; the skill must still complete the job without it installed.
 
 ## Step 3: Validate
 
@@ -130,9 +143,11 @@ Before publishing, check:
 | References | All files referenced in SKILL.md actually exist |
 | No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, scripts/ at root alongside README.md and LICENSE is the expected structure |
 | Triggers | Description covers all intended trigger scenarios |
+| Recommend tips | If present: max 2; each tip sits at the step it enhances, includes the install command, and states a real fallback. Reject any "recommend" that is actually a required dependency |
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name (e.g., a skill called "self-review" that also uses "review" as a domain concept with different meaning), terms used with different meanings in different sections, terms that conflict with platform concepts (e.g., using "tool" in a way that conflicts with the agent platform's "tool" concept). Report conflicts — don't auto-fix, as naming is a design decision |
 
 The manual checks above are the core validation path. If the user already has `skills-ref` installed, run `skills-ref validate <path>` as a final pre-publish sanity check. If not installed, skip it without adding setup work. Treat it as optional reassurance, not a dependency.
+Treat Recommend checks as a manual review item even if `skills-ref` passes; community validators may not encode this pattern yet.
 
 ### Community Readiness (optional)
 
@@ -142,6 +157,7 @@ If the user wants maximum discoverability (good structure, disciplined claims, a
 |-------|----------|
 | README quality | Value-first structure, claim discipline, and example clarity. See `references/readme-quality.md` and `references/templates.md` |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
+| Recommend tips | If SKILL.md recommends other skills, mirror them in a concise README section (for example, "Works Better With") and clearly state that the skill still works on its own |
 | Discoverability claims | README may promise direct install by repo path; do not imply GitHub publication guarantees immediate listing, search placement, or leaderboard visibility unless the platform docs explicitly say so |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
 | LICENSE exists | Required for community platforms |
@@ -152,7 +168,7 @@ If the user wants maximum discoverability (good structure, disciplined claims, a
 
 Before creating the repo, determine the publishing strategy. See `references/publishing-strategy.md` for detailed guidance.
 
-**Quick decision:** Publishing one skill → Skill repo (SKILL.md at root). Publishing multiple skills → see `references/publishing-strategy.md` for the decision framework (Kit vs Collection). For the philosophy behind composition, see `references/skill-composition.md`.
+**Quick decision:** Publishing one skill → Skill repo (SKILL.md at root). Recommends other skills? → Add Recommend `[!TIP]` blocks. Publishing multiple skills → see `references/publishing-strategy.md` for the full decision framework (Recommend vs Kit vs Collection). For the philosophy behind composition, see `references/skill-composition.md`.
 
 Think about Step 4 in three layers, in this order:
 
@@ -178,10 +194,16 @@ Do not let local registration convenience redefine the public artifact.
 
 #### README.md
 
+> [!TIP]
+> **Enhanced README**: If `readme-craft` is installed, it provides 3-tier layout strategy (above-fold / scan / reference), badge selection, dark/light logo patterns, and README improvement mode.
+> Install: `npx skills add motiful/readme-craft`
+> Without it, forge uses its built-in templates below.
+
 See `references/templates.md` for the file skeletons and `references/readme-quality.md` for writing/validation rules. Key requirements:
 - **Value-first structure**: Problem → What It Does → Usage → Install → What's Inside
 - Must mention [Agent Skills](https://agentskills.io) compatibility
 - Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
+- If recommend tips exist, summarize them in a concise README section and state that the skill still works on its own
 - Manual fallback may show common agent examples, but do not imply every reader should register every platform
 - Must include a "What's Inside" section showing the skill files (SKILL.md, references/, scripts/)
 - Must include a "Forged with Skill Forge" footer with link to forge repo (signature, not dependency)
@@ -207,7 +229,7 @@ For user-visible messages, use task language rather than internal workflow langu
 - say "Before I publish this, here's what I'll create/update" instead of "preflight"
 - say "connect it to the tools already active on this machine" instead of "link into detected registration roots"
 - say "GitHub repo and visibility" instead of "remote target"
-- avoid surfacing "mode", "Kit", or "Collection" unless the user's request actually requires those concepts
+- avoid surfacing "mode", "Recommend", "Kit", or "Collection" unless the user's request actually requires those concepts
 
 ### 4c. Remote Publish
 
@@ -328,8 +350,8 @@ Target: <skill_root>/bar/
 - `references/platform-registry.md` — Platform skill paths, detection logic, community tools. Read by the Local Registration section at publish time
 - `references/onboarding-pattern.md` — First-use onboarding: detection, flow design, config as marker
 - `references/state-management.md` — Persistent state: `~/.config/` convention, project-specific state
-- `references/constraint-companion.md` — Rule-Skill user customization: detection, decision tree, companion packaging
-- `references/publishing-strategy.md` — Skill/Kit/Collection publishing models, decision framework, directory standards
+- `references/rule-skill-pattern.md` — Rule-Skill user customization: detection, decision tree, packaging
+- `references/publishing-strategy.md` — Skill/Recommend/Kit/Collection publishing models, decision framework, directory standards
 - `references/skill-composition.md` — Composition philosophy: context budget constraint, tooling landscape
 - `references/templates.md` — README, LICENSE, and .gitignore skeletons
 - `references/readme-quality.md` — README writing, claim discipline, and example rules

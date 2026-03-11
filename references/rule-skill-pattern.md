@@ -1,8 +1,8 @@
-# Constraint Companion Pattern
+# Rule-Skill Pattern
 
 ## What It Is
 
-Rule-Skills are an advanced skill type that gives users the power to customize skill behavior with their own rules. When a skill has user-customizable constraints (MUST/NEVER rules, domain boundaries), those constraints are separated into a **companion rule-skill**. This enables:
+Rule-Skills are an advanced skill type that gives users the power to customize skill behavior with their own rules. When a skill has user-customizable constraints (MUST/NEVER rules, domain boundaries), those constraints are separated into a **paired rule-skill**. This enables:
 
 - **User customization** — users define their own rules without modifying the capability skill
 - **Dynamic loading** — the rule-skill's description is always visible in the skill listing, even when the capability skill isn't loaded
@@ -73,7 +73,7 @@ If the constraint is already enforced by **code/tooling** (mechanical enforcemen
 3. **Reference**: capability skill says "Use with `<name>-rules` for enforcement"
 4. **Methodology**: follows the [rules-as-skills](https://github.com/motiful/rules-as-skills) three-layer model
 
-## Companion Packaging
+## Packaging
 
 In the generated capability skill:
 - **README**: "For constraint enforcement, also install `<name>-rules`" with `npx skills add <org>/<name>-rules` as primary install command

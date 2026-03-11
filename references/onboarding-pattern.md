@@ -17,7 +17,7 @@ Depends entirely on the skill. Examples:
 - **Preference gathering** — ask user for defaults the skill can't guess (e.g., preferred org name, default license, output format)
 - **Dependency check** — verify external tools the skill needs are installed (e.g., `gh` CLI for GitHub operations)
 - **Directory setup** — create working directories, register paths
-- **Companion discovery** — check if related skills are installed, mention them if not (soft, once)
+- **Recommended skill discovery** — check if related skills are installed, mention them if not (soft, once)
 - **First-use guidance** — explain what the skill does and suggest a first action
 
 No fixed time limit or question count — each skill determines what its onboarding needs. The flow runs once; after that the config exists and the skill proceeds directly.

@@ -27,16 +27,16 @@ Config → Gather → Create → Validate → Publish
 ```
 
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences (auto-defaults, minimal questions)
-1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints?)
-2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in
+1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints? optional skill recommendations?)
+2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities and optional recommend tips in
 3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
 4. **Publish** — show one short confirmation of what will be created and connected, then push to GitHub and optionally connect it to the tools already active on this machine. The result is directly installable by repo path; broader directory visibility depends on downstream indexing or install telemetry
 
 The result: a standalone repo that anyone can install with one command.
 
-### Advanced: Publishing Multiple Skills
+### Advanced: Skill Composition
 
-Most users can ignore this. If you later need to publish several related skills, Skill Forge also covers the packaging options. See the publishing strategy reference for details.
+Most users can ignore this. If you later need to publish several related skills, Skill Forge helps you choose between Recommend, Kit, and Collection. Use Recommend for loose "works better together" hints, Kit for curated workflow bundles, and Collection only when skills are effectively locked together.
 
 ## Usage
 
@@ -60,6 +60,7 @@ Step 0: Config
 Step 1: Gather
   ✓ Existing skill detected at ~/skills/self-review/SKILL.md
   ✓ Capabilities: none needed (pure methodology, no state or onboarding)
+  ✓ Recommend tips: none
 
 Step 2: Create
   ✓ SKILL.md already exists — using as-is
@@ -71,11 +72,9 @@ Step 3: Validate
   ✓ references/dimensions.md exists and is linked
   ✓ no junk files in skill content
 
-Step 4: Review and confirm
+Step 4: Publish
   ✓ showed what would be created, where it would be published, and which active tools would be connected
-  ✓ user confirmed the side effects
-
-Step 5: Publish
+  ✓ user confirmed
   ✓ git init + initial commit
   ✓ detected the active tool locations on this machine
   ✓ connected self-review to the approved tools
@@ -121,19 +120,26 @@ ln -sfn ~/skills/skill-forge ~/.cursor/skills/skill-forge
 ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 ```
 
+## Works Better With
+
+- [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) — helps when the skill you're forging needs portable MUST/NEVER constraints. Install: `npx skills add motiful/rules-as-skills`
+- [`motiful/readme-craft`](https://github.com/motiful/readme-craft) — strengthens README writing and review during publish. Install: `npx skills add motiful/readme-craft`
+
+Skill Forge still works fully on its own.
+
 ## What's Inside
 
 ```
 SKILL.md              — Full creation + publishing pipeline
 references/
 ├── skill-format.md          — How to write a valid SKILL.md
-├── publishing-strategy.md   — One skill, multiple skills, or a themed Kit
+├── publishing-strategy.md   — Skill, Recommend, Kit, or Collection decisions
 ├── skill-composition.md     — Why skills need composition (like npm needs dependencies)
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing, claims, and example rules
 ├── onboarding-pattern.md    — Adding first-use setup to a skill
 ├── state-management.md      — Persistent config and state across sessions
-├── constraint-companion.md  — Separating enforceable rules into a companion skill
+├── rule-skill-pattern.md    — Separating enforceable rules into a paired rule-skill
 └── templates.md             — README, LICENSE, .gitignore skeletons
 ```
 

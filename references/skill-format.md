@@ -64,6 +64,7 @@ If you're building a CC-only skill and don't care about cross-platform portabili
 - Write for another AI agent, not a human. Include non-obvious procedural knowledge
 - Only add what the AI doesn't already know. Don't explain basic concepts
 - Prefer concise examples over verbose explanations
+- Default published skill content to English. Use another language only when the skill is explicitly language-specific or culture-specific
 
 ### Content Audience Check
 
@@ -136,6 +137,7 @@ skill-name/
 ├── SKILL.md              # required (at repo root for npx skills add discovery)
 ├── references/           # optional, loaded on demand
 ├── scripts/              # optional, executable utilities
+├── MAINTENANCE.md        # optional, maintenance playbook for skill maintainers
 ├── README.md             # required for GitHub
 ├── LICENSE               # required for GitHub (default: MIT)
 └── .gitignore
@@ -143,6 +145,7 @@ skill-name/
 
 - SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
 - References: one level deep from SKILL.md. Add a TOC at 100+ lines
+- MAINTENANCE.md: update triggers, verification steps, changelog. Not loaded at runtime — serves maintainers, not the executing agent
 - Delete empty directories (don't create scripts/ or references/ if unused)
 
 ## Cross-Platform Compatibility
@@ -164,7 +167,7 @@ Each skill must function when installed alone — this is the Agent Skills spec 
 Skills can freely reference and recommend other skills, methodologies, and tools. This is encouraged — it's how the ecosystem grows.
 
 **Do:**
-- Mention companion or related skills in README with install commands
+- Mention recommended or related skills in README with install commands
 - Reference methodologies in SKILL.md body (e.g., "consider using rules-as-skills for this")
 - Bundle related skills in the same repo for convenience
 - Recommend skills that enhance your skill's capabilities

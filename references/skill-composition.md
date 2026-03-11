@@ -41,6 +41,6 @@ As of March 2026, no tool fully solves skill composition.
 | `install.sh` (Kit) | Manual | Manual | Yes | No |
 | Discussion #210 proposal | Yes (skills.json) | Yes (proposed) | Yes | No |
 
-**Our recommendation today:** Use the Kit pattern (install.sh) for composition. It's simple, works everywhere, and doesn't require users to install extra tooling.
+**Our recommendation today:** Use Recommend for 2-3 independent skills that only need lightweight "works better together" hints. Use a Kit when you are curating a coherent workflow or 4+ skills and want one-command installation. Use Collection only when the skills are effectively locked together in one repo.
 
 **Future:** When the spec adds dependency support (or a tool wins the "npm for skills" slot), Kits can evolve into declarative manifests. The Kit-as-install-script pattern degrades gracefully.

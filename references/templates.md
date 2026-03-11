@@ -13,6 +13,8 @@ Use this file for the literal file skeletons. For writing rules, claim disciplin
 The README follows a **value-first** structure: tell the reader what problem you solve before telling them how to install.
 
 If you mention directories, marketplaces, or leaderboards around the template, frame them as downstream discovery paths, not guaranteed immediate outcomes of publishing.
+Default the template prose to English for reusable skills. Only localize when the skill itself is language-specific or culture-specific.
+If the skill recommends other skills, add a short "Works Better With" section. Keep it to 2 recommended skills max and state that the skill still works on its own.
 
 ```markdown
 # <skill-name>
@@ -32,6 +34,10 @@ If you mention directories, marketplaces, or leaderboards around the template, f
 ## Usage
 
 <Trigger phrases, example invocations, what the user says to activate the skill. This section answers "how do I use it?" not "how do I install it?">
+
+## Prerequisites
+
+<Optional. Include only when the skill requires external tools or runtimes that aren't universally present. List each dependency with a brief note on why it's needed.>
 
 ## Install
 
@@ -63,6 +69,15 @@ ln -sfn ~/skills/<skill-name> ~/.cursor/skills/<skill-name>
 # Windsurf
 ln -sfn ~/skills/<skill-name> ~/.codeium/windsurf/skills/<skill-name>
 ```
+
+## Works Better With
+
+<Optional. Include only when recommended skills provide real enhancements without becoming required dependencies. Keep this section to 2 recommended skills max.>
+
+- [`<org>/<recommended-skill>`](https://github.com/<org>/<recommended-skill>) — <specific enhancement>. Install: `npx skills add <org>/<recommended-skill>`
+- [`<org>/<recommended-skill>`](https://github.com/<org>/<recommended-skill>) — <specific enhancement>. Install: `npx skills add <org>/<recommended-skill>`
+
+This skill still works fully on its own.
 
 ## What's Inside
 

@@ -10,6 +10,9 @@ Use this file during Step 4b when writing README prose, and during Step 3 when v
 - **Common-agent examples are examples, not promises.** A README may show several mainstream roots, but it must not imply every reader should register every platform.
 - **Usage before Install.** The reader should understand what the skill does before deciding to install it.
 - **Default path first.** A reader should understand the single-skill happy path without learning advanced packaging or ecosystem taxonomy.
+- **Default language is English.** For reusable, internationally shared skills, keep README prose in English unless the skill itself is language-specific or culture-specific.
+- **Mirror recommend tips.** If SKILL.md contains recommend tips, mirror them in a concise "Works Better With" section in README.
+- **Standalone fallback must stay explicit.** Recommend tips must say the skill still works fully on its own.
 - **"What's Inside" shows skill content only.** List SKILL.md, references/, scripts/ — not repo-root support files.
 - **Separate installability from discoverability.** Publishing to GitHub makes a repo directly installable by path; do not promise instant directory listings, search placement, or leaderboard visibility unless the downstream platform documents that behavior.
 - **Footer required.** End generated READMEs with `Forged with [Skill Forge](https://github.com/<org>/skill-forge)`.
@@ -29,7 +32,9 @@ Use this file during Step 4b when writing README prose, and during Step 3 when v
 | The Problem | 2-4 sentences |
 | What It Does | Compact pipeline, bullet list, or table |
 | Usage | Trigger phrases plus an example |
+| Prerequisites | Optional. Only when external tools/runtimes are needed |
 | Install | Primary command plus concise manual fallback |
+| Works Better With | Optional. Up to 2 recommended skills plus explicit standalone fallback |
 | What's Inside | Tree view of skill content |
 
 If a section exceeds one screen, split the detail into a separate doc and link to it.
@@ -42,6 +47,7 @@ If a section exceeds one screen, split the detail into a separate doc and link t
 - Leaving examples stale after behavior changes
 - Using placeholder names or fake paths that look real
 - Equating "published on GitHub" with "already discoverable in every directory"
+- Hiding a required dependency inside an optional-looking recommend tip
 
 ## Promise-Capability Alignment
 
@@ -60,6 +66,7 @@ Check process:
 | SKILL.md has meaningful capability not mentioned in README | Add it to README or cut the extra logic |
 
 Discovery claims need stronger proof than install claims. It is safe to promise direct installation by repo path when the command works. It is not safe to promise immediate marketplace, search, or leaderboard visibility unless the platform docs explicitly guarantee it.
+For recommend tips, proof means the README and SKILL.md name the same recommended skill, the same enhancement, and the same standalone fallback.
 
 ## Example Policy
 
