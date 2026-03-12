@@ -155,10 +155,12 @@ Before publishing, check:
 | `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC) |
 | Body | Under 500 lines, has meaningful content (not just TODOs) |
 | References | All files referenced in SKILL.md actually exist |
-| No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, scripts/ at root alongside README.md and LICENSE is the expected structure |
+| No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, assets/, scripts/ at root alongside README.md and LICENSE is the expected structure |
 | Triggers | Description covers all intended trigger scenarios |
 | Recommended skills | If present: max 2; each recommendation sits at the step it enhances, includes the install command, and states a real fallback. Reject any "recommend" that is actually a required dependency |
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name (e.g., a skill called "self-review" that also uses "review" as a domain concept with different meaning), terms used with different meanings in different sections, terms that conflict with platform concepts (e.g., using "tool" in a way that conflicts with the agent platform's "tool" concept). Report conflicts — don't auto-fix, as naming is a design decision |
+| Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content (e.g., `templates/` → suggest `assets/`, `docs/` used for skill references → suggest `references/`). Directories serving only GitHub/repo presentation (like `docs/` for a logo gallery or `examples/` for demo files) are repo infrastructure and do not need renaming — just confirm they are not referenced by SKILL.md as skill content. Auto-fix when the mapping is unambiguous and the user confirms |
+| Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
 
 The manual checks above are the core validation path. If the user already has `skills-ref` installed, run `skills-ref validate <path>` as a final pre-publish sanity check. If not installed, skip it without adding setup work. Treat it as optional reassurance, not a dependency.
 Treat recommended-skills checks as a manual review item even if `skills-ref` passes; community validators may not encode this pattern yet.
@@ -208,7 +210,7 @@ Do not let local registration convenience redefine the public artifact.
 
 #### README.md
 
-If `readme-craft` is installed, it can strengthen README output with 3-tier layout strategy (above-fold / scan / reference), badge selection, dark/light logo patterns, and README improvement mode. Install: `npx skills add motiful/readme-craft`. Without it, forge uses its built-in templates below.
+**Recommended:** Use readme-craft for README generation — it provides 3-tier layout strategy (above-fold / scan / reference), badge selection, dark/light logo patterns, GitHub-native formatting, and README improvement mode. Install: `npx skills add motiful/readme-craft`. Without it, forge uses its built-in templates below.
 
 See `references/templates.md` for the file skeletons and `references/readme-quality.md` for writing/validation rules. Key requirements:
 - **Value-first structure**: Problem → What It Does → Usage → Install → What's Inside
@@ -366,3 +368,4 @@ Target: <skill_root>/bar/
 - `references/skill-composition.md` — Composition philosophy: context budget constraint, tooling landscape
 - `references/templates.md` — README, LICENSE, and .gitignore skeletons
 - `references/readme-quality.md` — README writing, claim discipline, and example rules
+- `references/script-quality.md` — Script file size limits, module split triggers, complexity thresholds, dependency policy

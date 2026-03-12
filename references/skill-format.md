@@ -8,6 +8,7 @@
 - [Body](#body)
 - [Content Splitting Rules](#content-splitting-rules)
 - [File Structure](#file-structure)
+  - [Directory Taxonomy](#directory-taxonomy)
 - [Cross-Platform Compatibility](#cross-platform-compatibility)
 
 ## Agent Skills Open Standard
@@ -135,7 +136,8 @@ Split content into a reference file when it meets ALL three criteria:
 ```
 skill-name/
 ├── SKILL.md              # required (at repo root for npx skills add discovery)
-├── references/           # optional, loaded on demand
+├── references/           # optional, domain knowledge loaded on demand
+├── assets/               # optional, templates and static resources consumed as material
 ├── scripts/              # optional, executable utilities
 ├── MAINTENANCE.md        # optional, maintenance playbook for skill maintainers
 ├── README.md             # required for GitHub
@@ -146,7 +148,19 @@ skill-name/
 - SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
 - References: one level deep from SKILL.md. Add a TOC at 100+ lines
 - MAINTENANCE.md: update triggers, verification steps, changelog. Not loaded at runtime — serves maintainers, not the executing agent
-- Delete empty directories (don't create scripts/ or references/ if unused)
+- Delete empty directories (don't create scripts/, references/, or assets/ if unused)
+
+### Directory Taxonomy
+
+**`references/`** — Domain knowledge loaded on-demand by the AI to make decisions. Checklists, format specs, evaluation criteria, rules.
+
+**`assets/`** — Static resources the AI consumes as raw material for output. Templates (to fill placeholders), data files, schemas, images.
+
+**`scripts/`** — Executable code the AI runs. Generators, validators, CLI tools.
+
+**Repo infrastructure** — Files serving GitHub/publishing, not skill runtime: README.md, LICENSE, CONTRIBUTING.md, .gitignore, MAINTENANCE.md, docs/, examples/, package.json, requirements.txt.
+
+The Agent Skills open standard names three skill directories: `references/`, `assets/`, `scripts/`. Additional directories (like `templates/`, `docs/`, `examples/`) are tolerated by the spec but non-standard. During validation (Step 3), flag non-standard directory names and suggest the canonical mapping: templates → assets, docs/examples → repo infrastructure.
 
 ## Cross-Platform Compatibility
 

@@ -8,7 +8,9 @@
 
 ## README.md Template
 
-Use this file for the literal file skeletons. For writing rules, claim discipline, and example policy, see `references/readme-quality.md`.
+> This skeleton defines the **minimum content requirements** for a skill README. For full layout, 3-tier hierarchy, badge selection, dark/light logo, collapsible sections, and formatting decisions, use readme-craft (`npx skills add motiful/readme-craft`). Without readme-craft, use this skeleton as-is.
+
+Use this file for the literal file skeletons. For writing rules and claim discipline, see `references/readme-quality.md`. For example provenance rules, tone/voice, and layout strategy, see readme-craft.
 
 The README follows a **value-first** structure: tell the reader what problem you solve before telling them how to install.
 
@@ -94,7 +96,7 @@ references/            — <if applicable>
 
 ---
 
-Forged with [Skill Forge](https://github.com/<org>/skill-forge)
+Forged with [Skill Forge](https://github.com/<org>/skill-forge) · Crafted with [readme-craft](https://github.com/<org>/readme-craft)
 ```
 
 ## LICENSE Template (MIT)

@@ -1,5 +1,7 @@
 # README Quality
 
+For layout strategy (3-tier hierarchy), badge selection, tone/voice, section overflow, and example provenance rules, use readme-craft (`npx skills add motiful/readme-craft`). This file covers skill-specific content requirements that readme-craft does not address.
+
 Use this file during Step 4b when writing README prose, and during Step 3 when validating community readiness.
 
 ## Core Rules
@@ -15,29 +17,7 @@ Use this file during Step 4b when writing README prose, and during Step 3 when v
 - **Standalone fallback must stay explicit.** Recommended skills must say the skill still works fully on its own.
 - **"What's Inside" shows skill content only.** List SKILL.md, references/, scripts/ — not repo-root support files.
 - **Separate installability from discoverability.** Publishing to GitHub makes a repo directly installable by path; do not promise instant directory listings, search placement, or leaderboard visibility unless the downstream platform documents that behavior.
-- **Footer required.** End generated READMEs with `Forged with [Skill Forge](https://github.com/<org>/skill-forge)`.
-
-## Tone and Voice
-
-- Use "you" for the reader's actions
-- Use third person for the software's behavior
-- Avoid "we"
-- Keep the tone professional and direct
-
-## Section Length
-
-| Section | Guideline |
-|---------|-----------|
-| Title + Description | 1-3 sentences |
-| The Problem | 2-4 sentences |
-| What It Does | Compact pipeline, bullet list, or table |
-| Usage | Trigger phrases plus an example |
-| Prerequisites | Optional. Only when external tools/runtimes are needed |
-| Install | Primary command plus concise manual fallback |
-| Works Better With | Optional. Up to 2 recommended skills plus explicit standalone fallback |
-| What's Inside | Tree view of skill content |
-
-If a section exceeds one screen, split the detail into a separate doc and link to it.
+- **Footer required.** End generated READMEs with `Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [readme-craft](https://github.com/motiful/readme-craft)` when both tools were used, or just the one that applies.
 
 ## Common Mistakes
 
@@ -67,12 +47,3 @@ Check process:
 
 Discovery claims need stronger proof than install claims. It is safe to promise direct installation by repo path when the command works. It is not safe to promise immediate marketplace, search, or leaderboard visibility unless the platform docs explicitly guarantee it.
 For recommended skills, proof means the README and SKILL.md name the same recommended skill, the same enhancement, and the same standalone fallback.
-
-## Example Policy
-
-Use plain `Example` headings. The important rule is provenance, not the label.
-
-- If the example is a sample flow rather than a literal transcript, say that in the sentence below the heading
-- If the example comes from a real run, keep the paths and outputs specific
-- Never imply that a path, platform root, or command was verified on a specific machine unless it actually was
-- Prefer to run the skill on at least one real project before publishing, but a clearly framed sample flow is acceptable

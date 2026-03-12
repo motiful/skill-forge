@@ -1,10 +1,32 @@
-# Skill Forge
+<div align="center">
 
-> From idea to published, installable AI skill — in one pipeline.
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
+    <img alt="Skill Forge" src="assets/logo-light.svg" width="480">
+  </picture>
 
-Say "publish this skill" to your AI coding assistant and Skill Forge handles the rest — from writing SKILL.md to pushing a ready-to-install repo to GitHub.
+  <p>From idea to published, installable AI skill — in one pipeline.</p>
+</div>
 
-[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other Agent Skills adopters.
+[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other adopters.
+
+<div align="center">
+
+[![License: MIT][license-shield]][license-url]
+[![Version][version-shield]][version-url]
+[![Agent Skills][skills-shield]][skills-url]
+
+</div>
+
+<div align="center">
+  <a href="#quick-start">Quick Start</a> &middot;
+  <a href="#usage">Usage</a> &middot;
+  <a href="#install">Install</a> &middot;
+  <a href="https://agentskills.io">Agent Skills</a>
+</div>
+
+---
 
 ## The Problem
 
@@ -22,53 +44,27 @@ Your skill is trapped. It can't be maintained globally, iterated on independentl
 
 Takes a skill idea (or an existing project-local skill) and runs the full pipeline:
 
-```
-Config → Gather → Create → Validate → Publish
-```
-
-0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences (auto-defaults, minimal questions)
-1. **Gather** — Auto-detect existing skill content from project and conversation. Detect what the skill needs (first-use setup? persistent state? enforceable constraints?)
-2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard, bake detected capabilities in, and describe helpful companion skills only where they genuinely strengthen a specific step
+0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences
+1. **Gather** — Auto-detect existing skill content from project and conversation
+2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard
 3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
-4. **Publish** — show one short confirmation of what will be created and connected, then push to GitHub and optionally connect it to the tools already active on this machine. The result is directly installable by repo path; broader directory visibility depends on downstream indexing or install telemetry
+4. **Publish** — Push to GitHub and optionally connect to tools already active on your machine
 
 The result: a standalone repo that anyone can install with one command.
 
-## Positioning
+## Quick Start
 
-Skill Forge optimizes for **public artifact quality**, not domain-level outcome certification.
-
-It helps users create skills that are:
-
-- installable
-- publishable
-- maintainable
-- composable
-- independently iterable
-- honestly described
-
-It does **not** claim to prove that a generated skill's domain outputs are objectively excellent, production-safe, or aesthetically strong. Those judgments still depend on the author, the domain, and real usage.
-
-Skill Forge is for skills that deserve a life beyond one project folder: their own repo, their own history, and their own maintenance surface.
-
-### Advanced: Skill Composition
-
-Most users can ignore this. The default model is simple:
-
-- publish one thing as a single skill
-- if another skill genuinely strengthens one step, mention it in that step and mirror it in a short `Works Better With` section
-- only move to `Kit` when several skills need to be delivered as one workflow
-- only use `Collection` when several skills are locked into one repo
-
-Within a single skill, the recommended-skills pattern should look like this:
-
-```markdown
-Step 4: Validate output
-
-If `readme-craft` is installed, use it here to tighten README structure and badge selection.
-Install: `npx skills add motiful/readme-craft`
-Without it, continue with the built-in README checks in this skill.
+```bash
+npx skills add motiful/skill-forge
 ```
+
+Then tell your AI coding assistant:
+
+```
+"Publish this skill to GitHub"
+```
+
+You get a standalone repo with SKILL.md, README, and LICENSE — pushed to GitHub and installable via `npx skills add <org>/<name>`.
 
 ## Usage
 
@@ -78,9 +74,10 @@ Say any of:
 - "Forge a skill from my notes"
 - "Turn this project-local skill into a repo"
 
-### Example: Publishing self-review
+<details>
+<summary>Example: Publishing self-review</summary>
 
-This is a sample flow, not a transcript from one specific machine. Exact registration depends on which skill roots already exist and which targets you explicitly choose.
+This is a sample flow, not a transcript from one specific machine.
 
 ```
 $ "Publish self-review to GitHub"
@@ -114,11 +111,7 @@ Step 4: Publish
   ✓ Published — install with: npx skills add motiful/self-review
 ```
 
-## Prerequisites
-
-- **Git** (required)
-- **Node.js** (required for `npx skills add`)
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — recommended for one-command publishing. Without it, you'll set up the remote manually
+</details>
 
 ## Install
 
@@ -126,15 +119,15 @@ Step 4: Publish
 npx skills add motiful/skill-forge
 ```
 
-Publishing note: pushing a skill repo to GitHub makes it directly installable by repo path. Directory listings and leaderboards are downstream and may lag or depend on install activity.
+Works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other [Agent Skills](https://agentskills.io) adopters.
 
-Common manual registration examples:
+<details>
+<summary>Manual registration (clone + symlink)</summary>
 
 ```bash
 git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
 
 # Register only in roots you actually use.
-# If a root does not exist yet, create it only intentionally.
 
 # Claude Code
 ln -sfn ~/skills/skill-forge ~/.claude/skills/skill-forge
@@ -145,35 +138,69 @@ ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
 # VS Code / GitHub Copilot
 ln -sfn ~/skills/skill-forge ~/.copilot/skills/skill-forge
 
-# Cursor (if your setup ignores the symlink, use a real copy in ~/.cursor/skills/skill-forge)
+# Cursor
 ln -sfn ~/skills/skill-forge ~/.cursor/skills/skill-forge
 
 # Windsurf
 ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 ```
 
-## Works Better With
+</details>
+
+<details>
+<summary>Prerequisites</summary>
+
+- **Git** (required)
+- **Node.js** (required for `npx skills add`)
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — recommended for one-command publishing. Without it, you set up the remote manually
+
+</details>
+
+<details>
+<summary>Works Better With</summary>
 
 - [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) — helps when the skill you're forging needs portable MUST/NEVER constraints. Install: `npx skills add motiful/rules-as-skills`
 - [`motiful/readme-craft`](https://github.com/motiful/readme-craft) — strengthens README writing and review during publish. Install: `npx skills add motiful/readme-craft`
 
 Skill Forge still works fully on its own.
 
-## What's Inside
+</details>
+
+<details>
+<summary>Positioning</summary>
+
+Skill Forge optimizes for **public artifact quality**, not domain-level outcome certification.
+
+It helps you create skills that are installable, publishable, maintainable, composable, independently iterable, and honestly described.
+
+It does **not** claim to prove that a generated skill's domain outputs are objectively excellent, production-safe, or aesthetically strong. Those judgments still depend on the author, the domain, and real usage.
+
+**Skill Composition:** Most users can ignore this. The default model is simple — publish one thing as a single skill. If another skill genuinely strengthens one step, mention it in that step and mirror it in a short "Works Better With" section. Only move to `Kit` when several skills need to be delivered as one workflow.
+
+</details>
+
+<details>
+<summary>What's Inside</summary>
 
 ```
 SKILL.md              — Full creation + publishing pipeline
 references/
 ├── skill-format.md          — How to write a valid SKILL.md
-├── publishing-strategy.md   — Skill, Kit, or Collection decisions; where recommended skills fit
-├── skill-composition.md     — Lightweight rules for companion skills, Kits, and context budget
+├── publishing-strategy.md   — Skill, Kit, or Collection decisions
+├── skill-composition.md     — Lightweight composition rules
 ├── platform-registry.md     — Where each platform looks for skills
-├── readme-quality.md        — README writing, claims, and example rules
+├── readme-quality.md        — README writing and claim discipline
 ├── onboarding-pattern.md    — Adding first-use setup to a skill
 ├── state-management.md      — Persistent config and state across sessions
 ├── rule-skill-pattern.md    — Separating enforceable rules into a paired rule-skill
 └── templates.md             — README, LICENSE, .gitignore skeletons
 ```
+
+</details>
+
+## Contributing
+
+Bug reports, validation rule ideas, and reference doc improvements are welcome. Open an issue or pull request on [GitHub](https://github.com/motiful/skill-forge).
 
 ## License
 
@@ -181,4 +208,12 @@ references/
 
 ---
 
-Forged with [Skill Forge](https://github.com/motiful/skill-forge)
+Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [readme-craft](https://github.com/motiful/readme-craft)
+
+<!-- Badge reference-style links -->
+[license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
+[license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
+[version-shield]: https://img.shields.io/badge/version-2.0-blue.svg
+[version-url]: SKILL.md
+[skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
+[skills-url]: https://agentskills.io
