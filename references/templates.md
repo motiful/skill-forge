@@ -96,7 +96,7 @@ references/            — <if applicable>
 
 ---
 
-Forged with [Skill Forge](https://github.com/<org>/skill-forge) · Crafted with [readme-craft](https://github.com/<org>/readme-craft)
+Forged with [Skill Forge](https://github.com/<org>/skill-forge) · Crafted with [Readme Craft](https://github.com/<org>/readme-craft)
 ```
 
 ## LICENSE Template (MIT)

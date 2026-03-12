@@ -208,7 +208,7 @@ Bug reports, validation rule ideas, and reference doc improvements are welcome. 
 
 ---
 
-Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [readme-craft](https://github.com/motiful/readme-craft)
+Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [Readme Craft](https://github.com/motiful/readme-craft)
 
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
