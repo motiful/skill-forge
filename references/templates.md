@@ -129,8 +129,11 @@ SOFTWARE.
 
 ```
 .DS_Store
+Thumbs.db
 *.skill
 node_modules/
 dist/
-.env
+.env*
+.idea/
+.vscode/
 ```

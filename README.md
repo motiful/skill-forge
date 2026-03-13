@@ -6,10 +6,8 @@
     <img alt="Skill Forge" src="assets/logo-light.svg" width="480">
   </picture>
 
-  <p>From idea to published, installable AI skill — in one pipeline.</p>
+  <p>From local experiment to installable, trustworthy skill — in one command.</p>
 </div>
-
-[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other adopters.
 
 <div align="center">
 
@@ -30,15 +28,11 @@
 
 ## The Problem
 
-You wrote a great skill. It works locally. But:
+**If you haven't published yet** — your skill is trapped in one project, can't be shared, and doesn't meet any platform's install standard. No README, no LICENSE, no proper structure, no discoverability.
 
-- It's trapped in one project's skills directory — not a proper, installable package
-- You can't share it across machines, let alone with other people
-- It doesn't meet any platform's install standard — no README, no LICENSE, no proper structure
-- There's no versioning, no discoverability, no community presence
-- Publishing means figuring out GitHub repo setup, README conventions, symlink registration, and community platform requirements — all manually
+**If you already published** — your repo might have issues you haven't noticed: leaked API keys in config files, missing .gitignore entries, structure that doesn't match the [Agent Skills](https://agentskills.io) standard, or claims in the README that don't match what the skill actually does.
 
-Your skill is trapped. It can't be maintained globally, iterated on independently, or shared with the community.
+Either way, getting from "works on my machine" to "anyone can install and trust this" takes more than a `git push`.
 
 ## What Skill Forge Does
 
@@ -47,10 +41,22 @@ Takes a skill idea (or an existing project-local skill) and runs the full pipeli
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences
 1. **Gather** — Auto-detect existing skill content from project and conversation
 2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard
-3. **Validate** — Structure, frontmatter, content quality, optional community readiness checks
+3. **Validate** — Structure, frontmatter, content quality, repo hygiene, optional community readiness checks
 4. **Publish** — Push to GitHub and optionally connect to tools already active on your machine
 
-The result: a standalone repo that anyone can install with one command.
+Or, **review an existing repo** — skip straight to validation and get a structured report with severity levels for every check, including leaked secrets, .gitignore gaps, and content quality.
+
+The result: a standalone repo that anyone can install with one command — or a clear list of what to fix before they should.
+
+## When to Load
+
+| You're doing... | Need skill-forge? |
+|-----------------|-------------------|
+| Writing a skill's content | No — focus on the domain, not formatting |
+| Ready to validate or publish | **Yes** — "publish this skill" or "forge a skill" |
+| Reviewing an existing repo | **Yes** — "review this skill repo" |
+
+skill-forge is a post-authoring tool. Load it when you're done writing, not while writing.
 
 ## Quick Start
 
@@ -73,6 +79,8 @@ Say any of:
 - "Publish this skill to GitHub"
 - "Forge a skill from my notes"
 - "Turn this project-local skill into a repo"
+- "Review this skill repo"
+- "Audit my skill before publishing"
 
 <details>
 <summary>Example: Publishing self-review</summary>
@@ -190,6 +198,7 @@ references/
 ├── skill-composition.md     — Lightweight composition rules
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing and claim discipline
+├── script-quality.md        — Script file structure guidelines
 ├── onboarding-pattern.md    — Adding first-use setup to a skill
 ├── state-management.md      — Persistent config and state across sessions
 ├── rule-skill-pattern.md    — Separating enforceable rules into a paired rule-skill

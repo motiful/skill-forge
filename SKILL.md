@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: Create, validate, and publish skills to GitHub as independent repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "skill to GitHub", or wants to turn a project-local skill into a shareable GitHub repository. Handles the full pipeline from content creation to git init, GitHub repo creation, and local platform registration.
+description: Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", or wants to turn a project-local skill into a shareable GitHub repository. Handles the full pipeline from content creation to git init, GitHub repo creation, and local platform registration — or review-only mode for existing repos.
 license: MIT
 metadata:
   author: motiful
@@ -25,7 +25,19 @@ If the user has established conventions (naming, structure, org, licensing), **f
 
 - User has a skill idea and wants it as a GitHub repo
 - User has an existing project-local skill (`.claude/skills/foo/`) and wants to publish it
+- User has an existing skill repo (local or on GitHub) and wants it reviewed or audited
 - User says "publish", "forge", "create a skill", "put this skill on GitHub"
+- User says "review this skill", "audit my skill repo", "check this skill repo"
+
+## Review Mode
+
+When the user wants to review or audit an existing skill repo — not create or publish — skip directly to Step 3.
+
+1. **Locate** — Find the skill repo (local path, or clone from a GitHub URL into a temp directory)
+2. **Validate** — Run all Step 3 checks: core validation, Repo Hygiene, and Community Readiness
+3. **Report** — Present a structured report with severity levels (critical / warning / pass) for each check
+
+Review mode does not require forge config (Step 0), content detection (Step 1), or content creation (Step 2). The user decides what to fix — forge does not auto-modify reviewed repos.
 
 ## Pipeline
 
@@ -41,9 +53,9 @@ If the user has established conventions (naming, structure, org, licensing), **f
 
 ### Positioning
 
-SkillForge creates **independent, publishable skill repositories**. If the user just wants a quick project-internal skill (not shared), guide them to the platform's built-in skill creator instead.
+Skill Forge creates **independent, publishable skill repositories**. If the user just wants a quick project-internal skill (not shared), guide them to the platform's built-in skill creator instead.
 
-SkillForge optimizes for **public artifact quality**:
+Skill Forge optimizes for **public artifact quality**:
 
 - installability
 - maintainability
@@ -164,6 +176,23 @@ Before publishing, check:
 
 The manual checks above are the core validation path. If the user already has `skills-ref` installed, run `skills-ref validate <path>` as a final pre-publish sanity check. If not installed, skip it without adding setup work. Treat it as optional reassurance, not a dependency.
 Treat recommended-skills checks as a manual review item even if `skills-ref` passes; community validators may not encode this pattern yet.
+
+### Repo Hygiene
+
+These checks apply to the entire repository, not just skill content. They run automatically before publish and in review mode.
+
+| Check | Criteria |
+|-------|----------|
+| Leaked secrets | Scan all tracked files for common secret patterns: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords in config files, private keys (`-----BEGIN.*PRIVATE KEY-----`), hardcoded credentials. **Block publish** until resolved |
+| .gitignore coverage | Verify common entries: `.env*`, `node_modules/`, `.DS_Store`, IDE configs (`.idea/`, `.vscode/settings.json`), OS files (`Thumbs.db`). Flag tracked files that match these patterns |
+| Credential files | Warn if `.env`, `credentials.json`, `*.pem`, `*.key`, or secret-bearing config files are tracked by git |
+| Unnecessary files | Flag files that add noise to a skill repo: lock files (`package-lock.json`, `yarn.lock`) without a `scripts/` runtime, large media files (> 1 MB), build artifacts, IDE workspace files |
+
+**Severity levels:**
+- **Critical** (leaked secrets, credential files) — block publish, require immediate action
+- **Warning** (missing .gitignore entries, unnecessary files) — report and recommend, do not block
+
+In review mode, present all findings with severity. In publish mode, block on critical issues only.
 
 ### Community Readiness (optional)
 
