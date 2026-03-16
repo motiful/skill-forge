@@ -302,6 +302,12 @@ If the user wants maximum discoverability:
 | Description clarity | Description alone should tell a stranger what this skill does and when to use it |
 | Security | If skill contains scripts, document what they do and what permissions they need |
 
+#### Cross-Pillar Alignment (Scenario 1 & 3)
+
+After structural checks, run self-review on the skill project to audit alignment across Design (README, docs), Artifact (SKILL.md, references, scripts), Skill (conventions), and Progress (changelog, roadmap). This catches drift that format validation misses — such as README claims diverging from SKILL.md execution logic, or stale progress tracking.
+
+Report self-review findings alongside Step 3 results. Do not duplicate checks that Step 3 already covers (frontmatter, description coverage, repo hygiene).
+
 ### Step 4: Publish
 
 #### Publishing Levels

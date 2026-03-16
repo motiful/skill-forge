@@ -79,4 +79,3 @@ Beyond scheduled platform registry checks, these events should trigger a mainten
 - 2026-03-16: **v3.0 — Principle-driven simplification.** Added `references/quality-principles.md` as the decision compass. Removed Capability Detection table, JIT dependency pattern, Enhancement Report, and Kit publishing model. Renamed `onboarding-pattern.md` → `precondition-checks.md`. Simplified `state-management.md` to edge-case reference. Publishing models: Skill + Collection only. Companion tools handled with simple inline mention + README "Works Better With."
 - 2026-03-15: Added JIT dependency pattern (subsequently removed in v3.0).
 - 2026-03-12: Collapsed the old Recommend tier back into the single-skill model.
-- 2026-03-11: Made Rule-Skill Split self-containment explicit. Renamed `constraint-companion.md` → `rule-skill-pattern.md`.

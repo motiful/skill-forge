@@ -190,7 +190,7 @@ ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 
 - **Git** (required)
 - **Node.js** (required for `npx skills add`)
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — recommended for one-command publishing. Without it, you set up the remote manually
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Review-only scenarios work without it
 
 </details>
 
@@ -238,8 +238,7 @@ references/
 ├── script-quality.md        — Script file structure guidelines
 └── templates.md             — README, LICENSE, .gitignore skeletons
 docs/
-├── quality-principles.md    — Maintenance: decision framework, 6 quality dimensions
-└── RENOVATION-v4.md         — Maintenance: v4 renovation plan
+└── quality-principles.md    — Maintenance: decision framework, 6 quality dimensions
 ```
 
 </details>

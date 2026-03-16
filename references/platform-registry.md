@@ -13,7 +13,7 @@
 - [Community Tools](#community-tools)
 - [Community Directories](#community-directories)
 
-Last verified: 2026-03-11
+Last verified: 2026-03-17
 
 This file is read by the Local Registration section at publish time. User-level skill directories are **not** standardized across agents. Do not describe `~/.agents/skills/` as a universal home-directory path, and do not treat platform directory management as Skill Forge's default responsibility.
 
