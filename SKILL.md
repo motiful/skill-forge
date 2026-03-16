@@ -4,7 +4,7 @@ description: Create, validate, publish, and review skills as GitHub repos. Use w
 license: MIT
 metadata:
   author: motiful
-  version: "3.1"
+  version: "4.0"
 ---
 
 # Skill Forge
@@ -88,7 +88,7 @@ User has an idea but no SKILL.md yet.
 Project-local skill is good enough to publish independently.
 
 **Flow**:
-1. **Step 0** — ensure forge config exists (`skill_root`, `github_org`)
+1. **Step 0** — run setup.sh, ensure forge config exists (`skill_root`, `github_org`)
 2. **Step 1** — locate the project-local skill
 3. **Graduation assessment** — check for project-specific references, hardcoded paths, project-internal dependencies
 4. **Cleanup** — generalize: remove project-specific refs, ensure standalone usability
@@ -110,13 +110,57 @@ Copy content (`cp -r <source>/* <skill_root>/<name>/`), clean up, validate, publ
 
 Steps 0–4 are reusable building blocks. Scenarios define which steps run and in what order.
 
-### Step 0: Configuration
+### Step 0: Environment Setup
+
+#### 0a. Installation
+
+Run `scripts/setup.sh` to check and install all dependencies.
+
+```
+1. Run scripts/setup.sh
+2. Exit 0 → proceed
+3. Exit non-zero → report error to user, stop
+```
+
+**Dependencies** (installed by setup.sh):
+- **CLI tools**: `gh`, `node`, `npx`
+- **Skills**: `motiful/readme-craft`, `motiful/rules-as-skills`, `motiful/self-review`
+
+See `references/installation.md` for the setup.sh standard.
+
+#### 0b. Onboarding (first use only)
+
+If `~/.config/skill-forge/config.md` does not exist, run onboarding:
+
+1. **Detect** — `github_org` via `gh api user -q .login`, platform from current agent
+2. **Summarize** — show detected defaults:
+   ```markdown
+   # Skill Forge Config
+   ## Defaults
+   - skill_root: ~/skills/
+   - github_org: <detected>
+   - license: MIT
+   ```
+3. **Confirm once** — ask for approval
+4. **Write** — create `~/.config/skill-forge/config.md`
+
+**`skill_root`** defaults to `~/skills/`. Tell the user: *"Your skills will live in `~/skills/` — each skill gets its own folder and git repo there. You can change this anytime in `~/.config/skill-forge/config.md`."*
+
+See `references/onboarding.md` for the onboarding pattern.
+
+#### 0c. Config Check
+
+Read `~/.config/skill-forge/config.md`.
+
+**Found** → read user's preferences and proceed.
+
+**Not found** (and onboarding didn't run) → create with detected defaults (see 0b).
 
 #### User Conventions
 
 Before creating or publishing, check for the user's existing conventions. Scan in priority order:
 
-1. **Forge config** — `~/.config/skill-forge/config.md` (platform-agnostic, created below)
+1. **Forge config** — `~/.config/skill-forge/config.md` (platform-agnostic, created above)
 2. **Project instructions** — `CLAUDE.md`, `AGENTS.md`, or equivalent for the current platform
 3. **Platform rules directory** — if it exists (CC: `~/.claude/rules/`, Cursor: `~/.cursor/rules/`, etc.)
 
@@ -127,37 +171,6 @@ If the user has established conventions (naming, structure, org, licensing), **f
 Skill Forge creates **independent, publishable skill repositories**. If the user just wants a quick project-internal skill (not shared), guide them to the platform's built-in skill creator instead.
 
 Skill Forge optimizes for **public artifact quality**: installability, maintainability, composition quality, README clarity, honest claims. It does **not** certify domain excellence or real-world effectiveness.
-
-#### Config Check
-
-Read `~/.config/skill-forge/config.md`.
-
-**Found** → read user's preferences and proceed.
-
-**Not found** → detect sensible defaults first, then ask for explicit confirmation before writing:
-
-```markdown
-# Skill Forge Config
-
-## Defaults
-
-- skill_root: ~/skills/
-- github_org: <auto-detect via `gh api user -q .login`, ask if `gh` unavailable>
-- license: MIT
-```
-
-**`skill_root`** defaults to `~/skills/`. Tell the user: *"Your skills will live in `~/skills/` — each skill gets its own folder and git repo there. You can change this anytime in `~/.config/skill-forge/config.md`."*
-
-Detect what you can (`github_org` via `gh`, platform from the current agent). Show the exact config path and values you plan to write, then ask once before writing. Don't interrogate — detect, summarize, confirm.
-
-`~/.config/skill-forge/config.md` is for stable forge preferences. Forge-managed registries and history belong in `~/.config/skill-forge/state.md`.
-
-#### Works Better With
-
-Forge works fully on its own. These companion tools strengthen specific steps when available:
-
-- **`motiful/rules-as-skills`** — strengthens Rule-Skill Split in Step 1 with portable constraint skills. Without it, forge uses built-in `references/rule-skill-pattern.md`
-- **`motiful/readme-craft`** — 3-tier layout, badge selection, dark/light logo for README in Step 4. Without it, forge uses built-in templates from `references/templates.md`
 
 ### Step 1: Gather
 
@@ -183,14 +196,32 @@ If multiple likely matches are found, summarize the candidate paths and ask whic
 - What does this skill do? (1-2 sentences)
 - When should it trigger? (specific phrases, file types, scenarios)
 
-#### Structural Patterns
+#### Ecosystem Check (Full Create only)
 
-Check if the skill needs any of these optional patterns:
+For Scenario 4 (Full Create), before writing new content, check if similar skills already exist:
 
-- **Precondition checks** — Does the skill need external tools (CLI, npm packages, APIs)? If yes, add a Step 0 that checks for them every run and handles absence. See `references/precondition-checks.md`
-- **Rule-Skill Split** — Does the skill have hard MUST/NEVER constraints that users might want to customize? If yes, consider separating constraints into a paired `<name>-rules` skill. See `references/rule-skill-pattern.md`
+1. **Search** — `npx skills find <keyword>` or search skills.sh for the domain
+2. **Found similar?** → present to user with options:
 
-Most skills need neither. Don't force-fit patterns where simple workflow steps suffice.
+| Finding | Recommendation |
+|---------|---------------|
+| Good match exists as standalone repo | Depend on it (`scripts/setup.sh`), don't recreate |
+| Partial match — needs significant customization | Fork and adapt, or create new with the existing as reference |
+| Nothing similar | Create from scratch |
+
+Skip this check for Scenarios 1, 2, 3, 5 — those work with existing skills.
+
+#### Capability Detection
+
+Detect which capabilities the skill needs. This is not optional — detect and act.
+
+| Capability | Detection question | Action | Reference |
+|---|---|---|---|
+| **Installation** | Does the skill have dependencies to install? (tools, skills, npm packages) | Add `scripts/setup.sh` + Step 0 that runs it | `references/installation.md` |
+| **Onboarding** | Does the skill need first-use user guidance? (profile setup, credentials, preferences) | Add onboarding flow in Step 0 | `references/onboarding.md` |
+| **Rule-Skill Split** | Does the skill contain 3+ MUST/NEVER constraints that users may want to customize? | Auto-create paired `<name>-rules` skill | `references/rule-skill-pattern.md` |
+
+**Rule-Skill Split is detection-driven**: if constraints are detected, forge creates the paired skill automatically. If no constraints detected, nothing is created. The user is not asked whether to create it — forge decides based on content.
 
 ### Step 2: Create
 
@@ -198,23 +229,23 @@ Write SKILL.md following the Agent Skills open standard. See `references/skill-f
 
 Key principle: write for another AI agent, not a human. Keep body under 500 lines — use `references/` files for detailed content.
 
-#### Baking In Structural Patterns
+#### Baking In Detected Capabilities
 
-For patterns detected in Step 1, bake the corresponding structure into the generated SKILL.md:
+For capabilities detected in Step 1, bake the corresponding structure into the generated SKILL.md:
 
-- **Precondition checks** → Add a Step 0 that checks for required external tools every run and handles absence (install prompt or graceful skip). See `references/precondition-checks.md`
-- **Rule-Skill Split** → Create a separate `<name>-rules` skill alongside the main skill, but keep the main skill usable on its own. If `<name>-rules` is absent, the generated skill must fall back to its built-in/default behavior and say that explicitly
+- **Installation** → Add `scripts/setup.sh` that checks and installs all declared dependencies. Add a Step 0 that runs setup.sh. See `references/installation.md`
+- **Onboarding** → Add first-use guidance in Step 0 (after setup.sh). See `references/onboarding.md`
+- **Rule-Skill Split** → Auto-create a separate `<name>-rules` skill alongside the main skill. See `references/rule-skill-pattern.md`
 
-These patterns are **transparent to the end user** — they work without the end user having skill-forge installed. Forge bakes them in at creation time; the generated skill is self-contained.
+These patterns are **transparent to the end user** — they work without the end user having skill-forge installed. Forge bakes them in at creation time; the generated skill is self-contained (independent from forge, not from its own dependencies).
 
-#### Companion Tools in Generated Skills
+#### Dependencies in Generated Skills
 
-If the skill being created works better with companion tools (other skills, CLI tools), mention them inline at the relevant workflow step with fallback behavior. Mirror them in README's "Works Better With" section.
+If the skill being created has dependencies (other skills, CLI tools, npm packages), they must be declared and installed:
 
-Keep it simple:
-- Mention what the companion does and how to get it
-- Describe the complete fallback if it's absent
-- The skill must fully complete its job without any companion installed
+- Declare in SKILL.md Step 0 and implement in `scripts/setup.sh`
+- Mirror in README's "Dependencies" section
+- No fallback behavior — dependencies are installed or the skill blocks with an error
 
 ### Step 3: Validate
 
@@ -229,7 +260,12 @@ Keep it simple:
 | Body | Under 500 lines, has meaningful content (not just TODOs) |
 | References | All files referenced in SKILL.md actually exist |
 | No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, assets/, scripts/ at root alongside README.md and LICENSE is the expected structure |
-| Companion tools | If the skill mentions companion tools, verify each has a complete fallback described. No companion should hide a real dependency |
+| Dependencies | If the skill declares dependencies, verify `scripts/setup.sh` exists and handles each one. Dependencies must be installed, not optional |
+| Runtime write to skill directory | Skill directory should have no runtime-written data files. Flag `.claude/skills/<name>/data/`, `.claude/skills/<name>/cache/`, or any non-published file | Warning |
+| Assets misuse | `assets/` only holds AI-consumed source material. Logo, screenshots, and repo infrastructure belong in `.github/` or root level, not in `assets/` | Warning |
+| Meta-skill contamination | Skill repo should not contain tooling skills (skill-forge, skill-creator) as subdirectories. Detect `skills/skill-forge/`, `.claude/skills/skill-forge/`, `.agents/skills/skill-forge/` or similar inside the repo. Remediation: `rm -rf <path>` then `npx skills add motiful/skill-forge -g` (tooling skills belong at global scope, not inside the skill being forged) | Warning |
+| Collection context budget | For multi-skill repos: count total skills. 15+ skills → warn about context flooding (descriptions alone consume ~1.5K+ tokens). Recommend selective install (`--skill`) in README | Warning |
+| Collection name collision | For multi-skill repos: flag generic skill names (`code-review`, `landing-page`) that are likely to collide with standalone skills the user may already have. Recommend namespacing (`<domain>-code-review`) | Warning |
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
@@ -259,7 +295,7 @@ If the user wants maximum discoverability:
 |-------|----------|
 | README quality | Value-first structure, claim discipline, example clarity. See `references/readme-quality.md` and `references/templates.md` |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
-| Companion tools | If SKILL.md mentions companion tools, mirror them in a concise README section and state the skill works on its own |
+| Dependencies | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
 | Discoverability claims | Do not imply GitHub publication guarantees immediate listing or search placement |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
 | LICENSE exists | Required for community platforms |
@@ -281,6 +317,16 @@ User can stop at any level. Each level is a valid resting point.
 
 Do not promise Level 3 as an outcome of running skill-forge. Do not push users past the level they requested.
 
+#### Location Rule
+
+Forge does not force-move the author's files. `skill_root` is the default for new skills, not a mandatory destination.
+
+| Scenario | Where to publish |
+|----------|-----------------|
+| Skill already has a location (with or without git) | **Publish in-place** — `git init` where it is |
+| Full Create (no existing files) | **Create in `<skill_root>/<skill-name>/`** — the default |
+| Graduation (explicit move request) | **Copy to `<skill_root>/<skill-name>/`** — user asked for the move |
+
 #### Strategy
 
 Before creating the repo, determine the publishing strategy. See `references/publishing-strategy.md` for detailed guidance.
@@ -300,10 +346,10 @@ Do not let local registration convenience redefine the public artifact.
 ##### Repo structure
 
 ```
-<skill_root>/<skill-name>/
-├── SKILL.md                       # at root for npx skills add discovery
-├── references/                    # if needed
-├── scripts/                       # if needed
+<skill-name>/                          # wherever the skill lives (see Location Rule)
+├── SKILL.md                           # at root for npx skills add discovery
+├── references/                        # if needed
+├── scripts/                           # if needed
 ├── README.md
 ├── LICENSE
 └── .gitignore
@@ -311,13 +357,13 @@ Do not let local registration convenience redefine the public artifact.
 
 ##### README.md
 
-Use readme-craft if available (3-tier layout, badge selection, dark/light logo). Without it, use built-in templates.
+Use readme-craft (3-tier layout, badge selection, dark/light logo — installed by setup.sh).
 
 See `references/templates.md` for skeletons and `references/readme-quality.md` for rules. Key requirements:
 - **Value-first**: Problem → What It Does → Usage → Install → What's Inside
 - Must mention [Agent Skills](https://agentskills.io) compatibility
 - Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
-- If companion tools exist, add a "Works Better With" section
+- If dependencies exist, add a "Dependencies" section
 - Include a "What's Inside" section showing skill files
 - Include a "Forged with Skill Forge" footer
 
@@ -359,6 +405,8 @@ git remote add origin <url> && git push -u origin main
 Update forge state: add the skill to `~/.config/skill-forge/state.md` under "Published Skills".
 
 After push, tell the user: *"Your skill is on GitHub. Install with `npx skills add <org>/<skill-name>`. Community directories may surface it later based on their own indexing."*
+
+**CC Market**: check `cc_market` in forge config. If `true` → include CC Market submission. If `false` → skip. If **not set** → ask once with recommendation to skip (GitHub is already installable), save preference. See `references/platform-registry.md` for details.
 
 See `references/platform-registry.md` for community directories and tools.
 
@@ -410,15 +458,14 @@ No new platform directories created.
 
 ## References
 
-- `references/quality-principles.md` — What is a good skill, 6 quality dimensions, skill-forge's identity, decision test for features
+- `references/installation.md` — setup.sh standard: dependency detection, installation, two outcomes
+- `references/onboarding.md` — Interactive first-use guidance pattern
+- `references/skill-configuration.md` — User preferences, config location, litmus test, stateless principle
 - `references/skill-format.md` — SKILL.md format specification (frontmatter, structure, guidelines)
-- `references/skill-composition.md` — Composition philosophy: context budget, "works better with" pattern
+- `references/skill-composition.md` — Composition philosophy: context budget, dependency tiers
+- `references/rule-skill-pattern.md` — Detection-driven: MUST/NEVER constraints as paired skill
 - `references/publishing-strategy.md` — Skill vs Collection publishing models
 - `references/platform-registry.md` — Platform skill paths, detection logic, community directories
-- `references/skill-configuration.md` — Optional pattern: user preferences that persist across sessions
-- `references/precondition-checks.md` — Optional pattern: runtime tool checking
-- `references/rule-skill-pattern.md` — Optional pattern: MUST/NEVER constraints as paired skill
-- `references/state-management.md` — State vs config distinction, forge's own state files
 - `references/templates.md` — README, LICENSE, and .gitignore skeletons
 - `references/readme-quality.md` — README writing, claim discipline, example rules
 - `references/script-quality.md` — Script size limits, module split triggers, dependency policy

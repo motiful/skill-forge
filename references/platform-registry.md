@@ -138,3 +138,57 @@ Never act on weak signals without explicit user confirmation. Never create direc
 | skills.sh | [skills.sh](https://skills.sh) | Leaderboard visibility follows `npx skills add` telemetry; do not promise immediate ranking from GitHub publication alone |
 | SkillsMP | [skillsmp.com](https://skillsmp.com) | 66k+ skills |
 | LobeHub | [lobehub.com/skills](https://lobehub.com/skills) | Marketplace |
+
+## CC Market (Claude Code Marketplace)
+
+Anthropic's official marketplace for Claude Code extensions. Requires review and approval.
+
+### Assessment
+
+| Factor | Evaluation |
+|--------|-----------|
+| **Review process** | Strict — manual review, may take days/weeks |
+| **Incremental value** | Low — GitHub repos are already natively installable via `npx skills add` without any marketplace |
+| **Maintenance burden** | Each update may require re-review |
+| **Discoverability** | Marginal — most users discover skills via GitHub, skills.sh, or word of mouth |
+| **Recommendation** | Skip by default. Only publish if user explicitly wants CC Market presence |
+
+### Publishing Flow
+
+**Step 4 behavior:**
+
+```
+1. Config has cc_market setting?
+   Yes, true  → include CC Market submission in publish flow
+   Yes, false → skip CC Market silently
+   No         → continue to step 2
+
+2. First-time: ask once with recommendation
+   "Your skill is on GitHub and already installable via npx skills add.
+    CC Market adds an Anthropic-curated listing, but requires manual review
+    on every update. Recommend: skip.
+    Publish to CC Market? [y/N]"
+
+   Save answer to ~/.config/skill-forge/config.md as cc_market: true/false
+```
+
+Config example:
+```markdown
+## Publishing
+- cc_market: false    # asked 2026-03-17, user chose to skip
+```
+
+### Why Default Off
+
+GitHub + `npx skills add` gives you:
+- Instant installability (zero review)
+- Cross-platform compatibility (all Agent Skills adopters)
+- Version control, issues, PRs, community contributions
+- Automatic indexing by skills.sh and other directories
+
+CC Market adds:
+- An Anthropic-branded listing (but only for Claude Code users)
+- Review overhead on every update
+- Platform lock-in (CC-only visibility)
+
+For most skill authors, GitHub publication is sufficient. CC Market is for authors who specifically want Anthropic-curated visibility.

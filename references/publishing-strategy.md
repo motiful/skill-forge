@@ -40,15 +40,15 @@ One skill, one GitHub repo. This is Skill-Forge's default output.
 - Community discovery (own GitHub stars, own SEO)
 - Low install friction (user evaluates one thing)
 
-### Companion Tools
+### Dependencies
 
-If a skill works better with companion tools (other skills, CLI tools), handle it simply:
+If a skill has dependencies (other skills, CLI tools, npm packages), declare them properly:
 
-- **In SKILL.md**: mention the companion at the relevant workflow step with what it does and how to proceed without it
-- **In README**: add a "Works Better With" section (max 3 companions, each with one-line description + install command)
-- **State clearly** that the skill works fully on its own
+- **In SKILL.md Step 0**: declare dependencies, run `scripts/setup.sh`
+- **In README**: add a "Dependencies" section listing what gets installed
+- **In `scripts/setup.sh`**: check and install each dependency
 
-Do not use this for repo-local scripts, package installs, or ordinary conditional logic — those belong in the skill's workflow steps or prerequisites.
+See `references/installation.md` for the full setup.sh standard.
 
 ## Collection (Multi-Skill Repo)
 
@@ -94,7 +94,7 @@ How many skills are you publishing?
 
 1. Just one skill?
    → Skill (one repo, default)
-   → If companion tools would help, mention them inline + README
+   → If dependencies exist, declare in Step 0 + setup.sh + README
    → Done
 
 2. Multiple skills?

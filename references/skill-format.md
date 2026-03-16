@@ -138,7 +138,7 @@ skill-name/
 ├── SKILL.md              # required (at repo root for npx skills add discovery)
 ├── references/           # optional, domain knowledge loaded on demand
 ├── assets/               # optional, templates and static resources consumed as material
-├── scripts/              # optional, executable utilities
+├── scripts/              # setup.sh required if skill has dependencies; other executables optional
 ├── MAINTENANCE.md        # optional, maintenance playbook for skill maintainers
 ├── README.md             # required for GitHub
 ├── LICENSE               # required for GitHub (default: MIT)
@@ -156,9 +156,11 @@ skill-name/
 
 **`assets/`** — Static resources the AI consumes as raw material for output. Templates (to fill placeholders), data files, schemas, images.
 
-**`scripts/`** — Executable code the AI runs. Generators, validators, CLI tools.
+**`scripts/`** — Executable code the AI runs. `setup.sh` (dependency installation — required for skills with dependencies), generators, validators, CLI tools.
 
-**Repo infrastructure** — Files serving GitHub/publishing, not skill runtime: README.md, LICENSE, CONTRIBUTING.md, .gitignore, MAINTENANCE.md, docs/, examples/, package.json, requirements.txt.
+**`.github/`** — Repo infrastructure serving GitHub presentation: logo, screenshots, badge images, workflow files. Not skill runtime content.
+
+**Repo infrastructure** — Files serving GitHub/publishing, not skill runtime: README.md, LICENSE, CONTRIBUTING.md, .gitignore, MAINTENANCE.md, `.github/`, docs/, examples/, package.json, requirements.txt.
 
 The Agent Skills open standard names three skill directories: `references/`, `assets/`, `scripts/`. Additional directories (like `templates/`, `docs/`, `examples/`) are tolerated by the spec but non-standard. During validation (Step 3), flag non-standard directory names and suggest the canonical mapping: templates → assets, docs/examples → repo infrastructure.
 
@@ -174,18 +176,19 @@ For maximum portability:
 
 ### Self-Containment
 
-Each skill must function when installed alone — this is the Agent Skills spec norm. **"Functions alone" ≠ "exists alone."** Skills can be bundled, referenced, and recommended together. Multi-skill repos are common (WordPress ships 13 skills, Vercel ships 5). The only engineering requirement: each skill must be functional when installed individually.
+Each generated skill must function without skill-forge installed — this is what "self-contained" means. It does NOT mean "has no dependencies on other skills or tools." Skills can and should declare their own dependencies, which `scripts/setup.sh` installs automatically.
 
-### Referencing Other Skills
+**"Self-contained from forge" ≠ "independent from everything."**
 
-Skills can freely reference and recommend other skills, methodologies, and tools. This is encouraged — it's how the ecosystem grows.
+### Dependencies and Composition
+
+Skills declare dependencies in SKILL.md Step 0 and install them via `scripts/setup.sh`. This is normal engineering, not package management.
 
 **Do:**
-- Mention recommended or related skills in README with install commands
-- Reference methodologies in SKILL.md body (e.g., "consider using rules-as-skills for this")
+- Declare dependencies in SKILL.md Step 0 and `scripts/setup.sh`
+- Mirror dependencies in README's "Dependencies" section
 - Bundle related skills in the same repo for convenience
-- Recommend companion tools that enhance one specific step in your skill
 
 **Don't:**
-- Auto-install other skills without user consent
-- Make your skill crash or error when a referenced skill isn't installed
+- Silently depend on a tool without declaring it
+- Use "works better with" language for things that are actually required

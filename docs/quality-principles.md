@@ -2,7 +2,7 @@
 
 The single source of truth for all skill-forge decisions.
 
-**Audience**: skill-forge maintainers and contributors. This document guides what features to add, what PRs to accept, and what direction to take. It is NOT read by the AI at validation time — concrete validation checks live in SKILL.md Step 3.
+**Audience**: AI agents maintaining skill-forge. Loaded during maintenance and self-review, NOT during runtime execution (Steps 0-4). This document guides what features to add, what PRs to accept, and what direction to take.
 
 ## TOC
 
@@ -64,15 +64,12 @@ Skills are not software, but they deserve the same engineering discipline as sof
 
 | Capability | Example | Mechanism |
 |------------|---------|-----------|
-| **Preferences** | "default to 3 dimensions, not 6" | Config file the skill reads at runtime |
-| **Configuration** | `github_org: motiful`, `verbosity: minimal` | `~/.config/<skill-name>/config.md` |
-| **Initialization** | First-run: create config, check tools, orient user | Step 0 instructions in SKILL.md |
-| **Preconditions** | "requires git and gh CLI" | Runtime check, inform user if absent |
-| **Composition** | "works better with readme-craft" | Inline mention + fallback behavior |
+| **Configuration** | User preferences, org defaults, verbosity | `~/.config/<skill-name>/config.md` — absent → create with defaults |
+| **Dependencies** | Tools (git, gh), skills (readme-craft), packages (npm) | `scripts/setup.sh` — absent → install. Can't install → block with error |
 
 These capabilities don't make skills stateful. Config is not state. Preferences are not sessions. A skill that reads `~/.config/self-review/config.md` to know its defaults is no more stateful than a CLI tool that reads a dotfile.
 
-**The litmus test:** if you delete the config file, does the skill still work (just with defaults)? If yes — it's config, not state. If no — you've crossed the line into infrastructure.
+**The litmus test:** if you delete the config file, can the skill automatically rebuild it with defaults and keep working? If yes — it's config (self-healing). If no — you've crossed the line into infrastructure.
 
 ## Skill Engineering Patterns
 
@@ -81,12 +78,12 @@ skill-forge defines engineering patterns for skill authors. These are optional �
 | Pattern | When to use |
 |---------|------------|
 | **Configuration** | Skill has user-adjustable behavior that persists across invocations |
-| **Precondition checks** | Skill needs external tools or runtimes to function |
+| **Installation** | Skill needs external tools or runtimes to function |
 | **Rule-Skill split** | Skill has hard MUST/NEVER constraints that users may want to customize |
 
 Each pattern is:
 - **Optional** — don't force-fit. Most skills are simple instruction packages and that's fine
-- **Self-contained** — the generated skill works without skill-forge installed
+- **Self-contained** — the generated skill works without skill-forge installed. This means independent from forge, not independent from all other skills or tools — skills may declare and install their own dependencies
 - **Prompt-driven** — implemented as SKILL.md instructions, not as scripts or binaries
 - **Practically tested** — skill-forge itself uses the configuration pattern (Step 0). We don't prescribe what we don't practice
 
@@ -113,7 +110,7 @@ The methodology defines how to build skills that score high on the 6 quality dim
 ### What skill-forge is NOT
 
 - Not an IDE or authoring tool — we validate and publish, not write content
-- Not a package manager — we don't resolve dependency trees or auto-install companions
+- Not a package manager — we don't resolve transitive dependency trees or arbitrate version conflicts. Installing declared direct dependencies is normal engineering, not package management
 - Not a behavioral test framework — we check engineering quality, not domain effectiveness
 - Not a platform feature — we are a skill about skills, not infrastructure
 
@@ -157,7 +154,7 @@ This keeps skill-forge:
 |---------------------------|----------------------------|
 | Defining skill quality dimensions | Writing skill content for users |
 | Engineering pattern definitions | Behavioral eval / A/B testing |
-| Format and structure validation | Dependency resolution or auto-install |
+| Format and structure validation | Transitive dependency resolution / version conflict arbitration |
 | Security scanning (leaked keys, credentials) | Package management |
 | README claim discipline | Platform-specific runtime tooling |
 | Description coverage checking | Model-specific optimization |
@@ -174,4 +171,4 @@ For any proposed feature or capability in skill-forge:
 4. **Does it impose an architectural opinion that most skills don't need?** → Remove
 5. **Is it a platform or infrastructure concern, not a skill quality concern?** → Remove
 6. **Does the ecosystem actually use this pattern?** → If no, demote to optional reference at most
-7. **Do we practice it ourselves?** → If we don't use it in skill-forge, don't prescribe it
+7. **Do we practice it ourselves?** → If we prescribe it, we must use it in skill-forge. Not practicing is a gap to fix, not a reason to avoid prescribing

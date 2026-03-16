@@ -1,6 +1,6 @@
 # Skill Configuration
 
-Optional engineering pattern: giving a skill user-adjustable preferences that persist across sessions.
+Engineering pattern: giving a skill user-adjustable preferences that persist across sessions.
 
 ## When to Use
 
@@ -16,12 +16,23 @@ Include a configuration pattern when the skill has preferences that:
 - All parameters can be auto-detected from the environment every run
 - The skill runs once and doesn't need to remember anything
 
+## Boundary Principle: Skill Directory = Read-Only
+
+The skill directory (`~/.claude/skills/<name>/`) is a **read-only published artifact**. All runtime data lives outside:
+
+| Data type | Location | Belongs to |
+|-----------|----------|------------|
+| User preferences / config | `~/.config/<skill-name>/config.md` | Skill's Configuration layer |
+| Business data / state | Project directory, database, cloud | User's application, not the skill |
+| Runtime cache | `~/.cache/<skill-name>/` or project dir | Temporary, deletable |
+
+**If data is written to the skill directory** (e.g., `.claude/skills/<name>/data/`), it is an abnormal pattern and should trigger a validation warning.
+
 ## Location Convention
 
 ```
 ~/.config/<skill-name>/
-├── config.md          # user preferences (stable)
-└── state.md           # dynamic data (see state-management.md)
+└── config.md          # user preferences (stable)
 ```
 
 Platform-agnostic — outside any agent's directory. Each skill owns its own `~/.config/<skill-name>/` directory.
@@ -44,11 +55,18 @@ Keep it flat and readable. Use markdown format (AI-native) unless complex struct
 
 ## The Litmus Test
 
-From `quality-principles.md`:
+> If you delete the config file, can the skill automatically rebuild it with defaults and keep working? If yes — it's config (self-healing). If no — you've crossed the line into infrastructure.
 
-> If you delete the config file, does the skill still work (just with defaults)? If yes — it's config. If no — you've crossed the line into infrastructure.
+Config makes a skill convenient. A skill without its config file must still complete its job — by recreating the config with built-in defaults and continuing.
 
-Config makes a skill convenient. Config should never make a skill required. A skill without its config file must still complete its job using built-in defaults.
+## Skills Are Stateless
+
+A skill itself does not have state. The only "state" a skill has is its configuration (data layer).
+
+- Skills **can serve** stateful scenarios (PostgreSQL management, cloud deployment)
+- But the skill itself **does not own or manage** that state
+- Business data belongs to the user's application, not to the skill
+- If a skill needs to track something across runs (e.g., a published-skills registry), that goes in `~/.config/<skill-name>/` as config data, not as "state"
 
 ## First-Run Initialization
 
@@ -61,19 +79,19 @@ When config is not found, the skill should:
 
 Don't interrogate the user with multiple questions. Detect what you can, present a single summary, confirm once.
 
-This check naturally fits inside the skill's Step 0 alongside precondition checks. See `precondition-checks.md` for how Step 0 handles both concerns.
+This naturally fits inside the skill's Step 0. See `onboarding.md` for the full first-use experience (onboarding may include config creation as one of its steps).
 
 ## Guidelines
 
 - Config is optional — most skills don't need it
-- The skill must work without config (using defaults)
+- The skill must work without config (recreate with defaults)
 - Prefer auto-detection over asking the user
 - Don't interrogate — detect, summarize, confirm
-- Use `config.md` for stable preferences, `state.md` for dynamic data (see `state-management.md`)
 - Skills never write to each other's config
+- All config lives in `~/.config/<skill-name>/`, never in the skill directory
 
 ## Cross-References
 
-- `quality-principles.md` — the litmus test for config vs infrastructure
-- `state-management.md` — config vs state distinction, storage convention
-- `precondition-checks.md` — first-run initialization as part of Step 0
+- `docs/quality-principles.md` — the litmus test for config vs infrastructure (maintenance doc, not runtime)
+- `installation.md` — automated dependency installation (Step 0, before config check)
+- `onboarding.md` — interactive first-use guidance (may create config)

@@ -27,7 +27,7 @@ Trigger: "update skill-forge", "refresh platform info", or during self-review of
 
 ## Contribution Criteria
 
-Use the **Decision Test** from `references/quality-principles.md` to evaluate every proposed change (PR, issue, or self-initiated improvement):
+Use the **Decision Test** from `docs/quality-principles.md` to evaluate every proposed change (PR, issue, or self-initiated improvement):
 
 1. Does it help users' skills score higher on the 6 quality dimensions?
 2. Is it simple enough that an AI agent will reliably follow it?
@@ -57,7 +57,7 @@ skill-forge validates other skills. It must also pass its own validation.
 **Consistency checks**:
 - SKILL.md description matches README's positioning
 - "What's Inside" file tree in README matches actual `references/` directory
-- No residual terminology from previous versions (check for: "five-layer", "Kit", "JIT", "Enhancement Report", "Capability Detection")
+- No residual terminology from previous versions (check for: "five-layer", "Kit", "JIT", "Enhancement Report")
 
 ## Update Triggers
 
@@ -74,6 +74,7 @@ Beyond scheduled platform registry checks, these events should trigger a mainten
 
 ## Changelog (max 5 entries)
 
+- 2026-03-16: **v4.0 — Prescription-driven practice.** Fixed 6 internal contradictions in quality-principles.md. Dependencies must install (no graceful skip). setup.sh is the standard. Three-layer separation: Installation / Onboarding / Configuration. Replaced `precondition-checks.md` with `installation.md` + `onboarding.md`. Removed `state-management.md` (absorbed into skill-configuration.md). Added self-review as dependency.
 - 2026-03-16: **v3.1 — Scenario-based engagement.** Restructured SKILL.md from linear pipeline to 5 engagement scenarios (Quick Review, Full Pipeline, Multi-Skill Triage, Full Create, Graduation) with 7 engagement principles. Added `skill-configuration.md`, expanded `precondition-checks.md` with fallback patterns, revised `state-management.md` with config-vs-state cross-ref. Rewrote README with "methodology + pipeline" positioning, 3-section validation framing, absorbed user value table from renovation plan. Expanded MAINTENANCE.md with contribution criteria (Decision Test), self-governance, and update triggers.
 - 2026-03-16: **v3.0 — Principle-driven simplification.** Added `references/quality-principles.md` as the decision compass. Removed Capability Detection table, JIT dependency pattern, Enhancement Report, and Kit publishing model. Renamed `onboarding-pattern.md` → `precondition-checks.md`. Simplified `state-management.md` to edge-case reference. Publishing models: Skill + Collection only. Companion tools handled with simple inline mention + README "Works Better With."
 - 2026-03-15: Added JIT dependency pattern (subsequently removed in v3.0).

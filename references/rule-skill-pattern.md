@@ -70,16 +70,28 @@ If the constraint is already enforced by **code/tooling** (mechanical enforcemen
 
 1. **Name**: `<skill-name>-rules` (e.g., `database-rules` for `database-access`)
 2. **Move** all MUST/NEVER statements into the rule-skill
-3. **Reference**: capability skill says "Optional: use with `<name>-rules` for user-defined constraint enforcement. Without it, the main skill still works on its own with its built-in/default behavior."
+3. **Reference**: capability skill declares `<name>-rules` as a dependency in Step 0 and `scripts/setup.sh`. The rule-skill is installed automatically
 4. **Methodology**: follows the [rules-as-skills](https://github.com/motiful/rules-as-skills) three-layer model
 
 ## Packaging
 
 In the generated capability skill:
-- **README**: State that `<name>-rules` is optional for user-defined constraint enforcement. Include `npx skills add <org>/<name>-rules`, and explicitly say the main skill still works on its own; without `<name>-rules`, only the built-in/default behavior applies
-- **SKILL.md body**: "Pairs optionally with `<name>-rules` for user-defined constraint enforcement. Without it, continue with the main skill's built-in/default behavior."
+- **SKILL.md Step 0**: declare `<name>-rules` as a dependency, installed by `scripts/setup.sh`
+- **README "Dependencies" section**: list `<name>-rules` with `npx skills add <org>/<name>-rules`
 
 In the generated rule-skill:
 - Standalone README with own install instructions
 - Self-contained SKILL.md with all constraint rules
 - No dependency on forge or rules-as-skills to function
+
+## When forge creates a rule-skill
+
+Rule-Skill creation is **detection-driven**, not user-chosen:
+
+| Detected | Forge action |
+|----------|-------------|
+| Skill content has 3+ MUST/NEVER constraints | Auto-create paired `<name>-rules` skill |
+| Constraints need per-project customization | Auto-create |
+| No constraints detected | Nothing created — not "skipped", just not needed |
+
+The user is not asked "do you want a rule-skill?" — forge detects and acts.

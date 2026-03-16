@@ -16,8 +16,7 @@ The README follows a **value-first** structure: tell the reader what problem you
 
 If you mention directories, marketplaces, or leaderboards around the template, frame them as downstream discovery paths, not guaranteed immediate outcomes of publishing.
 Default the template prose to English for reusable skills. Only localize when the skill itself is language-specific or culture-specific.
-If the skill works better with companion tools, add a short "Works Better With" section. Keep it to 3 companions max and state that the skill still works on its own.
-Do not use this section for repo-local scripts, package installs, or helper flows. Those belong in Usage, Prerequisites, or the main workflow description.
+If the skill has dependencies (other skills, CLI tools), add a "Dependencies" section listing what gets installed by `scripts/setup.sh`. Informational recommendations (not required) go in README body text only, not in a dedicated section.
 
 ```markdown
 # <skill-name>
@@ -45,7 +44,7 @@ Do not use this section for repo-local scripts, package installs, or helper flow
 ## Install
 
 ```bash
-npx skills add <org>/<skill-name>
+npx skills add <org>/<skill-name> -g
 ```
 
 Common manual registration examples:
@@ -73,14 +72,13 @@ ln -sfn ~/skills/<skill-name> ~/.cursor/skills/<skill-name>
 ln -sfn ~/skills/<skill-name> ~/.codeium/windsurf/skills/<skill-name>
 ```
 
-## Works Better With
+## Dependencies
 
-<Optional. Include only when companion tools provide real enhancements without becoming required dependencies. Keep to 3 companions max.>
+<Include when the skill has dependencies installed by scripts/setup.sh. Omit if the skill has no dependencies.>
 
-- [`<org>/<recommended-skill>`](https://github.com/<org>/<recommended-skill>) — <specific enhancement>. Install: `npx skills add <org>/<recommended-skill>`
-- [`<org>/<recommended-skill>`](https://github.com/<org>/<recommended-skill>) — <specific enhancement>. Install: `npx skills add <org>/<recommended-skill>`
-
-This skill still works fully on its own.
+| Dependency | Purpose | Installed by |
+|------------|---------|-------------|
+| `<tool-or-skill>` | <what it does for this skill> | `scripts/setup.sh` |
 
 ## What's Inside
 
@@ -97,6 +95,73 @@ references/            — <if applicable>
 ---
 
 Forged with [Skill Forge](https://github.com/<org>/skill-forge) · Crafted with [Readme Craft](https://github.com/<org>/readme-craft)
+```
+
+## Collection README.md Template
+
+> For multi-skill repos (Collection publishing model). See `references/publishing-strategy.md`.
+
+```markdown
+# <collection-name>
+
+> <one-line value proposition — what problem space this collection covers>
+
+[Agent Skills](https://agentskills.io) compatible — works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other Agent Skills adopters.
+
+## The Problem
+
+<2-4 sentences describing the pain point that spans multiple skills.>
+
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| [`<skill-a>`](skills/<skill-a>/SKILL.md) | <one-line description> |
+| [`<skill-b>`](skills/<skill-b>/SKILL.md) | <one-line description> |
+| [`<skill-c>`](skills/<skill-c>/SKILL.md) | <one-line description> |
+
+<If 10+ skills, group by category:>
+
+### <Category 1>
+
+| Skill | Description |
+|-------|-------------|
+| [`<skill-a>`](skills/<skill-a>/SKILL.md) | <one-line description> |
+
+### <Category 2>
+
+| Skill | Description |
+|-------|-------------|
+| [`<skill-b>`](skills/<skill-b>/SKILL.md) | <one-line description> |
+
+## Install
+
+```bash
+# All skills
+npx skills add <org>/<collection>
+
+# Specific skills
+npx skills add <org>/<collection> --skill <skill-a> <skill-b>
+
+# List available
+npx skills add <org>/<collection> --list
+```
+
+## Dependencies
+
+<Include when the collection has shared dependencies installed by scripts/setup.sh. Omit if none.>
+
+| Dependency | Purpose | Installed by |
+|------------|---------|-------------|
+| `<tool-or-skill>` | <what it does> | `scripts/setup.sh` |
+
+## License
+
+<license>
+
+---
+
+Forged with [Skill Forge](https://github.com/<org>/skill-forge)
 ```
 
 ## LICENSE Template (MIT)

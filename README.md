@@ -1,9 +1,9 @@
 <div align="center">
 
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
-    <img alt="Skill Forge" src="assets/logo-light.svg" width="480">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset=".github/logo-light.svg">
+    <img alt="Skill Forge" src=".github/logo-light.svg" width="480">
   </picture>
 
   <p>From local experiment to installable, trustworthy skill — in one command.</p>
@@ -71,7 +71,7 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 | **Efficient context usage** | Your skill doesn't waste the agent's context window | Body under 500 lines, instruction density check, progressive disclosure via references/ |
 | **Claim discipline** | README says what the skill actually does, no inflated promises | README ↔ SKILL.md consistency check |
 | **Configuration pattern** | Your skill can have user preferences, done properly | Reference pattern for declaring and reading config |
-| **Precondition handling** | Graceful behavior when required tools are missing | Reference pattern for Step 0 runtime checks |
+| **Dependency installation** | Required tools and skills are installed automatically | `scripts/setup.sh` standard — install or block, no graceful skip |
 | **One-command publishing** | Local files → installable GitHub repo | Full pipeline: git init → GitHub push → platform registration |
 | **Ongoing maintenance** | Catch regressions when you update | Review mode: re-run validation on existing repos |
 
@@ -92,7 +92,7 @@ skill-forge is a post-authoring tool. Load it when you're done writing, not whil
 ## Quick Start
 
 ```bash
-npx skills add motiful/skill-forge
+npx skills add motiful/skill-forge -g
 ```
 
 Then tell your AI coding assistant:
@@ -154,7 +154,7 @@ Step 4: Publish
 ## Install
 
 ```bash
-npx skills add motiful/skill-forge
+npx skills add motiful/skill-forge -g
 ```
 
 Works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other [Agent Skills](https://agentskills.io) adopters.
@@ -195,12 +195,15 @@ ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 </details>
 
 <details>
-<summary>Works Better With</summary>
+<summary>Dependencies</summary>
 
-- [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) — helps when the skill you're forging needs portable MUST/NEVER constraints. Install: `npx skills add motiful/rules-as-skills`
-- [`motiful/readme-craft`](https://github.com/motiful/readme-craft) — strengthens README writing and review during publish. Install: `npx skills add motiful/readme-craft`
+Installed automatically by `scripts/setup.sh` on first run:
 
-Skill Forge still works fully on its own.
+| Dependency | Purpose |
+|------------|---------|
+| [`motiful/readme-craft`](https://github.com/motiful/readme-craft) | 3-tier layout, badge selection, dark/light logo for README generation |
+| [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Portable MUST/NEVER constraint skills for Rule-Skill Split |
+| [`motiful/self-review`](https://github.com/motiful/self-review) | 4-pillar, 6-dimension alignment audit for skill quality validation |
 
 </details>
 
@@ -220,19 +223,23 @@ It does **not** claim to prove that a generated skill's domain outputs are objec
 
 ```
 SKILL.md              — Full creation + publishing pipeline
+scripts/
+└── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
 references/
-├── quality-principles.md    — What is a good skill, skill boundaries, decision test
+├── installation.md          — setup.sh standard: dependency detection and installation
+├── onboarding.md            — Interactive first-use guidance pattern
+├── skill-configuration.md   — User preferences, config location, stateless principle
 ├── skill-format.md          — How to write a valid SKILL.md
-├── publishing-strategy.md   — Skill or Collection decisions
 ├── skill-composition.md     — Composition philosophy and context budget
+├── rule-skill-pattern.md    — Detection-driven: MUST/NEVER constraints as paired skill
+├── publishing-strategy.md   — Skill or Collection decisions
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing and claim discipline
 ├── script-quality.md        — Script file structure guidelines
-├── precondition-checks.md   — Optional: checking for external tools at runtime
-├── state-management.md      — Optional: persistent data for rare stateful skills
-├── rule-skill-pattern.md    — Optional: separating MUST/NEVER constraints
-├── skill-configuration.md   — Optional: user preferences that persist across sessions
 └── templates.md             — README, LICENSE, .gitignore skeletons
+docs/
+├── quality-principles.md    — Maintenance: decision framework, 6 quality dimensions
+└── RENOVATION-v4.md         — Maintenance: v4 renovation plan
 ```
 
 </details>
@@ -252,7 +259,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-3.1-blue.svg
+[version-shield]: https://img.shields.io/badge/version-4.0-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io
