@@ -60,8 +60,7 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 
 </details>
 
-<details>
-<summary>What Users Get (concrete value)</summary>
+### What Users Get
 
 | Capability | What it means for you | How forge delivers it |
 |------------|----------------------|----------------------|
@@ -76,8 +75,6 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 | **Ongoing maintenance** | Catch regressions when you update | Review mode: re-run validation on existing repos |
 
 **Token cost**: Review ~5-10K | Review + improve ~10-15K | Full pipeline ~15-25K. No subagents, no Python, no surprise costs.
-
-</details>
 
 ## When to Load
 
@@ -185,17 +182,13 @@ ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 
 </details>
 
-<details>
-<summary>Prerequisites</summary>
+### Prerequisites
 
 - **Git** (required)
 - **Node.js** (required for `npx skills add`)
 - **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Review-only scenarios work without it
 
-</details>
-
-<details>
-<summary>Dependencies</summary>
+### Dependencies
 
 Installed automatically by `scripts/setup.sh` on first run:
 
@@ -204,8 +197,6 @@ Installed automatically by `scripts/setup.sh` on first run:
 | [`motiful/readme-craft`](https://github.com/motiful/readme-craft) | 3-tier layout, badge selection, dark/light logo for README generation |
 | [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Portable MUST/NEVER constraint skills for Rule-Skill Split |
 | [`motiful/self-review`](https://github.com/motiful/self-review) | 4-pillar, 6-dimension alignment audit for skill quality validation |
-
-</details>
 
 <details>
 <summary>Positioning</summary>
