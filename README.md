@@ -228,8 +228,6 @@ references/
 ├── readme-quality.md        — README writing and claim discipline
 ├── script-quality.md        — Script file structure guidelines
 └── templates.md             — README, LICENSE, .gitignore skeletons
-docs/
-└── quality-principles.md    — Maintenance: decision framework, 6 quality dimensions
 ```
 
 </details>

@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage a project's skills or graduate a project-local skill to standalone. Handles five engagement scenarios: quick review, full pipeline, multi-skill triage, full create, and graduation.
+description: 'Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage a project''s skills or graduate a project-local skill to standalone. Handles five engagement scenarios: quick review, full pipeline, multi-skill triage, full create, and graduation.'
 license: MIT
 metadata:
   author: motiful
@@ -254,8 +254,8 @@ If the skill being created has dependencies (other skills, CLI tools, npm packag
 | Check | Criteria |
 |-------|----------|
 | Frontmatter fields | Only standard top-level fields: `name`, `description`, `license`, `metadata`, `compatibility`, `allowed-tools`. Put CC-specific or custom fields inside `metadata` |
-| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens |
-| `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC) |
+| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. Must not start/end with hyphen, no consecutive hyphens (`--`), must match parent directory name |
+| `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC). If value contains `: ` (colon-space), must be quoted — strict YAML parsers (e.g. Codex) will reject unquoted colons as mapping indicators |
 | Description coverage | Does the description mention the key trigger scenarios from the SKILL.md body? For each major capability or workflow in the body, check if the description includes a corresponding trigger phrase. Report gaps as warnings with suggested additions. Report description claims absent from body as over-promises |
 | Body | Under 500 lines, has meaningful content (not just TODOs) |
 | References | All files referenced in SKILL.md actually exist |
@@ -408,7 +408,7 @@ gh repo create <org>/<skill-name> --public --source=. --push
 git remote add origin <url> && git push -u origin main
 ```
 
-Update forge state: add the skill to `~/.config/skill-forge/state.md` under "Published Skills".
+Update forge config: add the skill to `~/.config/skill-forge/config.md` under a "Published Skills" section.
 
 After push, tell the user: *"Your skill is on GitHub. Install with `npx skills add <org>/<skill-name>`. Community directories may surface it later based on their own indexing."*
 

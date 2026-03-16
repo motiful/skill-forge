@@ -28,6 +28,9 @@ skill_installed() {
   local name=$1
   [ -d "$HOME/.claude/skills/$name" ] && return 0
   [ -d "$HOME/.agents/skills/$name" ] && return 0
+  [ -d "$HOME/.copilot/skills/$name" ] && return 0
+  [ -d "$HOME/.cursor/skills/$name" ] && return 0
+  [ -d "$HOME/.codeium/windsurf/skills/$name" ] && return 0
   return 1
 }
 

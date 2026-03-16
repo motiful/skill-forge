@@ -32,8 +32,8 @@ metadata:                   # optional, custom key-value pairs
 ```
 
 **Key rules:**
-- `name` — kebab-case, max 64 chars
-- `description` — max 1024 chars, no angle brackets. This is the trigger mechanism — the agent reads descriptions to decide relevance. All trigger conditions go here.
+- `name` — kebab-case, max 64 chars. Must not start/end with hyphen, no consecutive hyphens (`--`), must match parent directory name
+- `description` — max 1024 chars, no angle brackets. Must be quoted if value contains `: ` (colon-space) to avoid strict YAML parser failures. This is the trigger mechanism — the agent reads descriptions to decide relevance. All trigger conditions go here.
 - `metadata` — free-form key-value pairs for author, version, tags, etc.
 
 ## CC-Specific Extensions

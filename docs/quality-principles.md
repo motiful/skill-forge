@@ -128,7 +128,7 @@ skill-forge tests whether a skill is ready to publish — "is it engineered well
 
 ## Technical Route
 
-**Prompt-driven. Platform-agnostic. No runtime dependencies.**
+**Prompt-driven. Platform-agnostic. No runtime dependencies for core logic.**
 
 | Choice | Rationale |
 |--------|-----------|

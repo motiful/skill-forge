@@ -12,7 +12,7 @@ A single skill solves a single problem. But users face workflows that span multi
 
 This is what makes skill composition fundamentally different from npm/pip.
 
-Each activated skill consumes context tokens. npm packages load into memory (effectively unlimited); skills load into context windows (200K tokens, shared with user conversation and tool results).
+Each activated skill consumes context tokens. npm packages load into memory (effectively unlimited); skills load into finite context windows (typically 200K–1M tokens depending on model, shared with user conversation and tool results).
 
 **Practical limits:**
 - A typical SKILL.md: 200-500 lines ~ 2K-5K tokens

@@ -69,10 +69,10 @@ Skills can exist in multiple directories depending on the installation method:
 | Source | Location(s) |
 |--------|------------|
 | `npx skills add -g` | `~/.agents/skills/<name>/` + `~/.claude/skills/<name>/` (hardlinked) |
-| Manual symlink | `~/.claude/skills/<name>/` |
-| Project-level | `<project>/.claude/skills/<name>/` |
+| Manual symlink | `~/.claude/skills/<name>/`, `~/.copilot/skills/<name>/`, `~/.cursor/skills/<name>/`, `~/.codeium/windsurf/skills/<name>/` |
+| Project-level | `<project>/.claude/skills/<name>/`, `<project>/.agents/skills/<name>/`, etc. |
 
-`npx skills add -g` automatically hardlinks to both `~/.agents/skills/` and `~/.claude/skills/`, so no manual symlink is needed.
+`npx skills add -g` automatically hardlinks to both `~/.agents/skills/` and `~/.claude/skills/`, so no manual symlink is needed. The detection function also checks Copilot, Cursor, and Windsurf native paths for manual installations.
 
 Detection function:
 
@@ -81,6 +81,9 @@ skill_installed() {
   local name=$1
   [ -d "$HOME/.claude/skills/$name" ] && return 0
   [ -d "$HOME/.agents/skills/$name" ] && return 0
+  [ -d "$HOME/.copilot/skills/$name" ] && return 0
+  [ -d "$HOME/.cursor/skills/$name" ] && return 0
+  [ -d "$HOME/.codeium/windsurf/skills/$name" ] && return 0
   return 1
 }
 ```
@@ -138,7 +141,7 @@ done
 # --- Skill dependencies ---
 install_skill() {
   local name=$1 repo=$2
-  if [ -d "$HOME/.claude/skills/$name" ] || [ -d "$HOME/.agents/skills/$name" ]; then
+  if skill_installed "$name"; then
     echo "  $name: installed"
     return 0
   fi
