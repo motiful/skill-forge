@@ -28,15 +28,29 @@
 
 ## The Problem
 
+88K+ skills exist in the Agent Skills ecosystem. Research shows 26% have security vulnerabilities. Most have descriptions that don't cover their actual trigger scenarios. There is no standard for what a "well-engineered skill" looks like.
+
 **If you haven't published yet** — your skill is trapped in one project, can't be shared, and doesn't meet any platform's install standard. No README, no LICENSE, no proper structure, no discoverability.
 
 **If you already published** — your repo might have issues you haven't noticed: leaked API keys in config files, missing .gitignore entries, structure that doesn't match the [Agent Skills](https://agentskills.io) standard, or claims in the README that don't match what the skill actually does.
 
-Either way, getting from "works on my machine" to "anyone can install and trust this" takes more than a `git push`.
+The gap is not in authoring — AI agents can already help write skill content. The gap is in engineering: validating structure, scanning for security issues, checking description coverage, enforcing claim discipline, and publishing correctly.
 
 ## What Skill Forge Does
 
-Takes a skill idea (or an existing project-local skill) and runs the full pipeline:
+Skill Forge is a **skill engineering methodology and publishing pipeline**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
+
+- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, reference integrity, and terminology so agents can find and correctly trigger your skill
+- **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block publish
+- **Checks README claim discipline** — compares README claims against SKILL.md capabilities, flags hardcoded paths, verifies install commands and LICENSE
+- **Handles five scenarios** — quick review of one skill, full publish pipeline, multi-skill triage across a project, create from scratch, or graduate a project-local skill to standalone repo
+- **Publishes to GitHub with explicit confirmation** — preflight summary of every action, single "yes", then `git init` → `gh repo create` → push
+- **Auto-registers across platforms** — detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks them to one source of truth
+- **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
+- **Respects your conventions** — scans forge config → project instructions → platform rules in priority order
+
+<details>
+<summary>Pipeline stages</summary>
 
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences
 1. **Gather** — Auto-detect existing skill content from project and conversation
@@ -44,9 +58,26 @@ Takes a skill idea (or an existing project-local skill) and runs the full pipeli
 3. **Validate** — Structure, frontmatter, content quality, repo hygiene, optional community readiness checks
 4. **Publish** — Push to GitHub and optionally connect to tools already active on your machine
 
-Or, **review an existing repo** — skip straight to validation and get a structured report with severity levels for every check, including leaked secrets, .gitignore gaps, and content quality.
+</details>
 
-The result: a standalone repo that anyone can install with one command — or a clear list of what to fix before they should.
+<details>
+<summary>What Users Get (concrete value)</summary>
+
+| Capability | What it means for you | How forge delivers it |
+|------------|----------------------|----------------------|
+| **Security assurance** | Your skill won't leak API keys or credentials to GitHub | Repo hygiene scan: regex pattern matching for common secret formats |
+| **Description quality** | Agents will actually find and trigger your skill | Coverage check: does the description mention key scenarios from the body? |
+| **Cross-platform compatibility** | Works on Claude Code, Codex, Cursor, Windsurf, Copilot — not just one | Standard frontmatter validation + platform-agnostic structure |
+| **Efficient context usage** | Your skill doesn't waste the agent's context window | Body under 500 lines, instruction density check, progressive disclosure via references/ |
+| **Claim discipline** | README says what the skill actually does, no inflated promises | README ↔ SKILL.md consistency check |
+| **Configuration pattern** | Your skill can have user preferences, done properly | Reference pattern for declaring and reading config |
+| **Precondition handling** | Graceful behavior when required tools are missing | Reference pattern for Step 0 runtime checks |
+| **One-command publishing** | Local files → installable GitHub repo | Full pipeline: git init → GitHub push → platform registration |
+| **Ongoing maintenance** | Catch regressions when you update | Review mode: re-run validation on existing repos |
+
+**Token cost**: Review ~5-10K | Review + improve ~10-15K | Full pipeline ~15-25K. No subagents, no Python, no surprise costs.
+
+</details>
 
 ## When to Load
 
@@ -96,8 +127,7 @@ Step 0: Config
 
 Step 1: Gather
   ✓ Existing skill detected at ~/skills/self-review/SKILL.md
-  ✓ Capabilities: none needed (pure methodology, no state or onboarding)
-  ✓ Recommended skills: none
+  ✓ Pure methodology skill — no preconditions needed
 
 Step 2: Create
   ✓ SKILL.md already exists — using as-is
@@ -177,13 +207,11 @@ Skill Forge still works fully on its own.
 <details>
 <summary>Positioning</summary>
 
-Skill Forge optimizes for **public artifact quality**, not domain-level outcome certification.
+Skill Forge is a **skill engineering methodology and publishing pipeline**. The methodology defines what "well-engineered skill" means — referenced while writing or improving skills. The pipeline automates validation and publishing — run when ready to share.
 
-It helps you create skills that are installable, publishable, maintainable, composable, independently iterable, and honestly described.
+It helps you create skills that are installable, publishable, maintainable, and honestly described.
 
 It does **not** claim to prove that a generated skill's domain outputs are objectively excellent, production-safe, or aesthetically strong. Those judgments still depend on the author, the domain, and real usage.
-
-**Skill Composition:** Most users can ignore this. The default model is simple — publish one thing as a single skill. If another skill genuinely strengthens one step, mention it in that step and mirror it in a short "Works Better With" section. Only move to `Kit` when several skills need to be delivered as one workflow.
 
 </details>
 
@@ -193,15 +221,17 @@ It does **not** claim to prove that a generated skill's domain outputs are objec
 ```
 SKILL.md              — Full creation + publishing pipeline
 references/
+├── quality-principles.md    — What is a good skill, skill boundaries, decision test
 ├── skill-format.md          — How to write a valid SKILL.md
-├── publishing-strategy.md   — Skill, Kit, or Collection decisions
-├── skill-composition.md     — Lightweight composition rules
+├── publishing-strategy.md   — Skill or Collection decisions
+├── skill-composition.md     — Composition philosophy and context budget
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing and claim discipline
 ├── script-quality.md        — Script file structure guidelines
-├── onboarding-pattern.md    — Adding first-use setup to a skill
-├── state-management.md      — Persistent config and state across sessions
-├── rule-skill-pattern.md    — Separating enforceable rules into a paired rule-skill
+├── precondition-checks.md   — Optional: checking for external tools at runtime
+├── state-management.md      — Optional: persistent data for rare stateful skills
+├── rule-skill-pattern.md    — Optional: separating MUST/NEVER constraints
+├── skill-configuration.md   — Optional: user preferences that persist across sessions
 └── templates.md             — README, LICENSE, .gitignore skeletons
 ```
 
@@ -222,7 +252,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-2.0-blue.svg
+[version-shield]: https://img.shields.io/badge/version-3.1-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

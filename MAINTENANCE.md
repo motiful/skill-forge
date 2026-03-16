@@ -25,10 +25,57 @@ Trigger: "update skill-forge", "refresh platform info", or during self-review of
 3. Check the current skills.sh FAQ before making visibility claims. Keep direct installability separate from directory or leaderboard visibility
 4. Update the Community Tools table in platform-registry.md if needed
 
+## Contribution Criteria
+
+Use the **Decision Test** from `references/quality-principles.md` to evaluate every proposed change (PR, issue, or self-initiated improvement):
+
+1. Does it help users' skills score higher on the 6 quality dimensions?
+2. Is it simple enough that an AI agent will reliably follow it?
+3. Can it be expressed as prompts instead of scripts?
+4. Does it impose an architectural opinion that most skills don't need?
+5. Is it a platform or infrastructure concern, not a skill quality concern?
+6. Does the ecosystem actually use this pattern?
+7. Do we practice it ourselves?
+
+**Accept** when answers are: yes, yes, yes, no, no, yes, yes. Any "wrong" answer requires justification or redesign.
+
+Additional PR hygiene:
+- Changes to SKILL.md must not push body over 500 lines
+- New reference files need a corresponding entry in SKILL.md's References section
+- Terminology changes must be consistent across SKILL.md, README.md, and all affected reference files
+
+## Self-Governance
+
+skill-forge validates other skills. It must also pass its own validation.
+
+**Self-review protocol** (run periodically or after significant changes):
+1. Run skill-forge's own Scenario 1 (Quick Review) against this repo
+2. Every README claim must be backed by a SKILL.md capability
+3. Every reference file listed in SKILL.md must exist and be current
+4. Version in SKILL.md frontmatter, README badge, and changelog must agree
+
+**Consistency checks**:
+- SKILL.md description matches README's positioning
+- "What's Inside" file tree in README matches actual `references/` directory
+- No residual terminology from previous versions (check for: "five-layer", "Kit", "JIT", "Enhancement Report", "Capability Detection")
+
+## Update Triggers
+
+Beyond scheduled platform registry checks, these events should trigger a maintenance pass:
+
+| Event | What to check |
+|-------|--------------|
+| Agent Skills standard changes | SKILL.md frontmatter fields, `references/skill-format.md` |
+| New platform adopts Agent Skills | `references/platform-registry.md`, README install examples, SKILL.md Step 4 |
+| `npx skills add` breaking change | README install commands, Quick Start |
+| skill-forge's own SKILL.md changes | README alignment, "What's Inside" tree, version badge |
+| New reference file added | SKILL.md References section, README "What's Inside" |
+| Community feedback or bug report | Relevant validation checks in SKILL.md Step 3 |
+
 ## Changelog (max 5 entries)
 
-- 2026-03-12: Collapsed the old Recommend tier back into the single-skill model. `skill-forge` now treats recommended skills as a lightweight writing pattern inside one skill plus `Works Better With` in README, not as a separate publishing type.
-- 2026-03-11: Made Rule-Skill Split self-containment explicit. Generated capability skills must say `<name>-rules` is optional, keep a real standalone fallback, and avoid implying a hidden dependency.
-- 2026-03-11: Renamed `constraint-companion.md` → `rule-skill-pattern.md`, clarified Rule-Skill Split naming, and temporarily consolidated companion-skill language under Recommend before the 2026-03-12 simplification.
-- 2026-03-11: Aligned single-skill composition guidance, Kit guidance, and default English authoring rules; later simplified the composition taxonomy again on 2026-03-12.
-- 2026-03-11: Tightened registration evidence to actual skill roots only, separated direct installability from downstream discoverability, and aligned README/registry guidance with that policy.
+- 2026-03-16: **v3.1 — Scenario-based engagement.** Restructured SKILL.md from linear pipeline to 5 engagement scenarios (Quick Review, Full Pipeline, Multi-Skill Triage, Full Create, Graduation) with 7 engagement principles. Added `skill-configuration.md`, expanded `precondition-checks.md` with fallback patterns, revised `state-management.md` with config-vs-state cross-ref. Rewrote README with "methodology + pipeline" positioning, 3-section validation framing, absorbed user value table from renovation plan. Expanded MAINTENANCE.md with contribution criteria (Decision Test), self-governance, and update triggers.
+- 2026-03-16: **v3.0 — Principle-driven simplification.** Added `references/quality-principles.md` as the decision compass. Removed Capability Detection table, JIT dependency pattern, Enhancement Report, and Kit publishing model. Renamed `onboarding-pattern.md` → `precondition-checks.md`. Simplified `state-management.md` to edge-case reference. Publishing models: Skill + Collection only. Companion tools handled with simple inline mention + README "Works Better With."
+- 2026-03-15: Added JIT dependency pattern (subsequently removed in v3.0).
+- 2026-03-12: Collapsed the old Recommend tier back into the single-skill model.
+- 2026-03-11: Made Rule-Skill Split self-containment explicit. Renamed `constraint-companion.md` → `rule-skill-pattern.md`.

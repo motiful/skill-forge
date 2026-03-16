@@ -5,6 +5,7 @@
 - [Core Rule](#core-rule)
 - [Skill Forge Registration Policy](#skill-forge-registration-policy)
 - [Detection Signals](#detection-signals)
+  - [Weak Signal Decision Tree](#weak-signal-decision-tree)
 - [Documented Directories](#documented-directories)
 - [Detection / Registration Strategy](#detection--registration-strategy)
 - [Per-Platform Reference](#per-platform-reference)
@@ -56,6 +57,18 @@ Treat these as **weak signals**:
 - Tooling docs or shell history that imply usage but do not show a current registration target
 
 Do not create directories from weak signals alone.
+
+### Weak Signal Decision Tree
+
+When a weak signal is detected (e.g., `~/.agents/` exists but no `skills/` subdirectory):
+
+1. **Record** — note the finding internally
+2. **Include in preflight** — "Detected `~/.agents/` — want to register for Codex?"
+3. **User says yes** → create the skill root directory + symlink
+4. **User says no** → skip, do not ask again this session
+5. **User doesn't mention** → do not ask, do not create
+
+Never act on weak signals without explicit user confirmation. Never create directories from weak signals alone.
 
 ## Documented Directories
 

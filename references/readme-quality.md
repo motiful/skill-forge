@@ -13,8 +13,8 @@ Use this file during Step 4b when writing README prose, and during Step 3 when v
 - **Usage before Install.** The reader should understand what the skill does before deciding to install it.
 - **Default path first.** A reader should understand the single-skill happy path without learning advanced packaging or ecosystem taxonomy.
 - **Default language is English.** For reusable, internationally shared skills, keep README prose in English unless the skill itself is language-specific or culture-specific.
-- **Mirror recommended skills.** If SKILL.md contains recommended skills, mirror them in a concise "Works Better With" section in README.
-- **Standalone fallback must stay explicit.** Recommended skills must say the skill still works fully on its own.
+- **Mirror companion tools.** If SKILL.md mentions companion tools, mirror them in a concise "Works Better With" section in README.
+- **Standalone fallback must stay explicit.** Companion tools must say the skill still works fully on its own.
 - **"What's Inside" shows skill content only.** List SKILL.md, references/, scripts/ — not repo-root support files.
 - **Separate installability from discoverability.** Publishing to GitHub makes a repo directly installable by path; do not promise instant directory listings, search placement, or leaderboard visibility unless the downstream platform documents that behavior.
 - **Footer required.** End generated READMEs with `Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [Readme Craft](https://github.com/motiful/readme-craft)` when both tools were used, or just the one that applies.
@@ -27,7 +27,7 @@ Use this file during Step 4b when writing README prose, and during Step 3 when v
 - Leaving examples stale after behavior changes
 - Using placeholder names or fake paths that look real
 - Equating "published on GitHub" with "already discoverable in every directory"
-- Hiding a required dependency inside an optional-looking recommended-skills section
+- Hiding a required dependency inside an optional-looking "Works Better With" section
 
 ## Promise-Capability Alignment
 
@@ -46,4 +46,4 @@ Check process:
 | SKILL.md has meaningful capability not mentioned in README | Add it to README or cut the extra logic |
 
 Discovery claims need stronger proof than install claims. It is safe to promise direct installation by repo path when the command works. It is not safe to promise immediate marketplace, search, or leaderboard visibility unless the platform docs explicitly guarantee it.
-For recommended skills, proof means the README and SKILL.md name the same recommended skill, the same enhancement, and the same standalone fallback.
+For companion tools, proof means the README and SKILL.md name the same tool, the same enhancement, and the same standalone fallback.
