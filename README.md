@@ -28,7 +28,7 @@
 
 ## The Problem
 
-88K+ skills exist in the Agent Skills ecosystem. Research shows 26% have security vulnerabilities. Most have descriptions that don't cover their actual trigger scenarios. There is no standard for what a "well-engineered skill" looks like.
+The Agent Skills ecosystem has grown to 88K+ published skills ([SkillsMP](https://skillsmp.com), [skills.sh](https://skills.sh)). Community audits estimate ~26% have security vulnerabilities. Most have descriptions that don't cover their actual trigger scenarios. There is no standard for what a "well-engineered skill" looks like.
 
 **If you haven't published yet** — your skill is trapped in one project, can't be shared, and doesn't meet any platform's install standard. No README, no LICENSE, no proper structure, no discoverability.
 
@@ -191,8 +191,13 @@ Installed automatically by `scripts/setup.sh` on first run:
 | Dependency | Purpose |
 |------------|---------|
 | [`motiful/readme-craft`](https://github.com/motiful/readme-craft) | 3-tier layout, badge selection, dark/light logo for README generation |
-| [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Portable MUST/NEVER constraint skills for Rule-Skill Split |
 | [`motiful/self-review`](https://github.com/motiful/self-review) | 4-pillar, 6-dimension alignment audit for skill quality validation |
+
+### Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Methodology for the Rule-Skill Split pattern. Forge references its three-layer model in `references/rule-skill-pattern.md` but does not invoke it at runtime |
 
 <details>
 <summary>Positioning</summary>
@@ -211,7 +216,7 @@ It does **not** claim to prove that a generated skill's domain outputs are objec
 ```
 SKILL.md              — Full creation + publishing pipeline
 scripts/
-└── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
+└── setup.sh                 — Dependency installation (readme-craft, self-review)
 references/
 ├── installation.md          — setup.sh standard: dependency detection and installation
 ├── skill-invocation.md      — Runtime invocation reliability for skill-to-skill calls
@@ -224,6 +229,8 @@ references/
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing and claim discipline
 ├── script-quality.md        — Script file structure guidelines
+├── maintenance-guide.md     — MAINTENANCE.md: when to create, what to include
+├── anti-graceful-skip.md    — Default-execute principle, no implicit skip paths
 └── templates.md             — README, LICENSE, .gitignore skeletons
 ```
 

@@ -76,6 +76,8 @@ Every paragraph in SKILL.md should pass the **behavior test**: if you delete thi
 - **Theoretical background** — "This draws from Feynman's criteria..." → Move to README's Design Philosophy section.
 - **Motivational framing** — "The valid engineering sequence is: build one step, test one step..." → Replace with the concrete check: "Flag items that depend on unbuilt prerequisites."
 - **Cross-references to README** — "For background, see README.md" → AI won't read README during execution. Delete.
+- **Statistical persuasion** — "~20% activation rate" used to argue why a pattern is good → Replace with the instruction: "Use `Skill(...)`, not natural language." Data as threshold/criterion is fine; data as argument is for README.
+- **Authority citations** — "Source: Scott Spence, 2026" or quotes from Anthropic docs → Agent doesn't need academic attribution or endorsement to follow instructions. Move to README if the claim supports marketing.
 
 **How to check:**
 1. Read each paragraph in SKILL.md
@@ -147,7 +149,7 @@ skill-name/
 
 - SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
 - References: one level deep from SKILL.md. Add a TOC at 100+ lines
-- MAINTENANCE.md: update triggers, verification steps, changelog. Not loaded at runtime — serves maintainers, not the executing agent
+- MAINTENANCE.md: update triggers, verification steps, changelog. Not loaded at runtime — serves maintainers, not the executing agent. See `maintenance-guide.md` for when to create and what to include
 - Delete empty directories (don't create scripts/, references/, or assets/ if unused)
 
 ### Directory Taxonomy

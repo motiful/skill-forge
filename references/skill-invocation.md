@@ -2,20 +2,6 @@
 
 How to make an AI agent **actually call** a dependent skill at runtime — not just have it installed.
 
-## The Gap: Installation ≠ Invocation
-
-`skill-composition.md` solves installation (`scripts/setup.sh`). But installation does not guarantee invocation.
-
-> "Claude tends to handle simple tasks on its own without consulting Skills, defaulting to not triggering them."
-> — Anthropic, Skill authoring best practices (2026)
-
-| Instruction style | Activation rate |
-|-------------------|----------------|
-| Natural language ("invoke X") | 20% |
-| Explicit tool call + structural gate | 84–100% |
-
-Source: Scott Spence, activation reliability study (2026).
-
 ## Why Agents Skip
 
 1. **Self-sufficiency bias** — agent believes it can do the task itself, skips the tool call
@@ -37,6 +23,32 @@ Line 2: **Block the alternative** (close the "I'll do it myself" escape).
 Line 3: **Output gate** (downstream step breaks if skipped).
 
 Use at least line 1 + line 3. Line 2 is insurance for skills whose domain overlaps with the agent's general ability (text analysis, code review, formatting).
+
+### Call Site Format
+
+When a skill declares a dependency on another skill, the call site uses this compact format:
+
+```
+`Skill("<name>", "<args>")` — <boundary: what it owns>.
+<host> owns <what host brings>. <combination rule>.
+<one guardrail>.
+```
+
+Example (skill-forge calling readme-craft):
+```
+`Skill("readme-craft", "review <path>")` — owns universal README quality.
+skill-forge owns skill-specific README standards (`references/readme-quality.md`). Both apply, domain wins.
+Do not manually fix what readme-craft handles.
+```
+
+#### Writing Principles
+
+| Principle | Rule |
+|-----------|------|
+| Position = timing | Place the call site at the workflow step where invocation happens. Do not add a separate "when to invoke" line |
+| Boundary not capability | Describe the division of ownership, not what each side does. Capabilities are described in each skill's own SKILL.md |
+| Binary not gradual | "Both apply, domain wins" not "consider applying both." No wiggle room |
+| One guardrail | Block the specific shortcut the AI would take for this dependency. Each dependency has a different escape route |
 
 ### Do NOT couple to dependency internals
 
@@ -60,10 +72,3 @@ The invoking skill should not describe the dependency's implementation. It chang
 | "Optionally invoke X" | Agent always skips optional calls | If needed, make it mandatory |
 | Describing dependency internals | Creates sync obligation | Just say "do not substitute" |
 
-## Relationship to Other References
-
-| Reference | Covers | This document adds |
-|-----------|--------|--------------------|
-| `skill-composition.md` | Installation, context budget | Runtime invocation reliability |
-| `installation.md` | setup.sh, dependency detection | Ensuring installed skills are actually called |
-| `skill-format.md` | SKILL.md structure | Invocation patterns within the body |
