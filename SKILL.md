@@ -1,10 +1,10 @@
 ---
 name: skill-forge
-description: 'Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage a project''s skills or graduate a project-local skill to standalone. Handles five engagement scenarios: quick review, full pipeline, multi-skill triage, full create, and graduation.'
+description: 'Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Publish is an independent action triggered by "push" or "publish to GitHub".'
 license: MIT
 metadata:
   author: motiful
-  version: "4.0"
+  version: "5.0"
 ---
 
 # Skill Forge
@@ -13,102 +13,62 @@ Skill engineering methodology and publishing pipeline. Defines what "well-engine
 
 ## Engagement Principles
 
-These rules govern all scenarios. Read them before acting.
+These rules govern all modes. Read them before acting.
 
 1. **Assess before acting** — first step is always understanding the situation (scan, inventory, read)
 2. **Report before modifying** — show findings, get user approval, then act
 3. **Security > Structure > Quality > Polish** — when multiple issues exist, fix in this priority
-4. **Scope is user-defined** — "check" means only check. "publish" means full pipeline. Don't upsell
+4. **Default to local-ready** — both modes run through validation and fixes until the skill is local-ready. User can stop at any point
 5. **One skill at a time for changes** — diagnose in batch, but modify one by one with user confirmation
-6. **Progressive commitment** — user can stop at any stage. Review-only is a complete interaction
+6. **Progressive commitment** — default is full run to local-ready. User can stop at any stage. Publish is a separate decision, never auto-triggered
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
 
-## Scenarios
+## Modes
 
-Identify the current scenario first, then compose the right Operation Modules.
+Identify the current mode first, then compose the right Operation Modules.
 
-### 1. Quick Review
+### Review (skill already exists)
 
-**Signal**: "check my skill", "review this skill", "audit my skill repo"
+**Signal**: "review", "check", "audit", "forge", "publish"
 
-User has an existing skill and wants a quality check. Not creating, not publishing.
+**Flow**: Locate → Step 3 (Validate) → Report → Fix → Local Ready
 
-**Flow**: Locate the skill → Step 3 (all checks) → structured report with severity levels
+The skill can be local (path) or remote (GitHub URL — clone to temp directory). Review does not require Step 0, Step 1, or Step 2.
 
-**Checkpoints**: which issues to fix (critical = must, warning = user's choice)
+**Multi-skill**: if multiple skills are detected (project scan or user request like "audit all my skills"), inventory all SKILL.md files, triage by severity (security > structure > quality), present a plan, then Review each skill one at a time.
 
-**Exit**: after report. Do not push toward publishing or creation.
-
-The skill can be local (path) or remote (GitHub URL — clone to temp directory). Quick Review does not require Step 0, Step 1, or Step 2.
-
-### 2. Full Pipeline
-
-**Signal**: "publish this skill", "put this on GitHub", "forge this skill"
-
-User has a skill ready to share.
-
-**Flow**: Step 0 → Step 1 → Step 3 → Step 4
-
-**Checkpoints**: confirm publish target, confirm preflight
-
-**Exit**: after successful publish (or at any Publishing Level the user chooses)
-
-### 3. Multi-Skill Triage
-
-**Signal**: "this project's skills are a mess", "audit all my skills", "review everything"
-
-Project has multiple scattered skills with inconsistent quality.
-
-**Flow**:
-1. **Inventory** — scan all SKILL.md files in project and skill roots
-2. **Triage** — prioritize by severity: security > structure > quality
-3. **Plan** — propose fix order, present to user
-4. **Execute** — each skill gets Step 3, one at a time
-
-**Checkpoints**: approve the plan, approve scope, confirm each skill's changes
-
-**Exit**: after all prioritized skills are reviewed. Don't force-publish.
-
-### 4. Full Create
-
-**Signal**: "create a new skill", "I want to build a skill for X"
-
-User has an idea but no SKILL.md yet.
-
-**Flow**: Step 0 → Step 1 → Step 2 → Step 3 → Step 4
-
-**Checkpoints**: confirm skill scope, confirm content, confirm publish target
-
-**Exit**: after publish (or earlier if user says stop)
-
-### 5. Graduation
-
-**Signal**: "graduate this project skill", "turn this local skill into a standalone repo"
-
-Project-local skill is good enough to publish independently.
-
-**Flow**:
-1. **Step 0** — run setup.sh, ensure forge config exists (`skill_root`, `github_org`)
-2. **Step 1** — locate the project-local skill
-3. **Graduation assessment** — check for project-specific references, hardcoded paths, project-internal dependencies
-4. **Cleanup** — generalize: remove project-specific refs, ensure standalone usability
-5. **Step 3** — validate the cleaned version
-6. **Step 4** — publish
+**Graduation**: if the skill is project-local (e.g. `<project>/.claude/skills/bar/`), prompt to move it to `<skill_root>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
 
 ```
 Source: <project>/.claude/skills/bar/    (or platform equivalent)
 Target: <skill_root>/bar/
 ```
 
-Copy content (`cp -r <source>/* <skill_root>/<name>/`), clean up, validate, publish. Original stays in the project — independent evolution.
+Copy content (`cp -r <source>/* <skill_root>/<name>/`), clean up, validate. Original stays in the project — independent evolution.
 
-**Checkpoints**: confirm what to clean, confirm publish target
+**Severity**: Critical = must fix. Warning = recommend fix (user confirms). Info = report only.
 
-**Exit**: after publish
+### Create (skill does not exist)
+
+**Signal**: "create a skill", "build a skill for X"
+
+**Flow**: Step 0 → Step 1 → Step 2 → Step 3 (Validate) → Fix → Local Ready
+
+**Checkpoints**: confirm skill scope, confirm content
+
+### Publish (user-triggered action)
+
+**Signal**: "push", "publish to GitHub", "put this on GitHub"
+
+Publish is not a mode — it is an independent action the user triggers after Review or Create has produced a local-ready skill.
+
+**Flow**: Step 0 (if not run) → Step 4 (Publish)
+
+**Checkpoints**: confirm publish target, confirm preflight
 
 ## Operation Modules
 
-Steps 0–4 are reusable building blocks. Scenarios define which steps run and in what order.
+Steps 0–4 are reusable building blocks. Modes define which steps run and in what order.
 
 ### Step 0: Environment Setup
 
@@ -196,9 +156,9 @@ If multiple likely matches are found, summarize the candidate paths and ask whic
 - What does this skill do? (1-2 sentences)
 - When should it trigger? (specific phrases, file types, scenarios)
 
-#### Ecosystem Check (Full Create only)
+#### Ecosystem Check (Create mode only)
 
-For Scenario 4 (Full Create), before writing new content, check if similar skills already exist:
+Before writing new content, check if similar skills already exist:
 
 1. **Search** — `npx skills find <keyword>` or search skills.sh for the domain
 2. **Found similar?** → present to user with options:
@@ -209,7 +169,7 @@ For Scenario 4 (Full Create), before writing new content, check if similar skill
 | Partial match — needs significant customization | Fork and adapt, or create new with the existing as reference |
 | Nothing similar | Create from scratch |
 
-Skip this check for Scenarios 1, 2, 3, 5 — those work with existing skills.
+Skip this check in Review mode — it works with existing skills.
 
 #### Capability Detection
 
@@ -269,6 +229,14 @@ If the skill being created has dependencies (other skills, CLI tools, npm packag
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
+| README quality | Value-first structure, claim discipline, example clarity. See `references/readme-quality.md` and `references/templates.md` |
+| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
+| Dependency mirroring | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
+| No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
+| LICENSE exists | Required for community platforms |
+| Description clarity | Description alone should tell a stranger what this skill does and when to use it |
+| Script documentation | If skill contains scripts, document what they do and what permissions they need |
+| Discoverability claims | Do not imply GitHub publication guarantees immediate listing or search placement |
 
 #### Repo Hygiene
 
@@ -285,24 +253,9 @@ These checks apply to the entire repository, not just skill content. They run au
 - **Critical** (leaked secrets, credential files) — block publish, require immediate action
 - **Warning** (missing .gitignore entries, unnecessary files) — report and recommend, do not block
 
-In review mode (Scenario 1), present all findings with severity. In publish mode, block on critical issues only.
+Present all findings with severity. Critical issues block publish.
 
-#### Community Readiness (optional)
-
-If the user wants maximum discoverability:
-
-| Check | Criteria |
-|-------|----------|
-| README quality | Value-first structure, claim discipline, example clarity. See `references/readme-quality.md` and `references/templates.md` |
-| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
-| Dependencies | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
-| Discoverability claims | Do not imply GitHub publication guarantees immediate listing or search placement |
-| No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
-| LICENSE exists | Required for community platforms |
-| Description clarity | Description alone should tell a stranger what this skill does and when to use it |
-| Security | If skill contains scripts, document what they do and what permissions they need |
-
-#### Cross-Pillar Alignment (Scenario 1 & 3)
+#### Cross-Pillar Alignment (Review mode)
 
 After structural checks, run self-review on the skill project to audit alignment across Design (README, docs), Artifact (SKILL.md, references, scripts), Skill (conventions), and Progress (changelog, roadmap). This catches drift that format validation misses — such as README claims diverging from SKILL.md execution logic, or stale progress tracking.
 
@@ -327,10 +280,10 @@ Do not promise Level 3 as an outcome of running skill-forge. Do not push users p
 
 Forge does not force-move the author's files. `skill_root` is the default for new skills, not a mandatory destination.
 
-| Scenario | Where to publish |
-|----------|-----------------|
+| Situation | Where to publish |
+|-----------|-----------------|
 | Skill already has a location (with or without git) | **Publish in-place** — `git init` where it is |
-| Full Create (no existing files) | **Create in `<skill_root>/<skill-name>/`** — the default |
+| Create mode (no existing files) | **Create in `<skill_root>/<skill-name>/`** — the default |
 | Graduation (explicit move request) | **Copy to `<skill_root>/<skill-name>/`** — user asked for the move |
 
 #### Strategy

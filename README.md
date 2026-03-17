@@ -43,7 +43,7 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 - **Validates structure and discoverability** — checks frontmatter, description coverage, body length, reference integrity, and terminology so agents can find and correctly trigger your skill
 - **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block publish
 - **Checks README claim discipline** — compares README claims against SKILL.md capabilities, flags hardcoded paths, verifies install commands and LICENSE
-- **Handles five scenarios** — quick review of one skill, full publish pipeline, multi-skill triage across a project, create from scratch, or graduate a project-local skill to standalone repo
+- **Two modes, one action** — Review (existing skill → validate → fix → local ready) or Create (new skill → build → validate → local ready). Publish is a separate action you trigger when ready
 - **Publishes to GitHub with explicit confirmation** — preflight summary of every action, single "yes", then `git init` → `gh repo create` → push
 - **Auto-registers across platforms** — detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks them to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
@@ -55,8 +55,8 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences
 1. **Gather** — Auto-detect existing skill content from project and conversation
 2. **Create** — Write SKILL.md following the [Agent Skills](https://agentskills.io) standard
-3. **Validate** — Structure, frontmatter, content quality, repo hygiene, optional community readiness checks
-4. **Publish** — Push to GitHub and optionally connect to tools already active on your machine
+3. **Validate** — Structure, frontmatter, content quality, repo hygiene, community readiness checks
+4. **Publish** — Push to GitHub and connect to tools already active on your machine (user-triggered)
 
 </details>
 
@@ -71,10 +71,10 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 | **Claim discipline** | README says what the skill actually does, no inflated promises | README ↔ SKILL.md consistency check |
 | **Configuration pattern** | Your skill can have user preferences, done properly | Reference pattern for declaring and reading config |
 | **Dependency installation** | Required tools and skills are installed automatically | `scripts/setup.sh` standard — install or block, no graceful skip |
-| **One-command publishing** | Local files → installable GitHub repo | Full pipeline: git init → GitHub push → platform registration |
+| **One-command publishing** | Local files → installable GitHub repo | Publish action: git init → GitHub push → platform registration |
 | **Ongoing maintenance** | Catch regressions when you update | Review mode: re-run validation on existing repos |
 
-**Token cost**: Review ~5-10K | Review + improve ~10-15K | Full pipeline ~15-25K. No subagents, no Python, no surprise costs.
+**Token cost**: Review ~5-15K | Create ~10-20K | Publish ~5-10K (additive). No subagents, no Python, no surprise costs.
 
 ## When to Load
 
@@ -103,12 +103,12 @@ You get a standalone repo with SKILL.md, README, and LICENSE — pushed to GitHu
 ## Usage
 
 Say any of:
-- "Create a skill for X and publish it"
-- "Publish this skill to GitHub"
-- "Forge a skill from my notes"
-- "Turn this project-local skill into a repo"
-- "Review this skill repo"
-- "Audit my skill before publishing"
+- "Review this skill repo" — Review mode
+- "Audit my skill" — Review mode
+- "Create a skill for X" — Create mode
+- "Forge a skill from my notes" — Create mode
+- "Publish this skill to GitHub" — Publish action
+- "Push this skill" — Publish action
 
 <details>
 <summary>Example: Publishing self-review</summary>
@@ -186,7 +186,7 @@ ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 
 - **Git** (required)
 - **Node.js** (required for `npx skills add`)
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Review-only scenarios work without it
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Review mode works without it
 
 ### Dependencies
 
@@ -247,7 +247,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-4.0-blue.svg
+[version-shield]: https://img.shields.io/badge/version-5.0-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io
