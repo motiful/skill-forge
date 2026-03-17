@@ -96,10 +96,10 @@ npx skills add motiful/skill-forge -g
 Then tell your AI coding assistant:
 
 ```
-"Publish this skill to GitHub"
+"Review this skill"          — validate, scan, fix → local ready
+"Create a skill for X"       — build from scratch → local ready
+"Push this skill to GitHub"  — one action after local ready
 ```
-
-You get a standalone repo with SKILL.md, README, and LICENSE — pushed to GitHub and installable via `npx skills add <org>/<name>`.
 
 ## Usage
 
