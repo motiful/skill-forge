@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: 'Create, validate, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
+description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
 license: MIT
 metadata:
   author: motiful
@@ -79,9 +79,11 @@ A skill is "local ready" when ALL of the following are true:
 
 ### Push (single action after local ready)
 
-**Signal**: "push", "publish to GitHub", "put this on GitHub"
+**Signal**: "push", "publish this skill", "publish to GitHub", "put this on GitHub"
 
-Push is NOT a mode — it is a single action the user triggers after a skill reaches local ready. No validation, no artifact creation — everything is already done.
+Push is NOT a mode — it is a single action the user triggers after a skill reaches local ready.
+
+**Pre-check**: If the skill has not reached local ready (no prior Review or Create in this session), run Review first. Push only executes after local ready is confirmed.
 
 **Flow**: Confirm remote target → `gh repo create` + `git push`
 
@@ -280,6 +282,12 @@ Extract actionable rules (e.g., "references >100 lines must have a TOC", "descri
 
 If the target project has no project-specific standards, proceed with Core Validation only.
 
+#### README Audit (action, not a check)
+
+**Invoke readme-craft** to audit the README before running the table below. readme-craft evaluates 3-tier layout, badge selection, tone/voice, section overflow, and layout quality. If README does not exist (Review mode), flag as Critical and create in Fix Phase.
+
+After readme-craft completes, additionally check skill-specific rules from `references/readme-quality.md`: value-first structure, claim discipline, dependency mirroring, footer, "What's Inside".
+
 #### Core Validation
 
 | Check | Criteria |
@@ -300,7 +308,7 @@ If the target project has no project-specific standards, proceed with Core Valid
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
-| README quality | **Invoke readme-craft** to audit README (3-tier hierarchy, badge selection, tone/voice, section overflow, layout quality). Additionally check skill-specific rules from `references/readme-quality.md`: value-first structure, claim discipline, dependency mirroring, footer, "What's Inside". If README does not exist (Review mode), flag as Critical and create in fix phase |
+| README quality | See [README Audit](#readme-audit-action-not-a-check) above — must be completed before this table runs |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
 | Dependency mirroring | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
@@ -370,7 +378,7 @@ After validation report is presented and user approves fixes:
 
 A single action, not a pipeline. Only available after local ready.
 
-**Signal**: "push", "publish to GitHub", "put this on GitHub"
+**Signal**: "push", "publish this skill", "publish to GitHub", "put this on GitHub"
 
 **Procedure**:
 
