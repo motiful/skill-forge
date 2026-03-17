@@ -31,9 +31,9 @@ Identify the current mode first, then compose the right Operation Modules.
 
 **Signal**: "review", "check", "audit", "forge", "publish"
 
-**Flow**: Locate → Step 3 (Validate) → Report → Fix → Local Ready
+**Flow**: Step 0 → Locate → Step 3 (Validate) → Report → Fix → Local Ready
 
-The skill can be local (path) or remote (GitHub URL — clone to temp directory). Review does not require Step 0, Step 1, or Step 2.
+The skill can be local (path) or remote (GitHub URL — clone to temp directory). Review does not require Step 1 or Step 2 (the skill already exists). Step 0 is required — Step 3 validation depends on tools installed by setup.sh (readme-craft for README quality, self-review for cross-pillar alignment).
 
 **Multi-skill**: if multiple skills are detected (project scan or user request like "audit all my skills"), inventory all SKILL.md files, triage by severity (security > structure > quality), present a plan, then Review each skill one at a time.
 
@@ -118,13 +118,13 @@ Read `~/.config/skill-forge/config.md`.
 
 #### User Conventions
 
-Before creating or publishing, check for the user's existing conventions. Scan in priority order:
+Check for the user's existing conventions. Scan in priority order:
 
 1. **Forge config** — `~/.config/skill-forge/config.md` (platform-agnostic, created above)
 2. **Project instructions** — `CLAUDE.md`, `AGENTS.md`, or equivalent for the current platform
 3. **Platform rules directory** — if it exists (CC: `~/.claude/rules/`, Cursor: `~/.cursor/rules/`, etc.)
 
-If the user has established conventions (naming, structure, org, licensing), **follow them**. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
+If the user has established conventions (naming, structure, org, licensing), **follow them** in Create/Publish and **validate against them** in Review. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
 
 #### Positioning
 
@@ -209,6 +209,19 @@ If the skill being created has dependencies (other skills, CLI tools, npm packag
 
 ### Step 3: Validate
 
+#### Project-Specific Standards
+
+Before running checks, scan the target project for its own quality standards. These become additional validation criteria on top of Core Validation.
+
+Scan in order:
+1. **Project instructions** — `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, or platform equivalents
+2. **Editor/linter configs** — `.editorconfig`, linter configs
+3. **Rules directory** — `.claude/rules/*.md`, `.cursor/rules/*.mdc`, etc.
+
+Extract actionable rules (e.g., "references >100 lines must have a TOC", "description must include a negative trigger") and check them alongside Core Validation. Report violations attributed to the project's own standard, not skill-forge's.
+
+If the target project has no project-specific standards, proceed with Core Validation only.
+
 #### Core Validation
 
 | Check | Criteria |
@@ -229,7 +242,7 @@ If the skill being created has dependencies (other skills, CLI tools, npm packag
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
-| README quality | Value-first structure, claim discipline, example clarity. See `references/readme-quality.md` and `references/templates.md` |
+| README quality | Two standards apply together: (1) `references/readme-quality.md` for skill-specific content rules (value-first structure, claim discipline, dependency mirroring, footer, "What's Inside"); (2) readme-craft SKILL.md for general layout quality (3-tier hierarchy, badge selection, tone/voice, section overflow). Read both and check against the applicable template (`references/templates.md` — Skill or Collection). See `references/readme-quality.md` |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
 | Dependency mirroring | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
