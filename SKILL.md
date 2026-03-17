@@ -219,6 +219,7 @@ Detect which capabilities the skill needs. This is not optional — detect and a
 | Capability | Detection question | Action | Reference |
 |---|---|---|---|
 | **Installation** | Does the skill have dependencies to install? (tools, skills, npm packages) | Add `scripts/setup.sh` + Step 0 that runs it | `references/installation.md` |
+| **Skill Invocation** | Does the skill invoke other skills at runtime? | Use the invocation pattern (explicit `Skill(...)` + output gate) at every call site | `references/skill-invocation.md` |
 | **Onboarding** | Does the skill need first-use user guidance? (profile setup, credentials, preferences) | Add onboarding flow in Step 0 | `references/onboarding.md` |
 | **Rule-Skill Split** | Does the skill contain 3+ MUST/NEVER constraints that users may want to customize? | Auto-create paired `<name>-rules` skill | `references/rule-skill-pattern.md` |
 
@@ -235,6 +236,7 @@ Key principle: write for another AI agent, not a human. Keep body under 500 line
 For capabilities detected in Step 1, bake the corresponding structure into the generated SKILL.md:
 
 - **Installation** → Add `scripts/setup.sh` that checks and installs all declared dependencies. Add a Step 0 that runs setup.sh. See `references/installation.md`
+- **Skill Invocation** → At every call site, use the invocation pattern: explicit `Skill(...)` + output gate. See `references/skill-invocation.md`
 - **Onboarding** → Add first-use guidance in Step 0 (after setup.sh). See `references/onboarding.md`
 - **Rule-Skill Split** → Auto-create a separate `<name>-rules` skill alongside the main skill. See `references/rule-skill-pattern.md`
 
@@ -242,10 +244,11 @@ These patterns are **transparent to the end user** — they work without the end
 
 #### Dependencies in Generated Skills
 
-If the skill being created has dependencies (other skills, CLI tools, npm packages), they must be declared and installed:
+If the skill being created has dependencies (other skills, CLI tools, npm packages), they must be declared, installed, AND reliably invoked:
 
-- Declare in SKILL.md Step 0 and implement in `scripts/setup.sh`
-- Mirror in README's "Dependencies" section
+- **Installation**: Declare in SKILL.md Step 0 and implement in `scripts/setup.sh`
+- **Invocation**: At every point the generated SKILL.md calls a dependency, use the pattern from `references/skill-invocation.md`: explicit `Skill(...)` call + output gate. Natural-language invocations ("invoke X") have ~20% activation rate
+- **Documentation**: Mirror in README's "Dependencies" section
 - No fallback behavior — dependencies are installed or the skill blocks with an error
 
 #### Repo Artifacts
@@ -282,11 +285,13 @@ Extract actionable rules (e.g., "references >100 lines must have a TOC", "descri
 
 If the target project has no project-specific standards, proceed with Core Validation only.
 
-#### README Audit (action, not a check)
+#### README Audit (required by Core Validation)
 
-**Invoke readme-craft** to audit the README before running the table below. readme-craft evaluates 3-tier layout, badge selection, tone/voice, section overflow, and layout quality. If README does not exist (Review mode), flag as Critical and create in Fix Phase.
+Run: `Skill("readme-craft", "review <readme-path>")`
+Do not substitute with manual evaluation.
+Record output — "README quality" row below requires it.
 
-After readme-craft completes, additionally check skill-specific rules from `references/readme-quality.md`: value-first structure, claim discipline, dependency mirroring, footer, "What's Inside".
+If README does not exist (Review mode), flag as Critical and create in Fix Phase. After readme-craft completes, additionally check skill-specific rules from `references/readme-quality.md`: value-first structure, claim discipline, dependency mirroring, footer, "What's Inside".
 
 #### Core Validation
 
@@ -300,6 +305,7 @@ After readme-craft completes, additionally check skill-specific rules from `refe
 | References | All files referenced in SKILL.md actually exist |
 | No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, assets/, scripts/ at root alongside README.md and LICENSE is the expected structure |
 | Dependencies | If the skill declares dependencies, verify `scripts/setup.sh` exists and handles each one. Dependencies must be installed, not optional |
+| Invocation reliability | For each skill dependency: does every invocation point use explicit `Skill(...)` syntax + output gate? Natural-language invocations ("invoke X", "run X") are flagged. See `references/skill-invocation.md` | Warning |
 | Runtime write to skill directory | Skill directory should have no runtime-written data files. Flag `.claude/skills/<name>/data/`, `.claude/skills/<name>/cache/`, or any non-published file | Warning |
 | Assets misuse | `assets/` only holds AI-consumed source material. Logo, screenshots, and repo infrastructure belong in `.github/` or root level, not in `assets/` | Warning |
 | Meta-skill contamination | Skill repo should not contain tooling skills (skill-forge, skill-creator) as subdirectories. Detect `skills/skill-forge/`, `.claude/skills/skill-forge/`, `.agents/skills/skill-forge/` or similar inside the repo. Remediation: `rm -rf <path>` then `npx skills add motiful/skill-forge -g` (tooling skills belong at global scope, not inside the skill being forged) | Warning |
@@ -308,7 +314,7 @@ After readme-craft completes, additionally check skill-specific rules from `refe
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
-| README quality | See [README Audit](#readme-audit-action-not-a-check) above — must be completed before this table runs |
+| README quality | **Requires readme-craft output from [README Audit](#readme-audit-required-by-core-validation) above.** Report readme-craft's findings here. This row cannot be completed without them |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
 | Dependency mirroring | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
@@ -336,9 +342,9 @@ Present all findings with severity. Critical issues block push.
 
 #### Cross-Pillar Alignment (Review mode)
 
-After structural checks, run self-review on the skill project to audit alignment across Design (README, docs), Artifact (SKILL.md, references, scripts), Skill (conventions), and Progress (changelog, roadmap). This catches drift that format validation misses — such as README claims diverging from SKILL.md execution logic, or stale progress tracking.
-
-Report self-review findings alongside Step 3 results. Do not duplicate checks that Step 3 already covers (frontmatter, description coverage, repo hygiene).
+Run: `Skill("self-review", "<skill-path>")`
+Do not substitute with manual alignment checks.
+Report findings alongside Step 3 results. Do not duplicate checks that Step 3 already covers (frontmatter, description coverage, repo hygiene).
 
 #### Fix Phase
 
@@ -408,6 +414,7 @@ A single action, not a pipeline. Only available after local ready.
 ## References
 
 - `references/installation.md` — setup.sh standard: dependency detection, installation, two outcomes
+- `references/skill-invocation.md` — Runtime invocation reliability: explicit `Skill(...)` call + output gate pattern
 - `references/onboarding.md` — Interactive first-use guidance pattern
 - `references/skill-configuration.md` — User preferences, config location, litmus test, stateless principle
 - `references/skill-format.md` — SKILL.md format specification (frontmatter, structure, guidelines)

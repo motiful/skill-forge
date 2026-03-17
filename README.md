@@ -214,6 +214,7 @@ scripts/
 └── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
 references/
 ├── installation.md          — setup.sh standard: dependency detection and installation
+├── skill-invocation.md      — Runtime invocation reliability for skill-to-skill calls
 ├── onboarding.md            — Interactive first-use guidance pattern
 ├── skill-configuration.md   — User preferences, config location, stateless principle
 ├── skill-format.md          — How to write a valid SKILL.md
