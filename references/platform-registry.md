@@ -155,7 +155,7 @@ Anthropic's official marketplace for Claude Code extensions. Requires review and
 
 ### Publishing Flow
 
-**Step 4 behavior:**
+**Push behavior:**
 
 ```
 1. Config has cc_market setting?

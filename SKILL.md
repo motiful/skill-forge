@@ -1,15 +1,15 @@
 ---
 name: skill-forge
-description: 'Create, validate, publish, and review skills as GitHub repos. Use when the user says "publish this skill", "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Publish is an independent action triggered by "push" or "publish to GitHub".'
+description: 'Create, validate, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
 license: MIT
 metadata:
   author: motiful
-  version: "5.0"
+  version: "6.0"
 ---
 
 # Skill Forge
 
-Skill engineering methodology and publishing pipeline. Defines what "well-engineered skill" means, validates skills against that standard, and publishes them as installable GitHub repos.
+Skill engineering methodology and publishing pipeline. Defines what "well-engineered skill" means, validates skills against that standard, and produces publishable GitHub repos.
 
 ## Engagement Principles
 
@@ -20,16 +20,16 @@ These rules govern all modes. Read them before acting.
 3. **Security > Structure > Quality > Polish** — when multiple issues exist, fix in this priority
 4. **Default to local-ready** — both modes run through validation and fixes until the skill is local-ready. User can stop at any point
 5. **One skill at a time for changes** — diagnose in batch, but modify one by one with user confirmation
-6. **Progressive commitment** — default is full run to local-ready. User can stop at any stage. Publish is a separate decision, never auto-triggered
+6. **Push is a single action, not a pipeline** — local-ready means everything is done; push only sends to remote
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
 
 ## Modes
 
-Identify the current mode first, then compose the right Operation Modules.
+Two modes. Push is a single action after either mode reaches local ready.
 
 ### Review (skill already exists)
 
-**Signal**: "review", "check", "audit", "forge", "publish"
+**Signal**: "review", "check", "audit", "forge"
 
 **Flow**: Step 0 → Locate → Step 3 (Validate) → Report → Fix → Local Ready
 
@@ -56,19 +56,40 @@ Copy content (`cp -r <source>/* <skill_root>/<name>/`), clean up, validate. Orig
 
 **Checkpoints**: confirm skill scope, confirm content
 
-### Publish (user-triggered action)
+### Local Ready Definition
+
+A skill is "local ready" when ALL of the following are true:
+
+```
+<skill-name>/
+├── SKILL.md                           # validated (Step 3 passed)
+├── references/                        # if needed, all links resolve
+├── scripts/                           # if needed, setup.sh works
+├── README.md                          # audited by readme-craft
+├── LICENSE                            # exists
+└── .gitignore                         # matches template
+```
+
+- `git init` done, initial commit made
+- Local registration (symlinks) done for all detected platform roots
+- All Critical and Warning issues from Step 3 resolved
+- README audited by readme-craft (not just manually checked)
+
+**Local ready = push-ready.** The only remaining action is a network operation.
+
+### Push (single action after local ready)
 
 **Signal**: "push", "publish to GitHub", "put this on GitHub"
 
-Publish is not a mode — it is an independent action the user triggers after Review or Create has produced a local-ready skill.
+Push is NOT a mode — it is a single action the user triggers after a skill reaches local ready. No validation, no artifact creation — everything is already done.
 
-**Flow**: Step 0 (if not run) → Step 4 (Publish)
+**Flow**: Confirm remote target → `gh repo create` + `git push`
 
-**Checkpoints**: confirm publish target, confirm preflight
+See [Push to Remote](#push-to-remote) for the exact procedure.
 
 ## Operation Modules
 
-Steps 0–4 are reusable building blocks. Modes define which steps run and in what order.
+Steps 0–3 are reusable building blocks. Modes define which steps run and in what order. Push is a standalone action after local ready.
 
 ### Step 0: Environment Setup
 
@@ -124,7 +145,7 @@ Check for the user's existing conventions. Scan in priority order:
 2. **Project instructions** — `CLAUDE.md`, `AGENTS.md`, or equivalent for the current platform
 3. **Platform rules directory** — if it exists (CC: `~/.claude/rules/`, Cursor: `~/.cursor/rules/`, etc.)
 
-If the user has established conventions (naming, structure, org, licensing), **follow them** in Create/Publish and **validate against them** in Review. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
+If the user has established conventions (naming, structure, org, licensing), **follow them** in Create and **validate against them** in Review. Skill-forge provides defaults for users who don't have conventions yet, not overrides for users who do.
 
 #### Positioning
 
@@ -148,13 +169,31 @@ Before asking anything, detect what's already available:
 
 3. **Explicit references** — Did the user point to specific files or directories?
 
-**If one clear match is found** → proceed with it automatically and include the chosen source path in the Step 4 confirmation summary.
+**If one clear match is found** → proceed with it automatically.
 
 If multiple likely matches are found, summarize the candidate paths and ask which one to use.
 
 **If nothing found** → then ask:
 - What does this skill do? (1-2 sentences)
 - When should it trigger? (specific phrases, file types, scenarios)
+
+#### Location Rule
+
+Where the skill lives depends on context:
+
+| Situation | Where to work |
+|-----------|---------------|
+| Skill already has a location (with or without git) | **In-place** — work where it is |
+| Create mode (no existing files) | **`<skill_root>/<skill-name>/`** — the default |
+| Graduation (explicit move request) | **Copy to `<skill_root>/<skill-name>/`** — user asked for the move |
+
+Forge does not force-move the author's files. `skill_root` is the default for new skills, not a mandatory destination.
+
+#### Publishing Strategy
+
+Before creating, determine the repo strategy. See `references/publishing-strategy.md` for detailed guidance.
+
+**Quick decision:** One skill → Skill repo (SKILL.md at root). Multiple tightly-coupled skills → see `references/publishing-strategy.md` for Skill vs Collection. For composition philosophy, see `references/skill-composition.md`.
 
 #### Ecosystem Check (Create mode only)
 
@@ -207,6 +246,25 @@ If the skill being created has dependencies (other skills, CLI tools, npm packag
 - Mirror in README's "Dependencies" section
 - No fallback behavior — dependencies are installed or the skill blocks with an error
 
+#### Repo Artifacts
+
+Step 2 creates ALL publishable files, not just SKILL.md:
+
+| File | Source | Notes |
+|------|--------|-------|
+| `SKILL.md` | Written in this step | Core skill content |
+| `README.md` | Generated by readme-craft | Value-first structure, see `references/readme-quality.md` and `references/templates.md` |
+| `LICENSE` | From `references/templates.md` | Default MIT, or per forge config |
+| `.gitignore` | From `references/templates.md` | Standard template |
+
+README requirements (enforced by readme-craft):
+- **Value-first**: Problem → What It Does → Usage → Install → What's Inside
+- Must mention [Agent Skills](https://agentskills.io) compatibility
+- Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
+- If dependencies exist, add a "Dependencies" section
+- Include a "What's Inside" section showing skill files
+- Include a "Forged with Skill Forge" footer
+
 ### Step 3: Validate
 
 #### Project-Specific Standards
@@ -242,7 +300,7 @@ If the target project has no project-specific standards, proceed with Core Valid
 | Terminology consistency | Extract core terms defined in SKILL.md. Check for: terms that conflict with the skill's own name, terms used with different meanings in different sections, terms that conflict with platform concepts. Report conflicts — don't auto-fix |
 | Directory names | The Agent Skills standard names three skill directories: `references/`, `assets/`, `scripts/`. Flag non-standard directory names used for skill content. Directories serving only GitHub/repo presentation do not need renaming — just confirm they are not referenced by SKILL.md as skill content |
 | Script quality | If `scripts/` exists: no single file >500 lines without justification; CLI parsing separated from business logic. See `references/script-quality.md` |
-| README quality | Two standards apply together: (1) `references/readme-quality.md` for skill-specific content rules (value-first structure, claim discipline, dependency mirroring, footer, "What's Inside"); (2) readme-craft SKILL.md for general layout quality (3-tier hierarchy, badge selection, tone/voice, section overflow). Read both and check against the applicable template (`references/templates.md` — Skill or Collection). See `references/readme-quality.md` |
+| README quality | **Invoke readme-craft** to audit README (3-tier hierarchy, badge selection, tone/voice, section overflow, layout quality). Additionally check skill-specific rules from `references/readme-quality.md`: value-first structure, claim discipline, dependency mirroring, footer, "What's Inside". If README does not exist (Review mode), flag as Critical and create in fix phase |
 | Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
 | Dependency mirroring | If SKILL.md declares dependencies, mirror them in a README "Dependencies" section |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
@@ -253,20 +311,20 @@ If the target project has no project-specific standards, proceed with Core Valid
 
 #### Repo Hygiene
 
-These checks apply to the entire repository, not just skill content. They run automatically before publish and in review mode.
+These checks apply to the entire repository, not just skill content.
 
 | Check | Criteria |
 |-------|----------|
-| Leaked secrets | Scan all tracked files for common secret patterns: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords in config files, private keys (`-----BEGIN.*PRIVATE KEY-----`), hardcoded credentials. **Block publish** until resolved |
+| Leaked secrets | Scan all tracked files for common secret patterns: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords in config files, private keys (`-----BEGIN.*PRIVATE KEY-----`), hardcoded credentials. **Block push** until resolved |
 | .gitignore coverage | Verify common entries: `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files. Flag tracked files that match these patterns |
 | Credential files | Warn if `.env`, `credentials.json`, `*.pem`, `*.key`, or secret-bearing config files are tracked by git |
 | Unnecessary files | Flag files that add noise: lock files without a `scripts/` runtime, large media (> 1 MB), build artifacts, IDE workspace files |
 
 **Severity levels:**
-- **Critical** (leaked secrets, credential files) — block publish, require immediate action
+- **Critical** (leaked secrets, credential files) — block push, require immediate action
 - **Warning** (missing .gitignore entries, unnecessary files) — report and recommend, do not block
 
-Present all findings with severity. Critical issues block publish.
+Present all findings with severity. Critical issues block push.
 
 #### Cross-Pillar Alignment (Review mode)
 
@@ -274,159 +332,70 @@ After structural checks, run self-review on the skill project to audit alignment
 
 Report self-review findings alongside Step 3 results. Do not duplicate checks that Step 3 already covers (frontmatter, description coverage, repo hygiene).
 
-### Step 4: Publish
+#### Fix Phase
 
-#### Publishing Levels
+After validation report is presented and user approves fixes:
 
-User can stop at any level. Each level is a valid resting point.
+1. Fix all Critical issues (mandatory)
+2. Fix Warning issues (with user confirmation)
+3. For Review mode: create missing repo artifacts (README via readme-craft, LICENSE, .gitignore) if they don't exist
+4. For both modes: update existing artifacts to pass validation
+5. **Local registration** — detect platform roots, create symlinks:
 
-| Level | What it means | skill-forge support |
-|-------|--------------|---------------------|
-| 0 — Local only | Skill lives in project, no git | Default state — no forge action needed |
-| 1 — Version control | `git init`, local repo | Direct (natural checkpoint) |
-| 2 — GitHub published | Public repo, `npx skills add` installable | Direct (full pipeline) |
-| 3 — Directory listed | Community directories index it | Downstream (not our control) |
+   ```
+   Scan for existing skill roots (strong signals only):
+     Strong: ~/.claude/skills/, ~/.agents/skills/, ~/.copilot/skills/,
+             ~/.cursor/skills/, ~/.codeium/windsurf/skills/
+     Strong: <project>/.claude/skills/, <project>/.agents/skills/,
+             <project>/.github/skills/, <project>/.cursor/skills/,
+             <project>/.windsurf/skills/
 
-Do not promise Level 3 as an outcome of running skill-forge. Do not push users past the level they requested.
+     Roots found → link all detected roots
+     No roots  → skip
+     User explicitly names undetected platform → create root + link
+   ```
 
-#### Location Rule
+   ```bash
+   ln -sfn <skill-path> ~/.claude/skills/<skill-name>
+   ```
 
-Forge does not force-move the author's files. `skill_root` is the default for new skills, not a mandatory destination.
+   Never link one vendor root to another. Every consumer root points to the skill's source directory.
 
-| Situation | Where to publish |
-|-----------|-----------------|
-| Skill already has a location (with or without git) | **Publish in-place** — `git init` where it is |
-| Create mode (no existing files) | **Create in `<skill_root>/<skill-name>/`** — the default |
-| Graduation (explicit move request) | **Copy to `<skill_root>/<skill-name>/`** — user asked for the move |
+   See `references/platform-registry.md` for the platform matrix and policy.
 
-#### Strategy
+6. **Git init** (if not already a git repo) + initial commit
+7. Verify all Local Ready criteria are met
 
-Before creating the repo, determine the publishing strategy. See `references/publishing-strategy.md` for detailed guidance.
+## Push to Remote
 
-**Quick decision:** One skill → Skill repo (SKILL.md at root). Multiple tightly-coupled skills → see `references/publishing-strategy.md` for Skill vs Collection. For composition philosophy, see `references/skill-composition.md`.
+A single action, not a pipeline. Only available after local ready.
 
-Think about publishing in three layers, in this order:
+**Signal**: "push", "publish to GitHub", "put this on GitHub"
 
-1. **Public Artifact** — what gets published and how strangers evaluate/install it
-2. **Remote Publish** — git + remote hosting
-3. **Local Registration** — optional convenience on the current machine
+**Procedure**:
 
-Do not let local registration convenience redefine the public artifact.
+1. **Confirm** — summarize what will happen:
+   - Remote target (`<org>/<skill-name>`, visibility)
+   - Current local ready status
 
-#### 4a. Public Artifact
+2. **Execute**:
 
-##### Repo structure
+   ```bash
+   # Push to GitHub (default)
+   gh repo create <org>/<skill-name> --public --source=. --push
 
-```
-<skill-name>/                          # wherever the skill lives (see Location Rule)
-├── SKILL.md                           # at root for npx skills add discovery
-├── references/                        # if needed
-├── scripts/                           # if needed
-├── README.md
-├── LICENSE
-└── .gitignore
-```
+   # Non-GitHub: ask for remote URL
+   git remote add origin <url> && git push -u origin main
 
-##### README.md
+   # Update skill_root .gitignore (if skill_root is a git repo)
+   # Add <skill-name>/ if not already present
+   ```
 
-Use readme-craft (3-tier layout, badge selection, dark/light logo — installed by setup.sh).
+3. **Update config** — add the skill to `~/.config/skill-forge/config.md` under "Published Skills"
 
-See `references/templates.md` for skeletons and `references/readme-quality.md` for rules. Key requirements:
-- **Value-first**: Problem → What It Does → Usage → Install → What's Inside
-- Must mention [Agent Skills](https://agentskills.io) compatibility
-- Primary install: `npx skills add <org>/<skill-name>`. Manual clone as fallback
-- If dependencies exist, add a "Dependencies" section
-- Include a "What's Inside" section showing skill files
-- Include a "Forged with Skill Forge" footer
-
-##### .gitignore
-
-Use the template from `references/templates.md`.
-
-#### 4b. Preflight Confirmation
-
-Before any side effect outside the current repo artifact, summarize the exact actions and get explicit confirmation once:
-
-- Config/state files to create or update
-- Local repo actions (`git init`, initial commit, target repo path)
-- Remote target (`<org>/<skill-name>`, visibility)
-- Detected registration roots that will be linked
-- Any new platform roots to be created (only for explicitly named platforms)
-
-After confirmation, execute without further mode-selection questions unless new ambiguity appears.
-
-Use task language: "Before I publish, here's what I'll do" instead of "preflight". Avoid surfacing internal concepts (mode, collection) unless the user's request requires them.
-
-#### 4c. Remote Publish
-
-```bash
-# Git init
-cd <skill_root>/<skill-name>
-git init && git add -A && git commit -m "init: <skill-name> skill"
-
-# Update skill_root .gitignore (if skill_root is a git repo)
-# Add <skill-name>/ if not already present
-
-# Push to GitHub (default)
-gh repo create <org>/<skill-name> --public --source=. --push
-
-# Non-GitHub: ask for remote URL
-git remote add origin <url> && git push -u origin main
-```
-
-Update forge config: add the skill to `~/.config/skill-forge/config.md` under a "Published Skills" section.
-
-After push, tell the user: *"Your skill is on GitHub. Install with `npx skills add <org>/<skill-name>`. Community directories may surface it later based on their own indexing."*
+4. **Report**: *"Your skill is on GitHub. Install with `npx skills add <org>/<skill-name>`. Community directories may surface it later based on their own indexing."*
 
 **CC Market**: check `cc_market` in forge config. If `true` → include CC Market submission. If `false` → skip. If **not set** → ask once with recommendation to skip (GitHub is already installable), save preference. See `references/platform-registry.md` for details.
-
-See `references/platform-registry.md` for community directories and tools.
-
-#### 4d. Local Registration (Optional)
-
-Source of truth is `<skill_root>/<skill-name>/`. Registration is a convenience layer, not part of the public artifact.
-
-**Do not ask the user to choose a registration mode.** Detect roots automatically, include in preflight, act after confirmation.
-
-See `references/platform-registry.md` for the platform matrix and policy.
-
-##### Decision Logic
-
-```
-1. Scan for existing skill roots (strong signals only)
-   Strong: ~/.claude/skills/, ~/.agents/skills/, ~/.copilot/skills/,
-           ~/.cursor/skills/, ~/.codeium/windsurf/skills/
-   Strong: <project>/.claude/skills/, <project>/.agents/skills/,
-           <project>/.github/skills/, <project>/.cursor/skills/,
-           <project>/.windsurf/skills/
-   Weak (ignore): installed CLI without skill root, generic config dirs,
-                  bare parent dirs like <project>/.github/
-
-2. Roots found → link all detected roots after confirmation
-   No roots  → skip, tell user the repo is ready
-
-3. User explicitly names undetected platform → create root + link after confirmation
-```
-
-Never link one vendor root to another. Every consumer root points to `<skill_root>/<skill-name>/`.
-
-```bash
-# Link into existing root
-ln -sfn <skill_root>/<skill-name> ~/.claude/skills/<skill-name>
-
-# User-requested new platform
-mkdir -p ~/.agents/skills
-ln -sfn <skill_root>/<skill-name> ~/.agents/skills/<skill-name>
-```
-
-##### Output
-
-```text
-Linked:
-✓ ~/.claude/skills/<name> → <skill_root>/<name>/
-
-No new platform directories created.
-```
 
 ## References
 

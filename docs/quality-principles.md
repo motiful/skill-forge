@@ -2,7 +2,7 @@
 
 The single source of truth for all skill-forge decisions.
 
-**Audience**: AI agents maintaining skill-forge. Loaded during maintenance and self-review, NOT during runtime execution (Steps 0-4). This document guides what features to add, what PRs to accept, and what direction to take.
+**Audience**: AI agents maintaining skill-forge. Loaded during maintenance and self-review, NOT during runtime execution (Steps 0-3). This document guides what features to add, what PRs to accept, and what direction to take.
 
 ## TOC
 

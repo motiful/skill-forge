@@ -14,7 +14,7 @@ Trigger: "update skill-forge", "refresh platform info", or during self-review of
 6. Treat Gemini CLI as adjacent tooling unless its official docs add Agent Skills directory support; today it uses extensions / commands, not the same registry model
 7. Update paths + "Last verified" date in platform-registry.md
 8. Keep platform facts separate from forge behavior: registry facts may change without changing the default registration policy
-9. If path changes affect the Detection logic, README install examples, or the Local Registration section in Step 4 of SKILL.md, update those too
+9. If path changes affect the Detection logic, README install examples, or the Fix Phase local registration in Step 3 of SKILL.md, update those too
 10. If README writing guidance changes, update both `references/templates.md` and `references/readme-quality.md`
 11. Add a changelog entry below (keep max 5 entries, trim oldest)
 
@@ -66,7 +66,7 @@ Beyond scheduled platform registry checks, these events should trigger a mainten
 | Event | What to check |
 |-------|--------------|
 | Agent Skills standard changes | SKILL.md frontmatter fields, `references/skill-format.md` |
-| New platform adopts Agent Skills | `references/platform-registry.md`, README install examples, SKILL.md Step 4 |
+| New platform adopts Agent Skills | `references/platform-registry.md`, README install examples, SKILL.md Step 3 Fix Phase |
 | `npx skills add` breaking change | README install commands, Quick Start |
 | skill-forge's own SKILL.md changes | README alignment, "What's Inside" tree, version badge |
 | New reference file added | SKILL.md References section, README "What's Inside" |
@@ -74,8 +74,8 @@ Beyond scheduled platform registry checks, these events should trigger a mainten
 
 ## Changelog (max 5 entries)
 
-- 2026-03-17: **v5.0 — Two modes, one action.** Replaced 5 engagement scenarios (Quick Review, Full Pipeline, Multi-Skill Triage, Full Create, Graduation) with 2 modes (Review, Create) and 1 independent action (Publish). Multi-skill triage and graduation folded into Review as sub-behaviors. Community Readiness checks merged into Core Validation (always run). Default behavior changed from "scope is user-defined" to "run to local-ready, user can stop". Publish is never auto-triggered.
-- 2026-03-16: **v4.0 — Prescription-driven practice.** Fixed 6 internal contradictions in quality-principles.md. Dependencies must install (no graceful skip). setup.sh is the standard. Three-layer separation: Installation / Onboarding / Configuration. Replaced `precondition-checks.md` with `installation.md` + `onboarding.md`. Removed `state-management.md` (absorbed into skill-configuration.md). Added self-review as dependency.
+- 2026-03-17: **v6.0 — Kill Publish as standalone path.** Removed Publish mode entirely. Redistributed Step 4 (4a–4d, 150 lines) into Step 2 (Repo Artifacts), Step 3 (Fix Phase + local registration), and a new top-level "Push to Remote" section (~30 lines). Added explicit Local Ready Definition. Step 3 now invokes readme-craft for README audit (not just manual reference). Push is a single network action after local ready, not a pipeline.
+- 2026-03-17: **v5.0 — Two modes, one action.** Replaced 5 engagement scenarios with 2 modes (Review, Create) and 1 independent action (Publish). Multi-skill triage and graduation folded into Review. Community Readiness merged into Core Validation. Default: run to local-ready.
+- 2026-03-16: **v4.0 — Prescription-driven practice.** Fixed 6 internal contradictions in quality-principles.md. Dependencies must install (no graceful skip). setup.sh is the standard. Three-layer separation: Installation / Onboarding / Configuration.
 - 2026-03-16: **v3.1 — Scenario-based engagement.** Restructured SKILL.md from linear pipeline to 5 engagement scenarios with 7 engagement principles.
 - 2026-03-16: **v3.0 — Principle-driven simplification.** Added `references/quality-principles.md` as the decision compass. Removed Capability Detection table, JIT dependency pattern, Enhancement Report, and Kit publishing model.
-- 2026-03-15: Added JIT dependency pattern (subsequently removed in v3.0).

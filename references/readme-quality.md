@@ -2,7 +2,7 @@
 
 For layout strategy (3-tier hierarchy), badge selection, tone/voice, section overflow, and example provenance rules, use readme-craft (`npx skills add motiful/readme-craft`). This file covers skill-specific content requirements that readme-craft does not address.
 
-Use this file during Step 4b when writing README prose, and during Step 3 when validating community readiness.
+Use this file during Step 2 (Create) when writing README prose, during Step 3 (Validate) when checking community readiness, and during the fix phase when creating or updating README for Review mode.
 
 ## Core Rules
 
