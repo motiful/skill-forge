@@ -191,13 +191,8 @@ Installed automatically by `scripts/setup.sh` on first run:
 | Dependency | Purpose |
 |------------|---------|
 | [`motiful/readme-craft`](https://github.com/motiful/readme-craft) | 3-tier layout, badge selection, dark/light logo for README generation |
+| [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Rule-skill methodology: three-layer model, format, in-repo patterns |
 | [`motiful/self-review`](https://github.com/motiful/self-review) | 4-pillar, 6-dimension alignment audit for skill quality validation |
-
-### Related Skills
-
-| Skill | Relationship |
-|-------|-------------|
-| [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Methodology for the Rule-Skill Split pattern. Forge references its three-layer model in `references/rule-skill-pattern.md` but does not invoke it at runtime |
 
 <details>
 <summary>Positioning</summary>
@@ -215,8 +210,11 @@ It does **not** claim to prove that a generated skill's domain outputs are objec
 
 ```
 SKILL.md              — Full creation + publishing pipeline
+.claude/skills/
+└── maintenance-rules/
+    └── SKILL.md             — In-repo maintenance rules (not independently published)
 scripts/
-└── setup.sh                 — Dependency installation (readme-craft, self-review)
+└── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
 references/
 ├── installation.md          — setup.sh standard: dependency detection and installation
 ├── skill-invocation.md      — Runtime invocation reliability for skill-to-skill calls
@@ -224,12 +222,12 @@ references/
 ├── skill-configuration.md   — User preferences, config location, stateless principle
 ├── skill-format.md          — How to write a valid SKILL.md
 ├── skill-composition.md     — Composition philosophy and context budget
-├── rule-skill-pattern.md    — Detection-driven: MUST/NEVER constraints as paired skill
+├── rule-skill-pattern.md    — Forge integration: detection, auto-creation, packaging of rule-skills
 ├── publishing-strategy.md   — Skill or Collection decisions
 ├── platform-registry.md     — Where each platform looks for skills
 ├── readme-quality.md        — README writing and claim discipline
 ├── script-quality.md        — Script file structure guidelines
-├── maintenance-guide.md     — MAINTENANCE.md: when to create, what to include
+├── maintenance-guide.md     — In-repo maintenance-rules: when to create, what to include
 ├── anti-graceful-skip.md    — Default-execute principle, no implicit skip paths
 └── templates.md             — README, LICENSE, .gitignore skeletons
 ```
@@ -251,7 +249,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-6.0-blue.svg
+[version-shield]: https://img.shields.io/badge/version-6.1-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

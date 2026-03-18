@@ -55,6 +55,7 @@ install_skill() {
 }
 
 install_skill "readme-craft" "motiful/readme-craft" || errors=$((errors + 1))
+install_skill "rules-as-skills" "motiful/rules-as-skills" || errors=$((errors + 1))
 install_skill "self-review" "motiful/self-review" || errors=$((errors + 1))
 
 echo ""

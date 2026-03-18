@@ -1,97 +1,49 @@
-# Rule-Skill Pattern
+# Rule-Skill Pattern — Forge Integration
 
-## What It Is
+How skill-forge detects, creates, and packages rule-skills.
 
-Rule-Skills are an advanced skill type that gives users the power to customize skill behavior with their own rules. When a skill has user-customizable constraints (MUST/NEVER rules, domain boundaries), those constraints are separated into a **paired rule-skill**. This enables:
-
-- **User customization** — users define their own rules without modifying the capability skill
-- **Dynamic loading** — the rule-skill's description is always visible in the skill listing, even when the capability skill isn't loaded
-- **Independent evolution** — rules can be updated without touching the capability skill
-
-The core advantage over native rule files: **always aware, pay on use**. Native rules are always-loaded (full context cost). Rule-Skills keep a summary in the description (~100 tokens, always visible) while loading full rules on-demand.
+For the complete rule-skill methodology (three-layer model, anatomy, decision tree, platform adaptation), see [rules-as-skills](https://github.com/motiful/rules-as-skills).
 
 ## Detection
 
-The skill has constraints worth separating if:
+skill-forge detects constraints worth separating when:
 - User explicitly states MUST/NEVER rules
-- Skill description or content contains constraint patterns (must, never, always, forbidden, required)
-- The skill imposes domain-specific boundaries ("no direct DB access", "must use parameterized queries")
-- Behavior limits exist ("max N tabs", "must do X before Y")
+- Skill content contains 3+ constraint patterns (must, never, always, forbidden, required)
+- The skill imposes domain-specific boundaries
+- Behavior limits exist ("max N", "must do X before Y")
 
-## When to Create a Rule-Skill vs Native Rules
+## When forge creates a rule-skill
 
-```
-Is the constraint...
+Detection-driven, not user-chosen:
 
-1. Universal (applies in ALL contexts, not domain-specific)?
-   YES -> Short enough for a rule file (<10 lines)?
-          YES -> Native rule (always-loaded, cheap)
-          NO  -> Rule-skill (dynamic loading saves context)
-                 + thin rule file as hard fallback
-   NO  -> Continue
+| Detected | Forge action |
+|----------|-------------|
+| 3+ MUST/NEVER constraints that users may want to customize | Auto-create paired `<name>-rules` skill |
+| Constraints need per-project customization | Auto-create |
+| No constraints detected | Nothing created |
 
-2. Domain-specific (only relevant in certain contexts)?
-   YES -> Complex enough to justify a full SKILL.md (>3 statements)?
-          YES -> Rule-skill (dynamic loading, portable, publishable)
-          NO  -> Native rule (simpler infrastructure)
-   NO  -> Continue
+The user is not asked "do you want a rule-skill?" — forge detects and acts.
 
-3. Does it need cross-platform portability?
-   YES -> Rule-skill (Skills are the most portable mechanism)
-   NO  -> Native rule is fine
+Before creating, load the methodology:
 
-4. Does it have a capability counterpart?
-   YES -> Rule-skill, paired with capability skill
-   NO  -> Consider if standalone rule-skill or native rule is simpler
-```
-
-### When to Use Both (Belt + Suspenders)
-
-Use a rule-skill AND a native rule file when the constraint is **critical** — violation causes data loss, security breach, or irreversible damage. Deploy:
-1. Full rule-skill for dynamic loading, portability, detailed context
-2. Thin rule file (platform-native) that says: "See [skill-name] for full constraints. Summary: [1-2 line MUST/NEVER]."
-
-### When to Use Neither
-
-If the constraint is already enforced by **code/tooling** (mechanical enforcement), a rule-skill is redundant documentation.
-
-### Quick Reference
-
-| Scenario | Mechanism | Example |
-|----------|-----------|---------|
-| Short, universal constraint | Native rule | "Never commit .env files" |
-| Domain-specific, complex constraint | Rule-skill | browser-rules (10+ MUST/NEVER) |
-| Critical + must not miss | Rule-skill + rule file | memory-rules + thin fallback |
-| Already code-enforced | Neither | Tab limit daemon |
-| Needs cross-platform sharing | Rule-skill | Publish to npm/GitHub |
-| Has capability counterpart | Rule-skill, paired | browser-hygiene + browser-rules |
-
-## Creating a Rule-Skill
-
-1. **Name**: `<skill-name>-rules` (e.g., `database-rules` for `database-access`)
-2. **Move** all MUST/NEVER statements into the rule-skill
-3. **Reference**: capability skill declares `<name>-rules` as a dependency in Step 0 and `scripts/setup.sh`. The rule-skill is installed automatically
-4. **Methodology**: follows the [rules-as-skills](https://github.com/motiful/rules-as-skills) three-layer model
+`Skill("rules-as-skills")` — owns rule-skill methodology (three-layer model, anatomy, description format).
+skill-forge owns detection and packaging. Both apply.
+Do not create a rule-skill without consulting rules-as-skills methodology.
 
 ## Packaging
 
 In the generated capability skill:
-- **SKILL.md Step 0**: declare `<name>-rules` as a dependency, installed by `scripts/setup.sh`
-- **README "Dependencies" section**: list `<name>-rules` with `npx skills add <org>/<name>-rules`
+- **SKILL.md Step 0**: declare `<name>-rules` as dependency, installed by `scripts/setup.sh`
+- **README "Dependencies"**: list `<name>-rules` with `npx skills add <org>/<name>-rules`
 
 In the generated rule-skill:
 - Standalone README with own install instructions
 - Self-contained SKILL.md with all constraint rules
 - No dependency on forge or rules-as-skills to function
 
-## When forge creates a rule-skill
+## Attribution
 
-Rule-Skill creation is **detection-driven**, not user-chosen:
+Generated rule-skills (published) should include in README:
 
-| Detected | Forge action |
-|----------|-------------|
-| Skill content has 3+ MUST/NEVER constraints | Auto-create paired `<name>-rules` skill |
-| Constraints need per-project customization | Auto-create |
-| No constraints detected | Nothing created — not "skipped", just not needed |
-
-The user is not asked "do you want a rule-skill?" — forge detects and acts.
+> ### Further Reading
+> This rule-skill follows the [rules-as-skills](https://github.com/motiful/rules-as-skills) methodology.

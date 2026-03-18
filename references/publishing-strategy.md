@@ -87,10 +87,38 @@ npx skills add <org>/<collection>                   # interactive picker
 - `vercel-labs/agent-skills` — 5 skills for Vercel + React
 - `anthropics/skills` — 17 skills for Claude API
 
+## In-Repo (Not Independently Published)
+
+Skills that ship with a project repo. Distributed via clone/fork, not `npx skills add`.
+
+**Structure:**
+```
+project-repo/
+├── SKILL.md                              ← main skill (published)
+├── .claude/skills/<name>/
+│   └── SKILL.md                          ← in-repo skill (source of truth)
+├── .agents/skills/<name>                  → relative symlink
+└── .gitignore                            ← .claude/* + !.claude/skills/
+```
+
+**Best for:**
+- Maintenance constraints for the repo itself
+- Project-specific coding standards or security rules
+- Constraints that don't generalize to other projects
+- Agent project internal skills that are crucial to project function
+
+**Important**: `.claude/skills/` as source of truth. `.agents/skills/` as relative symlink for Codex/Windsurf coverage.
+
+**Graduation**: In-repo skill that proves generally useful can be extracted to a standalone repo.
+
 ## Decision Framework
 
 ```
 How many skills are you publishing?
+
+0. Is this skill only for THIS repo's maintainers/developers?
+   → In-repo (in .claude/skills/)
+   → Done
 
 1. Just one skill?
    → Skill (one repo, default)

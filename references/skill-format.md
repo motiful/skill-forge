@@ -141,7 +141,7 @@ skill-name/
 ├── references/           # optional, domain knowledge loaded on demand
 ├── assets/               # optional, templates and static resources consumed as material
 ├── scripts/              # setup.sh required if skill has dependencies; other executables optional
-├── MAINTENANCE.md        # optional, maintenance playbook for skill maintainers
+├── .claude/skills/       # optional, in-repo skills (e.g., maintenance-rules)
 ├── README.md             # required for GitHub
 ├── LICENSE               # required for GitHub (default: MIT)
 └── .gitignore
@@ -149,7 +149,7 @@ skill-name/
 
 - SKILL.md at repo root — `npx skills add` discovers root SKILL.md first
 - References: one level deep from SKILL.md. Add a TOC at 100+ lines
-- MAINTENANCE.md: update triggers, verification steps, changelog. Not loaded at runtime — serves maintainers, not the executing agent. See `maintenance-guide.md` for when to create and what to include
+- `.claude/skills/`: in-repo skills loaded via Agent Skills mechanism. See `maintenance-guide.md` for maintenance-rules, `publishing-strategy.md` for the in-repo publishing model
 - Delete empty directories (don't create scripts/, references/, or assets/ if unused)
 
 ### Directory Taxonomy
@@ -162,7 +162,7 @@ skill-name/
 
 **`.github/`** — Repo infrastructure serving GitHub presentation: logo, screenshots, badge images, workflow files. Not skill runtime content.
 
-**Repo infrastructure** — Files serving GitHub/publishing, not skill runtime: README.md, LICENSE, CONTRIBUTING.md, .gitignore, MAINTENANCE.md, `.github/`, docs/, examples/, package.json, requirements.txt.
+**Repo infrastructure** — Files serving GitHub/publishing, not skill runtime: README.md, LICENSE, CONTRIBUTING.md, .gitignore, `.github/`, docs/, examples/, package.json, requirements.txt.
 
 The Agent Skills open standard names three skill directories: `references/`, `assets/`, `scripts/`. Additional directories (like `templates/`, `docs/`, `examples/`) are tolerated by the spec but non-standard. During validation (Step 3), flag non-standard directory names and suggest the canonical mapping: templates → assets, docs/examples → repo infrastructure.
 

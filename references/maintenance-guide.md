@@ -1,85 +1,78 @@
 # Maintenance Guide
 
-How to write MAINTENANCE.md for skill repositories. This reference tells skill-forge when and how to generate one.
+How to generate a maintenance-rules skill for complex skill repositories. This reference tells skill-forge when and how to create one.
 
-## What MAINTENANCE.md Is
+## What maintenance-rules Is
 
-A maintenance playbook for skill maintainers (human or AI). Answers: "How do I keep this skill working over time?"
+An in-repo rule-skill containing maintenance constraints and procedures. Lives in `.claude/skills/maintenance-rules/` within the skill repo.
 
-- Not loaded at runtime — serves maintainers, not the executing agent
-- Not user-facing — users read README, not MAINTENANCE.md
-- Not a duplicate of SKILL.md — says HOW to maintain, not WHAT the skill does
+Unlike a dead MAINTENANCE.md file, it's discoverable by AI agents through the Agent Skills loading mechanism: description is always visible, body loads on trigger.
 
 ## When to Create
 
-Generate MAINTENANCE.md when the skill meets **any** of these:
+Generate when the skill meets **any** of these:
 
-| Condition | Why it needs maintenance |
-|-----------|------------------------|
+| Condition | Why |
+|-----------|-----|
 | 3+ external dependencies (tools, skills, APIs) | Versions change, APIs deprecate |
-| References platform-specific paths | Platforms update their skill directories |
-| Has `scripts/` directory | Scripts need update instructions and permission docs |
-| SKILL.md body > 300 lines | Complexity warrants a consistency checklist |
-| Reads external data sources or URLs | Data formats and endpoints change |
+| SKILL.md content references platform-specific paths | Platforms update directories |
+| Has `scripts/` directory | Scripts need update instructions |
+| SKILL.md body > 300 lines | Complexity warrants consistency checklist |
+| Reads external data sources or URLs | Endpoints change |
 
 **Skip** for simple skills: single-purpose, no dependencies, < 200 line SKILL.md.
 
-## Required Sections
+Note: "platform-specific paths" means the SKILL.md CONTENT references paths like `~/.claude/skills/`, NOT that the skill is installed in platform directories. A simple `code-review` skill installed via symlink does not trigger this condition.
 
-### 1. Purpose Statement
+## Generated Skill Structure
 
-Who this file is for and when to read it. Two lines max.
-
-```markdown
-This file is for the agent maintaining <skill-name> — not for users or the runtime agent.
-Trigger: "update <skill-name>", "refresh <skill-name>", or during self-review.
+```yaml
+---
+name: maintenance-rules
+description: 'Maintenance rules for <skill-name>. MUST [constraint 1]. MUST [constraint 2]. MUST [constraint 3]. Triggers on "update <skill-name>", "maintain <skill-name>".'
+metadata:
+  author: <author>
+---
 ```
+
+Directory placement:
+```
+<skill-repo>/
+├── .claude/skills/maintenance-rules/
+│   └── SKILL.md              ← source of truth
+├── .agents/skills/maintenance-rules  → relative symlink
+└── .gitignore                ← .claude/* + !.claude/skills/
+```
+
+## Required Content
+
+### 1. Constraints (top of body)
+
+MUST/NEVER statements — the core rules for maintainers.
 
 ### 2. Update Triggers
 
-Table of events that should prompt a maintenance pass. Map each event to specific files to check.
-
-```markdown
-| Event | What to check |
-|-------|--------------|
-| <dependency> releases new version | <affected files> |
-| <platform> changes skill paths | <affected files> |
-| SKILL.md content changes | README alignment, version badge |
-```
+Table: event → what files to check.
 
 ### 3. Verification Steps
 
-How to confirm the skill still works after changes. Include cross-file consistency checks.
-
-```markdown
-1. Run skill-forge Review on this repo
-2. Every README claim must be backed by a SKILL.md capability
-3. Every reference file listed in SKILL.md must exist and be current
-```
+How to confirm the skill still works after changes.
 
 ### 4. Changelog
 
-Recent changes. Keep max 5 entries, trim oldest.
+Recent changes. Max 5 entries, trim oldest.
 
-```markdown
-## Changelog (max 5 entries)
-- YYYY-MM-DD: **vX.Y — Summary.** Details.
-```
+## Optional Content
 
-## Recommended Sections
-
-Add these when applicable:
-
-| Section | When to include |
-|---------|----------------|
-| **Dependency update instructions** | Skill has 3+ dependencies with their own release cycles |
-| **Contribution criteria** | Skill has collaborators or accepts PRs |
-| **Self-governance** | Skill has self-referential capabilities (e.g., skill-forge validates itself) |
-| **Consistency checks** | Multiple files must stay aligned (SKILL.md ↔ README ↔ references) |
+| Section | When |
+|---------|------|
+| Dependency update instructions | 3+ dependencies with own release cycles |
+| Contribution criteria | Skill has collaborators |
+| Self-governance | Skill has self-referential capabilities |
+| Consistency checks | Multiple files must stay aligned |
 
 ## Anti-Patterns
 
 - Don't duplicate SKILL.md content — maintain ≠ describe
-- Don't include runtime instructions — MAINTENANCE.md is never loaded during execution
-- Don't put user-facing information here — that belongs in README
-- Don't make it a changelog-only file — the changelog is one section, not the whole file
+- Don't include runtime instructions — maintenance-rules is for maintainers, not users
+- Don't make it a changelog-only file — constraints come first

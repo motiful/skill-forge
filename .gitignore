@@ -6,4 +6,7 @@ dist/
 .env*
 .idea/
 .vscode/
-.claude/
+.claude/*
+!.claude/skills/
+.agents/*
+!.agents/skills/
