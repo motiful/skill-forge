@@ -116,7 +116,7 @@ Rules files come in two kinds. **Do not treat them the same.**
 **If one rule contains many unrelated trigger conditions:** split into multiple rule-skills — one coherent trigger cluster per skill. A skill's description is the trigger index; it cannot serve 10 unrelated use cases at once.
 
 **Conversion steps:**
-1. `Skill("rules-as-skills")` — owns the three-layer model and description format. Load before writing any rule-skill.
+1. `Skill("rules-as-skills")` — owns the three-layer model and description format. Load before writing any rule-skill. If the skill does not load or returns no usable methodology, stop conversion and tell the user: "rules-as-skills is required for this step — run `npx skills add motiful/rules-as-skills -g` to install it."
 2. Identify all trigger conditions in the rule file
 3. Group related conditions into one skill; split unrelated ones into separate skills
 4. Validate each resulting rule-skill through the standard Review flow (Step 3 → Fix → Local Ready)

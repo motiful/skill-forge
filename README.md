@@ -229,7 +229,8 @@ references/
 ├── script-quality.md        — Script file structure guidelines
 ├── maintenance-guide.md     — In-repo maintenance-rules: when to create, what to include
 ├── anti-graceful-skip.md    — Default-execute principle, no implicit skip paths
-└── templates.md             — README, LICENSE, .gitignore skeletons
+├── templates.md             — README, LICENSE, .gitignore skeletons
+└── project-audit.md         — Discovery, Classification, Plan File, Rules Conversion for project-level Review
 ```
 
 </details>
@@ -249,7 +250,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-6.1-blue.svg
+[version-shield]: https://img.shields.io/badge/version-6.2-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

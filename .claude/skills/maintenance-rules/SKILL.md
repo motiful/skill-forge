@@ -87,6 +87,7 @@ Protocol (run after significant changes):
 
 ## Changelog (max 5 entries)
 
+- 2026-03-18: **v6.2 — Project Audit mode.** Review mode unified: Discovery → Classification → Plan File → per-item execution. Always-on vs. trigger-based rules distinction. Proactive graduation. skill_workspace rename. New references/project-audit.md.
 - 2026-03-18: **v6.1 — Maintenance as in-repo rule-skill.** Converted MAINTENANCE.md to `.claude/skills/maintenance-rules/`. Added in-repo skills concept to publishing-strategy. Restored rules-as-skills as dependency. Slimmed rule-skill-pattern.md to forge-specific logic.
 - 2026-03-17: **v6.0 — Kill Publish as standalone path.** Removed Publish mode. Step 3 invokes readme-craft. Push is single action after local ready.
 - 2026-03-17: **v5.0 — Two modes, one action.** Review + Create + Push.

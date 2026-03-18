@@ -4,7 +4,7 @@ description: 'Create, validate, scan for security issues, and review skills as p
 license: MIT
 metadata:
   author: motiful
-  version: "6.1"
+  version: "6.2"
 ---
 
 # Skill Forge
@@ -47,7 +47,7 @@ Every Review run starts with Discovery — even for a single skill. The target c
 
 **Flow**: Step 0 → Step 1 → Step 2 → Step 3 (Validate) → Fix → Local Ready
 
-**Plan file**: created at start (`/tmp/skill-forge-<name>.md`), tracks progress through creation steps. Deleted on completion.
+**Plan file**: created at start (`/tmp/skill-forge-<name>.md`), tracks progress through creation steps. Deleted on completion. See `references/project-audit.md` — Plan File section for format.
 
 **Checkpoints**: confirm skill scope, confirm content
 

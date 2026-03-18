@@ -89,15 +89,16 @@ Each pattern is:
 
 ## Skill-Forge's Identity
 
-**skill-forge = skill engineering methodology + publishing pipeline.**
+**skill-forge = skill engineering methodology + publishing pipeline + project skills architect.**
 
-The methodology defines how to build skills that score high on the 6 quality dimensions. The pipeline automates validation and publishing. Both are valuable independently — a user can reference the methodology without ever running the pipeline, and vice versa.
+The methodology defines how to build skills that score high on the 6 quality dimensions. The pipeline automates validation and publishing. The project audit capability organizes messy real-world projects into clean, maintainable skill structures. All three are valuable independently.
 
 | Layer | What it does | When it helps |
 |-------|-------------|---------------|
 | **Methodology** | Engineering patterns, quality standards, format spec | While writing or improving skills |
 | **Validation** | Format, security, structure, description coverage, claim consistency | Before publish, or as standalone audit |
 | **Publishing** | Git init, GitHub push, platform registration, README generation | When ready to share |
+| **Project Audit** | Discover, classify, and reorganize all agent-related files in a project or monorepo | When facing a messy existing project with mixed skills, rules, and instructions |
 
 ### What skill-forge is
 
@@ -105,6 +106,7 @@ The methodology defines how to build skills that score high on the 6 quality dim
 - A validation suite for format, security, structure, and claims
 - A publishing pipeline from local files to installable GitHub repo
 - A reference library of engineering patterns for skill authors
+- A project-level skills architect: discovery, classification, graduation, reorganization
 - Platform-agnostic — works wherever Agent Skills work
 
 ### What skill-forge is NOT
@@ -160,6 +162,9 @@ This keeps skill-forge:
 | Description coverage checking | Model-specific optimization |
 | Publishing automation (git → GitHub → register) | Session or state management infrastructure |
 | Cross-platform compatibility guidance | Commercial distribution or marketplace |
+| Project-level discovery and classification of agent files | Authoring or generating skill content |
+| Proactive graduation of personal tools to standalone repos | Behavioral testing of skill effectiveness |
+| Rules → rule-skills conversion (trigger-based only) | Managing always-on rules content |
 
 ## Decision Test
 
