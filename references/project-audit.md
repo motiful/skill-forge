@@ -41,7 +41,7 @@ Apply to every item in the discovery inventory. Use the Decision Framework from 
 
 | Type | Signals | Action |
 |------|---------|--------|
-| **In-repo maintenance** | References this repo's specific files, paths, or conventions; only useful to this repo's developers/maintainers | Stay in-repo — validate in-place |
+| **In-repo maintenance** | References this repo's specific files, paths, or conventions; only useful to this repo's developers/maintainers | Stay in-repo — validate in-place. Cross-vendor symlinks (e.g. `.agents/skills/`) must use **relative paths** (`../../.claude/skills/X`), not absolute. Absolute paths break when other users clone the repo. |
 | **Product skill** | Designed to be distributed with the product; end users install it to use the product better | Stay in-repo — validate + check distribution structure + reorganize if needed |
 | **Personal tool** | Generic enough to work outside this project; developer uses or would use it across multiple projects | Proactive graduation → `<skill_workspace>/<name>/`, full Review, register globally |
 | **External (imported)** | Installed via `npx skills add`, content unmodified | Inventory only — do not touch |

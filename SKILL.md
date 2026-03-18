@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
+description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", or points to a project directory with mixed skills and rules. Two modes: Review (existing skill or project → discover → classify → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
 license: MIT
 metadata:
   author: motiful
@@ -111,7 +111,7 @@ See `references/installation.md` for the setup.sh standard.
 If `~/.config/skill-forge/config.md` does not exist, run onboarding:
 
 1. **Detect** — `github_org` via `gh api user -q .login`, platform from current agent
-2. **Ask workspace** — `skill_workspace` is the only value that differs per person. Ask explicitly: *"Where should new skills live? [~/skills/]"* — let the user type a path or press Enter for the default. Do not bundle this into a generic confirm.
+2. **Ask workspace** — `skill_workspace` is the only value that differs per person. Output this question and stop — wait for the user's response before proceeding: *"Where should new skills live? [~/skills/]"* Let the user type a path or press Enter for the default. Do not bundle this into a generic confirm and do not assume the default.
 3. **Summarize** — show the confirmed workspace plus detected defaults:
    ```markdown
    # Skill Forge Config
