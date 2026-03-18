@@ -339,6 +339,7 @@ After validation report is presented and user approves fixes:
    Detect platform registration paths (see `references/platform-registry.md` for the full path matrix and policy).
    Paths found → symlink all. No paths → skip. User names undetected platform → create + link.
    Never link one vendor path to another. Every consumer path points to the skill's source directory.
+   **Exception — in-repo skills**: for skills committed to a repository (e.g., `.claude/skills/maintenance-rules/`), cross-vendor symlinks like `.agents/skills/X → ../../.claude/skills/X` are correct. These must be relative paths so they work for anyone who clones the repo. The `.claude/skills/` path IS the source directory in this context, not a vendor proxy.
 
 7. **Git init** (if not already a git repo) + initial commit
 8. Final quality review:

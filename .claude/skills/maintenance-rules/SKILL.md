@@ -92,4 +92,3 @@ Protocol (run after significant changes):
 - 2026-03-17: **v6.0 — Kill Publish as standalone path.** Removed Publish mode. Step 3 invokes readme-craft. Push is single action after local ready.
 - 2026-03-17: **v5.0 — Two modes, one action.** Review + Create + Push.
 - 2026-03-16: **v4.0 — Prescription-driven practice.** Dependencies must install. setup.sh standard.
-- 2026-03-16: **v3.1 — Scenario-based engagement.** 5 engagement scenarios.

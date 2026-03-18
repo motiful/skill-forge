@@ -13,7 +13,7 @@
 - [Community Tools](#community-tools)
 - [Community Directories](#community-directories)
 
-Last verified: 2026-03-17
+Last verified: 2026-03-18
 
 This file is read by the Local Registration section at publish time. User-level skill directories are **not** standardized across agents. Do not describe `~/.agents/skills/` as a universal home-directory path, and do not treat platform directory management as Skill Forge's default responsibility.
 
@@ -29,6 +29,8 @@ Distinguish between:
 There is no single `~` directory that officially covers Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot together.
 
 Every consumer root should link back to the source of truth. Do **not** link one vendor root to another vendor root.
+
+**Exception — in-repo skills**: skills committed inside a repository (e.g., `.claude/skills/maintenance-rules/`) use relative cross-vendor symlinks (`.agents/skills/X → ../../.claude/skills/X`). This is correct because (1) absolute paths break for other users who clone the repo, and (2) the `.claude/skills/` path is the canonical source directory for in-repo skills, not a vendor proxy.
 
 Only actual skill roots count as registration evidence. Parent config directories alone are not enough.
 
