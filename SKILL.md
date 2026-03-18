@@ -29,22 +29,15 @@ Two modes. Push is a single action after either mode reaches local ready.
 
 ### Review (skill already exists)
 
-**Signal**: "review", "check", "audit", "check my skill", "audit this skill"
+**Signal**: "review", "check", "audit", "check my skill", "audit this skill", "audit all my skills"
 
-**Flow**: Step 0 → Locate → Step 3 (Validate) → Report → Fix → Local Ready
+**Flow**: Step 0 → Discovery → Classification → Plan File → [per item: Step 3 → Fix → Local Ready] → Close Plan
 
-The skill can be local (path) or remote (GitHub URL — clone to temp directory). Review does not require Step 1 or Step 2 (the skill already exists). Step 0 is required — Fix Phase depends on tools installed by setup.sh (readme-craft for README quality, self-review for holistic quality judgment).
+Every Review run starts with Discovery — even for a single skill. The target can be a single skill (local path or GitHub URL), a project directory, or a full monorepo. Discovery determines what the plan contains. See `references/project-audit.md` for Discovery, Classification, Plan File format, Rules Conversion, and Execution Order.
 
-**Multi-skill**: if multiple skills are detected (project scan or user request like "audit all my skills"), inventory all SKILL.md files, triage by severity (security > structure > quality), present a plan, then Review each skill one at a time.
+**Plan file**: always created at `/tmp/skill-forge-<name>.md`. If a plan file already exists at that path, resume from the first incomplete step — do not restart Discovery.
 
-**Graduation**: if the skill is in-repo (e.g. `<project>/.claude/skills/bar/`) and the user wants to publish it independently, prompt to copy it to `<skill_workspace>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
-
-```
-Source: <project>/.claude/skills/bar/    (or platform equivalent)
-Target: <skill_workspace>/bar/
-```
-
-Copy content (`cp -r <source>/* <skill_workspace>/<name>/`), clean up, validate. Original stays in the project — independent evolution.
+**Graduation**: Classification proactively identifies personal tool skills (useful beyond this project). Forge executes graduation without waiting for the user to ask: copy to `<skill_workspace>/<name>/`, run full Review, register globally. Original stays in the project.
 
 **Severity**: Critical = must fix. Warning = recommend fix (user confirms). Info = report only.
 
@@ -53,6 +46,8 @@ Copy content (`cp -r <source>/* <skill_workspace>/<name>/`), clean up, validate.
 **Signal**: "create a skill", "build a skill for X", "forge a skill"
 
 **Flow**: Step 0 → Step 1 → Step 2 → Step 3 (Validate) → Fix → Local Ready
+
+**Plan file**: created at start (`/tmp/skill-forge-<name>.md`), tracks progress through creation steps. Deleted on completion.
 
 **Checkpoints**: confirm skill scope, confirm content
 
@@ -401,3 +396,4 @@ A single action, not a pipeline. Only available after local ready.
 - `references/script-quality.md` — Script size limits, module split triggers, dependency policy
 - `references/maintenance-guide.md` — In-repo maintenance-rules skill: when to create, required content, template
 - `references/anti-graceful-skip.md` — Default-execute principle, skip conditions, no-downside enhancements, Step 3 audit criteria
+- `references/project-audit.md` — Discovery, Classification, Plan File, Rules Conversion, Execution Order for project-level Review

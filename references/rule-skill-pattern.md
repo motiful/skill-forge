@@ -41,6 +41,12 @@ In the generated rule-skill:
 - Self-contained SKILL.md with all constraint rules
 - No dependency on forge or rules-as-skills to function
 
+## Converting Existing Rules Files to Rule-Skills
+
+This section covers **new skill creation** from detected constraints. For converting existing `.claude/rules/` or `CLAUDE.md` files during project audit, see `references/project-audit.md` — Rules Conversion section.
+
+Key distinction: always-on rules (no `description`, or `alwaysApply: true`) must **not** be converted to skills. Skills are trigger-based; converting always-on rules changes their activation behavior. Project audit handles this classification before any conversion.
+
 ## Attribution
 
 Generated rule-skills (published) should include in README:

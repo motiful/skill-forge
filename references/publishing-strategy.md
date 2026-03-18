@@ -114,6 +114,8 @@ project-repo/
 
 ## Decision Framework
 
+This framework is also used by the Classification step in `references/project-audit.md`. When classifying skills found during a project audit, apply this decision tree to determine whether each skill should stay in-repo, be extracted as a standalone repo, or grouped into a collection.
+
 ```
 How many skills are you publishing?
 
