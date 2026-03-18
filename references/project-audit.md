@@ -9,6 +9,7 @@ Every Review run — single skill or full project — starts with Discovery. The
 - [Discovery](#discovery)
 - [Classification](#classification)
 - [Plan File](#plan-file)
+- [Rules Quality](#rules-quality)
 - [Rules Conversion](#rules-conversion)
 - [Execution Order](#execution-order)
 
@@ -50,8 +51,20 @@ Apply to every item in the discovery inventory. Use the Decision Framework from 
 
 **Product skill distribution:** if a product skill should be distributed to users, determine the right structure:
 - One skill → standalone repo (`npx skills add <org>/<name>`)
-- Multiple always-together skills → collection (`npx skills add <org>/<collection>`)
-- Execute the reorganization — do not just recommend it. Copy files, set up repo structure, run full Review on each extracted skill.
+- Multiple skills that belong together → collection (`npx skills add <org>/<collection>`)
+- Execute the reorganization — do not just recommend it. Copy files, set up repo structure via Fix Phase (git init, README, LICENSE, local registration — no external scaffolding tool needed), run full Review on each extracted skill.
+
+**Collection vs. standalone — detection signals:**
+
+| Signal | Suggests |
+|--------|---------|
+| Skills reference each other as dependencies | Collection |
+| The product workflow breaks if any one skill is missing | Collection |
+| All skills share the same install audience (users always need all of them) | Collection |
+| Each skill delivers value independently; users might want only one | Separate standalone repos |
+| Skills have distinct trigger scenarios with no overlap | Separate standalone repos |
+
+When ambiguous, default to **separate standalone repos** — easier to install selectively, easier to version independently. Collection is the exception, not the default.
 
 ## Plan File
 
@@ -95,6 +108,26 @@ Completed: 0 / 5
 
 Update `- [ ]` to `- [x]` and increment `Completed` after each step. Delete the file when `Completed: N / N`.
 
+## Rules Quality
+
+Before deciding whether to convert a rules file, assess its quality. Poor-quality rules stay poor-quality after conversion — fix the content first.
+
+**Quality signals to check for every rules file:**
+
+| Issue | What it looks like | Fix |
+|-------|-------------------|-----|
+| **Vague constraint** | "write good code", "be careful" | Rewrite with specific, actionable criteria |
+| **Missing scope** | No indication of when the rule applies | Add trigger: file type, task context, or user action |
+| **Negation without alternative** | "don't do X" with no "do Y instead" | Add the positive case |
+| **Multiple unrelated concerns** | One file covering 5 different domains | Split into separate rule files |
+| **Stale reference** | Mentions outdated tools, APIs, or practices | Update or remove |
+| **Redundant with platform defaults** | Re-states what the agent already does | Remove |
+| **Contradicts another rule** | Two rules in the same project conflict | Resolve before continuing |
+
+**Size signal:** a rules file over 100 lines is probably doing too much. Split by domain.
+
+Report quality issues alongside the conversion assessment. Fix quality first, then decide on conversion.
+
 ## Rules Conversion
 
 Rules files come in two kinds. **Do not treat them the same.**
@@ -135,4 +168,4 @@ Within a plan, execute in this priority:
 5. **Rules conversion** — after skills are settled; converts trigger-based rules, keeps always-on rules
 6. **External skills** — inventory report only, no action taken
 
-Within each category: Critical issues before Warnings.
+Within each category: Critical issues before Warnings. Items of the same type are processed in discovery order.
