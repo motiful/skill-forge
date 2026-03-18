@@ -114,10 +114,10 @@ Detecting defaults...
   - License: MIT (default)
 
 Where should new skills live? [~/skills/]
-> ~/motifpool/
+> ~/my-skills/
 
 Config:
-  - skill_workspace: ~/motifpool/
+  - skill_workspace: ~/my-skills/
   - github_org: motiful
   - license: MIT
 
