@@ -38,12 +38,13 @@ The gap is not in authoring — AI agents can already help write skill content. 
 
 ## What Skill Forge Does
 
-Skill Forge is a **skill engineering methodology and publishing pipeline**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
+Skill Forge is a **skill engineering methodology, publishing pipeline, and project skills architect**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
 
 - **Validates structure and discoverability** — checks frontmatter, description coverage, body length, reference integrity, and terminology so agents can find and correctly trigger your skill
 - **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
 - **Checks README claim discipline** — compares README claims against SKILL.md capabilities, flags hardcoded paths, verifies install commands and LICENSE
-- **Two modes, one action** — Review (existing skill → validate → fix → local ready) or Create (new skill → build → validate → local ready). Push is a single action you trigger when ready
+- **Two modes, one action** — Review (existing skill or project → discover → classify → validate → fix → local ready) or Create (new skill → build → validate → local ready). Push is a single action you trigger when ready
+- **Audits entire projects** — point forge at any project directory and it discovers all skills, rules files, and agent instructions; classifies each (in-repo, product skill, personal tool, always-on rule); proactively graduates personal tools to standalone repos; converts trigger-based rules to rule-skills; leaves always-on rules untouched
 - **Pushes to GitHub with explicit confirmation** — confirm remote target, then `gh repo create` → push. Everything else is already done at local ready
 - **Auto-registers across platforms** — detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks them to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
@@ -52,10 +53,18 @@ Skill Forge is a **skill engineering methodology and publishing pipeline**. The 
 <details>
 <summary>Pipeline stages</summary>
 
-0. **Config** — Set up `~/skills/` root, detect your GitHub org and preferences
-1. **Gather** — Auto-detect existing skill content from project and conversation
-2. **Create** — Write SKILL.md + README + LICENSE + .gitignore following the [Agent Skills](https://agentskills.io) standard
-3. **Validate & Fix** — Structure, frontmatter, content quality, repo hygiene, readme-craft audit, local registration → local ready
+**Review mode** (existing skill or project):
+1. **Discovery** — traverse the full project tree; inventory all skills, rules files, and agent instructions
+2. **Classification** — classify each item: in-repo maintenance, product skill, personal tool, external (imported), or rules file
+3. **Plan** — create `/tmp/skill-forge-<name>.md`; one step per item; resumable after context compaction
+4. **Per item: Validate & Fix** — structure, frontmatter, content quality, repo hygiene, readme-craft audit, local registration → local ready
+5. **Rules** — trigger-based rules → rule-skills; always-on rules kept as-is (converting them removes unconditional activation)
+
+**Create mode** (new skill):
+0. **Config** — set up skill workspace, detect your GitHub org and preferences
+1. **Gather** — auto-detect existing skill content from project and conversation
+2. **Create** — write SKILL.md + README + LICENSE + .gitignore following the [Agent Skills](https://agentskills.io) standard
+3. **Validate & Fix** — structure, frontmatter, content quality, repo hygiene, readme-craft audit, local registration → local ready
 
 Push to GitHub is a single action after local ready — confirm target, then `gh repo create` + push.
 
@@ -84,6 +93,7 @@ Push to GitHub is a single action after local ready — confirm target, then `gh
 | Writing a skill's content | No — focus on the domain, not formatting |
 | Ready to validate or publish | **Yes** — "publish this skill" or "forge a skill" |
 | Reviewing an existing repo | **Yes** — "review this skill repo" |
+| Cleaning up a project with mixed skills, rules, and agent instructions | **Yes** — "audit this project" or point forge at the directory |
 
 skill-forge is a post-authoring tool. Load it when you're done writing, not while writing.
 
