@@ -223,6 +223,8 @@ SKILL.md              — Full creation + publishing pipeline
 .claude/skills/
 └── maintenance-rules/
     └── SKILL.md             — In-repo maintenance rules (not independently published)
+docs/
+└── quality-principles.md    — Maintainer governance: decision test, quality dimensions, boundaries
 scripts/
 └── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
 references/
