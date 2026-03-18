@@ -5,6 +5,7 @@
 - [Terminology](#terminology)
 - [Skill (Single Repo)](#skill-single-repo)
 - [Collection (Multi-Skill Repo)](#collection-multi-skill-repo)
+- [In-Repo (Not Independently Published)](#in-repo-not-independently-published)
 - [Decision Framework](#decision-framework)
 - [Directory Standards](#directory-standards)
 

@@ -13,7 +13,7 @@ Constraints and procedures for maintaining the skill-forge repository.
 
 - MUST run Decision Test (7 criteria from `docs/quality-principles.md`) before accepting any change
 - MUST NOT push SKILL.md body over 500 lines
-- MUST keep SKILL.md ↔ README ↔ references 术语一致
+- MUST keep SKILL.md ↔ README ↔ references terminology consistent
 - MUST add References section entry when adding new reference files
 - MUST update "What's Inside" tree in README when references/ changes
 - MUST NOT include content that fails the Content Audience Check (see references/skill-format.md)

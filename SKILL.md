@@ -37,7 +37,7 @@ The skill can be local (path) or remote (GitHub URL — clone to temp directory)
 
 **Multi-skill**: if multiple skills are detected (project scan or user request like "audit all my skills"), inventory all SKILL.md files, triage by severity (security > structure > quality), present a plan, then Review each skill one at a time.
 
-**Graduation**: if the skill is project-local (e.g. `<project>/.claude/skills/bar/`), prompt to move it to `<skill_root>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
+**Graduation**: if the skill is in-repo (e.g. `<project>/.claude/skills/bar/`) and the user wants to publish it independently, prompt to copy it to `<skill_root>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
 
 ```
 Source: <project>/.claude/skills/bar/    (or platform equivalent)
