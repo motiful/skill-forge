@@ -146,7 +146,12 @@ Rules files come in two kinds. **Do not treat them the same.**
 
 **Can convert to a rule-skill.** The rule's `description` → skill's `description`. Full rule content → skill body.
 
-**If one rule contains many unrelated trigger conditions:** split into multiple rule-skills — one coherent trigger cluster per skill. A skill's description is the trigger index; it cannot serve 10 unrelated use cases at once.
+**When to split into multiple rule-skills:**
+- Conditions are unrelated (different domains, different contexts) → always split
+- Conditions are related but too many to fit in a single description (~300 chars) → split by sub-cluster
+- Rule body exceeds 500 lines after grouping → split
+
+A skill's description is the trigger index. If the description needs to list 8 scenarios to cover all conditions, that's 8 separate skills, not one overloaded skill.
 
 **Conversion steps:**
 1. `Skill("rules-as-skills")` — owns the three-layer model and description format. Load before writing any rule-skill. If the skill does not load or returns no usable methodology, stop conversion and tell the user: "rules-as-skills is required for this step — run `npx skills add motiful/rules-as-skills -g` to install it."
