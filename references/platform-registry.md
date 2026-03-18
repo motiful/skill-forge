@@ -24,7 +24,7 @@ Distinguish between:
 - **Native directories** — vendor-owned paths such as `~/.claude/skills/` or `~/.cursor/skills/`
 - **Shared compatibility directories** — paths that more than one vendor officially reads, such as `.claude/skills/` or `.agents/skills/`
 - **Configurable custom locations** — paths the user can point a tool at manually; these are not the same as built-in shared directories
-- **Source of truth** — the actual repo at `<skill_root>/<skill-name>/`
+- **Source of truth** — the actual repo at `<skill_workspace>/<skill-name>/`
 
 There is no single `~` directory that officially covers Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot together.
 

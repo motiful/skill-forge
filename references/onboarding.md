@@ -111,13 +111,17 @@ First use detected (no config at ~/.config/skill-forge/config.md).
 
 Detecting defaults...
   - GitHub org: motiful (from gh api user)
-  - Skill root: ~/skills/ (default)
   - License: MIT (default)
 
-Save these defaults? [Y/n]
-> Y
+Where should new skills live? [~/skills/]
+> ~/motifpool/
 
-Config written to ~/.config/skill-forge/config.md.
+Config:
+  - skill_workspace: ~/motifpool/
+  - github_org: motiful
+  - license: MIT
+
+Saving to ~/.config/skill-forge/config.md...
 ```
 
 ## Cross-References

@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
+description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "check my skill", or wants to triage, graduate, or push a skill. Two modes: Review (existing skill → validate → fix → local ready) and Create (new skill → build → validate → local ready). Push to GitHub is a single action after local ready.'
 license: MIT
 metadata:
   author: motiful
@@ -29,7 +29,7 @@ Two modes. Push is a single action after either mode reaches local ready.
 
 ### Review (skill already exists)
 
-**Signal**: "review", "check", "audit", "forge"
+**Signal**: "review", "check", "audit", "check my skill", "audit this skill"
 
 **Flow**: Step 0 → Locate → Step 3 (Validate) → Report → Fix → Local Ready
 
@@ -37,20 +37,20 @@ The skill can be local (path) or remote (GitHub URL — clone to temp directory)
 
 **Multi-skill**: if multiple skills are detected (project scan or user request like "audit all my skills"), inventory all SKILL.md files, triage by severity (security > structure > quality), present a plan, then Review each skill one at a time.
 
-**Graduation**: if the skill is in-repo (e.g. `<project>/.claude/skills/bar/`) and the user wants to publish it independently, prompt to copy it to `<skill_root>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
+**Graduation**: if the skill is in-repo (e.g. `<project>/.claude/skills/bar/`) and the user wants to publish it independently, prompt to copy it to `<skill_workspace>/<name>/` first. Run graduation assessment (project-specific references, hardcoded paths, project-internal dependencies), clean up, then continue Review.
 
 ```
 Source: <project>/.claude/skills/bar/    (or platform equivalent)
-Target: <skill_root>/bar/
+Target: <skill_workspace>/bar/
 ```
 
-Copy content (`cp -r <source>/* <skill_root>/<name>/`), clean up, validate. Original stays in the project — independent evolution.
+Copy content (`cp -r <source>/* <skill_workspace>/<name>/`), clean up, validate. Original stays in the project — independent evolution.
 
 **Severity**: Critical = must fix. Warning = recommend fix (user confirms). Info = report only.
 
 ### Create (skill does not exist)
 
-**Signal**: "create a skill", "build a skill for X"
+**Signal**: "create a skill", "build a skill for X", "forge a skill"
 
 **Flow**: Step 0 → Step 1 → Step 2 → Step 3 (Validate) → Fix → Local Ready
 
@@ -116,18 +116,18 @@ See `references/installation.md` for the setup.sh standard.
 If `~/.config/skill-forge/config.md` does not exist, run onboarding:
 
 1. **Detect** — `github_org` via `gh api user -q .login`, platform from current agent
-2. **Summarize** — show detected defaults:
+2. **Ask workspace** — `skill_workspace` is the only value that differs per person. Ask explicitly: *"Where should new skills live? [~/skills/]"* — let the user type a path or press Enter for the default. Do not bundle this into a generic confirm.
+3. **Summarize** — show the confirmed workspace plus detected defaults:
    ```markdown
    # Skill Forge Config
    ## Defaults
-   - skill_root: ~/skills/
+   - skill_workspace: <confirmed path>
    - github_org: <detected>
    - license: MIT
    ```
-3. **Confirm once** — ask for approval
 4. **Write** — create `~/.config/skill-forge/config.md`
 
-**`skill_root`** defaults to `~/skills/`. Tell the user: *"Your skills will live in `~/skills/` — each skill gets its own folder and git repo there. You can change this anytime in `~/.config/skill-forge/config.md`."*
+**`skill_workspace`** is where new skill repos are created — each skill gets its own subfolder and git repo there. It is the only onboarding value that needs explicit user input; `github_org` and `license` have reliable defaults.
 
 See `references/onboarding.md` for the onboarding pattern.
 
@@ -164,7 +164,7 @@ Before asking anything, detect what's already available:
 1. **Current project scan** — Look for existing skill content:
    - `.claude/skills/*/SKILL.md` (or platform equivalent)
    - `skill/SKILL.md` in the working directory
-   - If Step 0 found forge config: `<skill_root>/*/SKILL.md` (one level deep only; prefer exact name matches or user-referenced paths)
+   - If Step 0 found forge config: `<skill_workspace>/*/SKILL.md` (one level deep only; prefer exact name matches or user-referenced paths)
    - Any `SKILL.md` file the user might be working on
 
 2. **Conversation context** — Has the user been discussing a skill idea? Are there notes, specs, or requirements already in the conversation?
@@ -186,10 +186,10 @@ Where the skill lives depends on context:
 | Situation | Where to work |
 |-----------|---------------|
 | Skill already has a location (with or without git) | **In-place** — work where it is |
-| Create mode (no existing files) | **`<skill_root>/<skill-name>/`** — the default |
-| Graduation (explicit move request) | **Copy to `<skill_root>/<skill-name>/`** — user asked for the move |
+| Create mode (no existing files) | **`<skill_workspace>/<skill-name>/`** — the default |
+| Graduation (explicit move request) | **Copy to `<skill_workspace>/<skill-name>/`** — user asked for the move |
 
-Forge does not force-move the author's files. `skill_root` is the default for new skills, not a mandatory destination.
+Forge does not force-move the author's files. `skill_workspace` is the default for new skills, not a mandatory destination.
 
 #### Publishing Strategy
 
@@ -341,9 +341,9 @@ After validation report is presented and user approves fixes:
 5. Update remaining artifacts to pass validation
 6. **Local registration** — detect platform roots, create symlinks:
 
-   Detect platform skill roots (see `references/platform-registry.md` for the full path matrix and policy).
-   Roots found → symlink all. No roots → skip. User names undetected platform → create + link.
-   Never link one vendor root to another. Every consumer root points to the skill's source directory.
+   Detect platform registration paths (see `references/platform-registry.md` for the full path matrix and policy).
+   Paths found → symlink all. No paths → skip. User names undetected platform → create + link.
+   Never link one vendor path to another. Every consumer path points to the skill's source directory.
 
 7. **Git init** (if not already a git repo) + initial commit
 8. Final quality review:
@@ -375,7 +375,7 @@ A single action, not a pipeline. Only available after local ready.
    # Non-GitHub: ask for remote URL
    git remote add origin <url> && git push -u origin main
 
-   # Update skill_root .gitignore (if skill_root is a git repo)
+   # Update skill_workspace .gitignore (if skill_workspace is a git repo)
    # Add <skill-name>/ if not already present
    ```
 

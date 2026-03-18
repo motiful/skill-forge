@@ -6,7 +6,7 @@ Engineering pattern: giving a skill user-adjustable preferences that persist acr
 
 Include a configuration pattern when the skill has preferences that:
 
-- Cannot be auto-discovered every run (e.g., `github_org`, `skill_root`)
+- Cannot be auto-discovered every run (e.g., `github_org`, `skill_workspace`)
 - Should persist across sessions (e.g., `license: MIT`, `verbosity: minimal`)
 - Have sensible defaults but users may want to change them
 
@@ -46,7 +46,7 @@ Markdown with sections. Example from skill-forge itself:
 
 ## Defaults
 
-- skill_root: ~/skills/
+- skill_workspace: ~/skills/
 - github_org: motiful
 - license: MIT
 ```

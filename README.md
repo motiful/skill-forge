@@ -121,7 +121,7 @@ $ "Publish self-review to GitHub"
 
 Step 0: Config
   ✓ ~/.config/skill-forge/config.md found
-  ✓ skill_root: ~/skills/, github_org: motiful
+  ✓ skill_workspace: ~/skills/, github_org: motiful
 
 Step 3: Validate (Review mode — skill already exists)
   ✓ name: self-review (kebab-case, 11 chars)
