@@ -47,10 +47,14 @@ def main_workflow(input):
 
     # STEP 3: Execute
     for item in plan.items:
-        review_plan(plan_path)                    # re-read plan, check progress
         process(item)
+        assert checkpoint(plan_path, item, "processed")
+
         Skill("other-skill", item.path)           # explicit Skill() call
-        update_plan(plan_path, item, "done")
+        assert checkpoint(plan_path, item, "reviewed")
+
+        assert done(item)
+        checkpoint(plan_path, item, "done")
 ```
 
 ### 2. Plan = Checklist
@@ -62,28 +66,42 @@ The runtime plan file IS the execution checklist. Not two separate concepts.
 | **Procedure** (in SKILL.md) | Template — defines what steps exist |
 | **Plan** (runtime file) | Instance — tracks progress through those steps |
 
-The plan is created fresh each run with per-item sub-steps matching the procedure:
+The plan is created fresh each run with per-item sub-steps matching the checkpoint boundaries:
 
 ```markdown
 - [ ] 1. Item A
-  - [ ] Step 1 sub-task
-  - [ ] Step 2 sub-task
-  - [ ] Step 3 sub-task
+  - [ ] validated
+  - [ ] readme-craft
+  - [ ] self-review
+  - [ ] done
 ```
 
-The agent re-reads the plan before each item (`review_plan()`), checks off completed sub-steps, and stays on track even after context growth.
+Plan sub-steps correspond 1:1 to `checkpoint()` calls in the EP. Each checkpoint reads the plan, updates status, and asserts success before the next major step begins.
 
-### 3. GATE Assertions
+### 3. GATE Assertions and Checkpoints
 
 `assert` statements between dependent steps force completion before proceeding:
 
 ```python
 write_plan(plan_path, data)
 assert file_exists(plan_path)          # cannot proceed without plan
-# ... later steps use plan_path
 ```
 
 GATEs prevent the most common drift pattern: skipping prerequisite steps and jumping to execution.
+
+**Checkpoints** are GATEs applied to plan progress. Place `assert checkpoint()` at **major step boundaries only** — between phases that produce distinct deliverables (e.g., validation → readme-craft → self-review), not between every sub-task.
+
+```python
+# checkpoint = read plan + update status + assert success
+assert checkpoint(plan_path, item, "validated")   # after all validation + fixes
+assert checkpoint(plan_path, item, "readme-craft") # after readme-craft completes
+assert checkpoint(plan_path, item, "self-review")  # after self-review completes
+checkpoint(plan_path, item, "done")                # final — no assert needed
+```
+
+**Why checkpoints work**: LLMs reliably follow `assert` (GATE) but skip suggestions. `review_plan()` and `update_plan()` without assert are suggestions — they will be ignored when conversation momentum carries the agent forward. Wrapping plan updates in `assert` makes them mandatory.
+
+**Where to place checkpoints**: between steps that each take significant effort and produce a distinct result. If two steps always run back-to-back with no decision point between them, a single checkpoint after both is sufficient.
 
 ### 4. Inline References (One-Hop)
 
@@ -116,3 +134,5 @@ The agent follows the pseudocode (Execution Procedure) and consults Content sect
 | Two-hop references (step → intermediate section → reference file) | Information loss at each hop | One-hop: pseudocode → reference |
 | Methodology explanation mixed with execution instructions | Agent absorbs execution as knowledge | Pseudocode at top, explanation below |
 | Resumable plan files across runs | Stale state from previous context | Fresh plan each run |
+| `review_plan()` / `update_plan()` as suggestions | LLM skips non-GATE actions when conversation momentum carries forward | Use `assert checkpoint()` — makes plan update mandatory |
+| Checkpoint on every sub-task | High friction, low value — agent starts skipping all of them | Checkpoint only at major step boundaries (distinct deliverables) |

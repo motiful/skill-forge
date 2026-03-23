@@ -94,18 +94,16 @@ def forge(target):
     assert file_exists(plan_path)
     # Plan = instantiated procedure with per-item SUB-STEPS:
     #   - [ ] 1. Validate X
-    #     - [ ] Core Validation + Repo Hygiene
-    #     - [ ] Fix Critical/Warning
-    #     - [ ] Skill("readme-craft")
-    #     - [ ] Skill("self-review")
-    #     - [ ] Local Ready
+    #     - [ ] validated (Core Validation + Content Review + Repo Hygiene + Fix)
+    #     - [ ] readme-craft
+    #     - [ ] self-review
+    #     - [ ] done (Local Ready)
     # Full template: references/project-audit.md
-    # This plan IS your checklist. Re-read it before each item.
+    # Checkpoints between major steps — see references/execution-procedure.md
 
     # STEP 3: Validate & Fix
     # Priority: security > in-repo > personal > product > rules
     for item in plan.items:
-        review_plan(plan_path)                         # re-read plan, check progress
 
         # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
         # → additional checks on top of Core Validation
@@ -117,19 +115,21 @@ def forge(target):
 
         fix_critical(findings)                         # mandatory
         if user_approves: fix_warnings(findings)
+        assert checkpoint(plan_path, item, "validated")
 
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
         if not item.is_in_repo:
             Skill("readme-craft", f"review {item.path}")   # see Fix Phase
+            assert checkpoint(plan_path, item, "readme-craft")
+
             Skill("self-review", item.path)                # see Fix Phase
+            assert checkpoint(plan_path, item, "self-review")
 
         register_locally(item)                         # references/platform-registry.md
         if not item.has_git: git_init(item)
         assert local_ready(item)                       # see Local Ready Definition
-        update_plan(plan_path, item, "done")
-
-    close_plan(plan_path)
+        checkpoint(plan_path, item, "done")
 
     # STEP 4: Publish (optional — only when trigger includes publish intent)
     # Triggers: "publish this skill", "push this to GitHub", "put this on GitHub"

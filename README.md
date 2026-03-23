@@ -42,14 +42,13 @@ The gap is not in authoring — AI agents can already help write skill content. 
 
 Skill Forge is a **skill engineering methodology, publishing pipeline, and project skills architect**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
 
-- **Audits entire projects** — point forge at any project directory and it discovers all skills, rules files, and agent instructions; classifies each; graduates personal tools to standalone repos; converts trigger-based rules to rule-skills
+- **Audits entire projects** — point forge at any project directory and it organizes scattered skills, rules, and agent instructions into clean, maintainable structures — graduating personal tools to standalone repos and converting trigger-based rules to rule-skills
 - **Makes workflow skills actually get followed** — detects multi-step skills and adds structure so agents follow your procedure step-by-step, instead of absorbing it as background knowledge. Creates the structure when forging new skills; flags missing structure when reviewing existing ones
 - **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
-- **Reviews every file, not just SKILL.md** — a skill is a codebase. Forge reads every reference, script, and doc — checking that content is actionable for agents, scripts actually work, and docs match what SKILL.md claims
+- **Reviews every file, not just SKILL.md** — a skill is a codebase. Forge reads every reference, script, and doc — checking that content is actionable for agents, references follow the three-layer format, scripts actually work, and docs match what SKILL.md claims
 - **Validates structure and discoverability** — checks frontmatter, description coverage, body length, terminology, and cross-file consistency so agents can find and correctly trigger your skill
-- **Checks README claim discipline** — compares README claims against SKILL.md capabilities, flags hardcoded paths, verifies install commands and LICENSE
-- **Review existing or create from scratch** — point forge at any project directory. Finds existing skills to review, or creates new ones from scratch. Publishing is a single action you trigger when ready
-- **Publishes and registers across platforms** — pushes to GitHub, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
+- **Keeps your README honest** — flags claims that exceed what your skill actually does, catches hardcoded paths, and verifies install commands and LICENSE
+- **Publishes and registers across platforms** — pushes to GitHub with optimized About description and discoverable topics (3-tier selection), then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
 
 <details>
@@ -103,7 +102,7 @@ npx skills add motiful/skill-forge -g
 
 Then tell your AI coding assistant:
 
-```
+```text
 "Review this skill"          — validate, scan, fix → local ready
 "Create a skill for X"       — build from scratch → local ready
 "Publish this skill"         — forge + publish to GitHub
