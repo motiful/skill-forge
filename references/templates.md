@@ -1,3 +1,18 @@
+---
+name: templates
+description: README, LICENSE, and .gitignore skeleton templates for skill repos. Covers value-first README layout (problem → solution → usage → install), collection README variant, MIT license template, standard .gitignore exclusions, and placeholder substitution rules.
+---
+
+```
+generate(template_type, metadata) → file_content
+
+select template by type from sections below
+fill placeholders with skill metadata
+if readme → value-first layout, collection variant if needed
+if license → MIT with year + author
+if gitignore → standard exclusions
+```
+
 # Templates
 
 ## TOC

@@ -1,0 +1,21 @@
+description: >
+  Skill engineering methodology and publishing pipeline for AI agent skills.
+  Validates structure, scans for security, audits entire projects, and publishes to GitHub.
+  Skills are code — engineer them like it.
+topics:
+  # Tier 1: big traffic
+  - ai
+  - llm
+  - ai-agents
+  - developer-tools
+  # Tier 2: precise track
+  - agent-skills
+  - skills
+  - agentic-ai
+  - context-engineering
+  # Tier 3: ecosystem
+  - claude-code
+  - codex
+  - cursor
+  - ai-tools
+homepage: ""

@@ -1,3 +1,18 @@
+---
+name: script-quality
+description: Script file structure guidelines including line count thresholds, module split triggers (responsibility count, complexity indicators), CLI/logic/data separation principle, dependency policy, and before/after decomposition examples.
+---
+
+```
+validate(script_path) → findings[]
+
+check: line count (< 200 ideal, < 500 acceptable, > 500 needs split)
+check: responsibility count (> 3 → split)
+check: CLI parsing separated from business logic
+check: complexity indicators (functions > 15, nesting > 3)
+check: dependency policy (zero for pure computation)
+```
+
 # Script Quality Standard
 
 Applies to any skill that includes a `scripts/` directory. Scripts are executable artifacts shipped with the skill — they must meet a higher bar than reference docs because users run them directly.

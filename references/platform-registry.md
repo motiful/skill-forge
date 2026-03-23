@@ -1,3 +1,18 @@
+---
+name: platform-registry
+description: Mapping of agent platforms (Claude Code, Codex, Copilot, Cursor, Windsurf) to their skill directory paths with detection logic. Covers strong vs weak signals, per-platform path tables, detection strategy, community tools (npx skills add, skills.sh), community directories, and CC Market assessment.
+---
+
+```
+lookup(platforms) → symlink_map
+
+scan global + project skill roots (strong signals only)
+for each detected root → add to registration plan
+report plan to user → get approval (HITL)
+if approved → create symlinks to source of truth
+no roots found → skip registration
+```
+
 # Platform Registry
 
 ## TOC
@@ -13,7 +28,7 @@
 - [Community Tools](#community-tools)
 - [Community Directories](#community-directories)
 
-Last verified: 2026-03-18
+Last verified: 2026-03-23
 
 This file is read by the Local Registration section at publish time. User-level skill directories are **not** standardized across agents. Do not describe `~/.agents/skills/` as a universal home-directory path, and do not treat platform directory management as Skill Forge's default responsibility.
 

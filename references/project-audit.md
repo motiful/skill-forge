@@ -1,8 +1,24 @@
+---
+name: project-audit
+description: Discovery, classification, and plan file creation for project-level forge. Covers full-tree traversal for agent-related files, five classification types (in-repo, product, personal, external, rules), plan file template with per-item checklists, rules quality assessment, and execution priority ordering.
+---
+
+```
+discover_and_classify(project_path) → classified_items[]
+
+traverse full project tree → find all SKILL.md, rules files, agent instructions
+for each item:
+    classify: in-repo | product | personal | external | rules
+    ambiguous → ask user with reasoning (HITL)
+create plan file: /tmp/skill-forge-<name>.md with per-item checklists
+execution priority: security > in-repo > personal > product > rules
+```
+
 # Project Audit
 
-Discovery, Classification, and Plan File logic for Review mode.
+Discovery, Classification, and Plan File logic for forge's review path.
 
-Every Review run — single skill or full project — starts with Discovery. The plan file is always created. Discovery determines what the plan contains.
+Every forge run — single skill or full project — starts with Discovery. The plan file is always created. Discovery determines what the plan contains.
 
 ## TOC
 
@@ -72,7 +88,9 @@ When ambiguous, default to **separate standalone repos** — easier to install s
 
 **Path:** `/tmp/skill-forge-<name>.md` where `<name>` is the last path segment of the target (e.g., `booth`, `skill-forge`, `my-project`).
 
-**If a plan file already exists at that path:** re-read it, find the first incomplete step (`- [ ]`), resume from there. Do not restart discovery — trust the existing plan.
+**If a plan file already exists at that path:** delete it. Every Review starts with a fresh plan — there is no "resume" across separate runs. Plans are execution artifacts for the current session, not persistent state.
+
+**Building the Steps section:** For every Validate or Graduate step, expand into sub-steps that mirror SKILL.md's Fix Phase. This ensures skill invocations (`Skill("readme-craft")`, `Skill("self-review")`) are explicit checkboxes — not implicit steps the agent might skip. Read SKILL.md Fix Phase before building the plan.
 
 **Format:**
 
@@ -97,16 +115,38 @@ When ambiguous, default to **separate standalone repos** — easier to install s
 
 ## Steps
 - [ ] 1. Validate .claude/skills/booth/ (in-place)
+  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Fix Critical/Warning issues
+  - [ ] Skill("readme-craft", "review <path>")
+  - [ ] readme-quality.md skill-specific checks
+  - [ ] Skill("self-review", "<path>")
+  - [ ] Verify Local Ready
 - [ ] 2. Validate .claude/skills/deck/ (in-place)
+  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Fix Critical/Warning issues
+  - [ ] Skill("readme-craft", "review <path>")
+  - [ ] readme-quality.md skill-specific checks
+  - [ ] Skill("self-review", "<path>")
+  - [ ] Verify Local Ready
 - [ ] 3. Graduate .claude/skills/formatter/ → ~/skills/formatter/
+  - [ ] Copy to skill_workspace + git init
+  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Fix Critical/Warning issues
+  - [ ] Skill("readme-craft", "review <path>")
+  - [ ] readme-quality.md skill-specific checks
+  - [ ] Skill("self-review", "<path>")
+  - [ ] Register globally (symlinks) + Verify Local Ready
 - [ ] 4. Assess CLAUDE.md — always-on, no conversion
 - [ ] 5. Convert .claude/rules/api.md → rule-skill
+  - [ ] Skill("rules-as-skills")
+  - [ ] Create rule-skill
+  - [ ] Core Validation + Fix + Skill("readme-craft") + Skill("self-review") + Local Ready
 
 ## Progress
 Completed: 0 / 5
 ```
 
-Update `- [ ]` to `- [x]` and increment `Completed` after each step. Delete the file when `Completed: N / N`.
+Update `- [ ]` to `- [x]` and increment `Completed` after each step (a step is complete when all its sub-steps are checked). Delete the file when `Completed: N / N`.
 
 ## Rules Quality
 

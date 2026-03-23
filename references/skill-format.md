@@ -1,4 +1,24 @@
-# SKILL.md Format Specification
+---
+name: skill-format
+description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file three-layer format (skill-forge internal convention), Positional Test (replaces Content Audience Check), content splitting rules, alignment validation, and cross-platform compatibility.
+---
+
+```
+validate(file) → format_findings[]
+
+if SKILL.md:
+    check: standard frontmatter (name, description, license, metadata)
+    check: body under 500 lines
+    check: Execution Procedure present for workflow skills
+if reference file:
+    check: frontmatter (name, description)
+    check: Execution Procedure present (pseudocode block)
+    check: EP signature declares input/output
+    check: Content sections map to EP lines (alignment validation)
+positional test: HITL context → stays, calibrating → stays, homeless → docs/README
+```
+
+# SKILL.md and Reference File Format Specification
 
 ## TOC
 
@@ -6,6 +26,16 @@
 - [Standard Frontmatter](#standard-frontmatter)
 - [CC-Specific Extensions](#cc-specific-extensions)
 - [Body](#body)
+  - [Positional Test](#positional-test)
+  - [Context Budget](#context-budget)
+- [Reference File Format](#reference-file-format)
+  - [Philosophy](#philosophy)
+  - [Three Layers](#three-layers)
+  - [Reference Frontmatter](#reference-frontmatter)
+  - [Execution Procedure](#execution-procedure)
+  - [Content Rules](#content-rules)
+  - [HITL Convention](#hitl-convention)
+  - [Alignment Validation](#alignment-validation)
 - [Content Splitting Rules](#content-splitting-rules)
 - [File Structure](#file-structure)
   - [Directory Taxonomy](#directory-taxonomy)
@@ -67,24 +97,32 @@ If you're building a CC-only skill and don't care about cross-platform portabili
 - Prefer concise examples over verbose explanations
 - Default published skill content to English. Use another language only when the skill is explicitly language-specific or culture-specific
 
-### Content Audience Check
+### Positional Test
 
-Every paragraph in SKILL.md should pass the **behavior test**: if you delete this paragraph, would the AI's execution change? If not, the content belongs in README.md (for humans) or should be translated into an actionable Rule.
+Every content block in SKILL.md (and in reference files) must pass the positional test:
+**Can this content be placed at a specific point in the Execution Procedure?**
+
+Three ways to pass:
+1. **Execution logic** — the content IS an EP operation (condition, assertion, step)
+2. **Calibrating context** — the content helps the AI judge a specific condition more accurately
+   (e.g., "3-5 skills ~ 15K-25K tokens" calibrates the "too many dependencies" threshold)
+3. **HITL context** — the content supports a `report to user (HITL)` step
+   (e.g., explaining impact so the user can approve/reject a finding)
+
+Content that passes → stays, placed at the EP point it serves.
+Content that fails (no EP point serves it) → docs/ or README.
 
 **Common violations:**
-- **Concept explanations** — "Pillars are lenses, not file categories" → AI doesn't need convincing. Translate to a Rule: "Scan by content, not file type."
-- **Theoretical background** — "This draws from Feynman's criteria..." → Move to README's Design Philosophy section.
-- **Motivational framing** — "The valid engineering sequence is: build one step, test one step..." → Replace with the concrete check: "Flag items that depend on unbuilt prerequisites."
-- **Cross-references to README** — "For background, see README.md" → AI won't read README during execution. Delete.
-- **Statistical persuasion** — "~20% activation rate" used to argue why a pattern is good → Replace with the instruction: "Use `Skill(...)`, not natural language." Data as threshold/criterion is fine; data as argument is for README.
-- **Authority citations** — "Source: Scott Spence, 2026" or quotes from Anthropic docs → Agent doesn't need academic attribution or endorsement to follow instructions. Move to README if the claim supports marketing.
+- Concept explanations without a corresponding EP condition → translate to a Rule or move out
+- Statistical persuasion used as argument (not as threshold) → move to README
+- Authority citations → move to README
+- Cross-references to README → delete (AI won't read README during execution)
 
 **How to check:**
-1. Read each paragraph in SKILL.md
-2. Ask: "Does this tell the AI **what to do**, **when to do it**, or **how to judge the result**?"
-3. If yes → keep
-4. If it explains **why** without a corresponding **what** → translate to a Rule or move to README
-5. **Exception for domain-agnostic skills**: if the skill is designed to work across domains (code, video, research, content), domain examples that show *how to apply a check in a non-obvious domain* pass the behavior test — they define execution scope, not explain concepts.
+1. Read each paragraph
+2. Ask: "Which EP line does this serve?"
+3. Can name one → keep, place near that EP line
+4. Cannot → move to docs/ or README
 
 ### Context Budget
 
@@ -99,6 +137,70 @@ Skill loading consumes context tokens. The total loaded content (SKILL.md + all 
 **How to estimate instruction density:**
 Count lines that are: table rows with check actions, numbered/bulleted process steps, code blocks, report templates, Rules items. For domain-agnostic skills, also count domain examples that define execution scope (e.g., showing how a check applies to video or research projects). Divide by total non-blank lines. If the ratio is below 0.6, look for explanatory paragraphs that can be compressed or moved to README.
 
+## Reference File Format
+
+### Philosophy
+
+**Skills are code. The LLM is the compiler.** Structured natural language → LLM → tool calls, file edits, code. This is mechanism, not metaphor.
+
+References are **modules** in this compilation model. SKILL.md is the main program. Each reference is a callable unit with a declared interface (EP). A reference without an EP is a source file without exports — the compiler can process it, but unreliably.
+
+### Three Layers
+
+Every reference file has three layers — the same pattern as SKILL.md, at module scale:
+
+| Layer | SKILL.md | Reference |
+|-------|----------|-----------|
+| Frontmatter | Agent Skills standard (name, description, license, metadata) | skill-forge convention (name, description) |
+| Execution Procedure | Same spec — entry point, triggered by platform/user | Same spec — module, called by SKILL.md |
+| Content | Sections expanding EP steps | Sections expanding EP lines |
+
+Same EP specification, no functional restrictions. Only difference: SKILL.md is the entry point, references are called modules.
+
+### Reference Frontmatter
+
+```yaml
+---
+name: kebab-case-name
+description: Complete scope description of this module — what it validates, decides, or generates, and what aspects it covers.
+---
+```
+
+- `name` — kebab-case, must match filename (without `.md`)
+- `description` — module's complete scope (more detailed than SKILL.md's trigger-oriented description)
+- No `input`/`output` — declared by EP signature line. No `license` — inherits from parent repo
+
+**Important**: This is a **skill-forge internal convention**, not the Agent Skills community standard. SKILL.md frontmatter is parsed by platforms (CC, Codex, etc.); reference frontmatter is parsed only by skill-forge during Review. The two are not interchangeable.
+
+### Execution Procedure
+
+Pseudocode block after frontmatter, before the first `##` section. Always present. Signature line (first line) declares input/output: `validate(skill_md) → findings[]`. Structured natural language, not strict syntax. HITL steps marked inline: `(HITL)`. 2-10 lines typical, no artificial limit.
+
+### Content Rules
+
+- Each `##` Section corresponds to one or more EP lines
+- **Inline Why**: follows the rule it serves, 1-2 lines max. Self-evident rules need no Why
+- No orphan Sections (content not mapped to any EP line)
+- Tables, lists, templates, pseudocode — whatever form fits
+
+### HITL Convention
+
+HITL is an **execution step** in the EP, not file-level metadata. In EP: `report findings to user → get approval (HITL)`. In Content: the HITL section specifies what to present and what context the human needs.
+
+Content supporting HITL presentation — impact explanations, decision context — is inside the system. It serves the HITL step. See Positional Test for the three content categories (HITL context, calibrating context, homeless content).
+
+### Alignment Validation
+
+Mechanical EP ↔ Content alignment check, run during Content Review:
+
+```
+for each reference file:
+    for each Content section:
+        if no EP line references it → Warning: homeless content
+    for each EP line:
+        if no Content section expands it → Warning: possible drift
+```
+
 ## Content Splitting Rules
 
 **SKILL.md is the index and decision tree. References are the knowledge base.**
@@ -107,11 +209,11 @@ Count lines that are: table rows with check actions, numbered/bulleted process s
 - References answer: *what specifically to check, how to check it, how to judge the result*
 
 Split content into a reference file when it meets ALL three criteria:
-1. **Large enough** — the section exceeds 80 lines of domain-specific content (check tables, format specs, templates)
+1. **EP-writability test** — you can write 2+ lines of meaningful Execution Procedure for it (input → operations → output). Can't write an EP = content is either too trivial (keep inline) or purpose too vague (clarify first)
 2. **Single responsibility** — the content covers one coherent concern that can be understood on its own
 3. **Different change cadence** — you'd update this content independently of the process flow
 
-**Do NOT split** when content is small (<80 lines), tightly coupled to the process flow (report templates, decision tables), or would require the reader to constantly jump back to SKILL.md.
+**Do NOT split** when you can't write an EP for it, content is tightly coupled to the process flow (report templates, decision tables), or would require the reader to constantly jump back to SKILL.md.
 
 **Split early** when a file mixes multiple responsibilities, even if it is under 300 lines. Mixed examples:
 - literal templates + writing rules
@@ -154,7 +256,7 @@ skill-name/
 
 ### Directory Taxonomy
 
-**`references/`** — Domain knowledge loaded on-demand by the AI to make decisions. Checklists, format specs, evaluation criteria, rules.
+**`references/`** — Domain knowledge loaded on-demand by the AI to make decisions. Checklists, format specs, evaluation criteria, rules. Reference files follow the three-layer format: frontmatter (name + description) + Execution Procedure (pseudocode) + Content (sections).
 
 **`assets/`** — Static resources the AI consumes as raw material for output. Templates (to fill placeholders), data files, schemas, images.
 

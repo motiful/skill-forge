@@ -1,16 +1,27 @@
+---
+name: skill-invocation
+description: Runtime invocation reliability pattern ensuring AI agents actually call dependent skills instead of skipping them. Covers the three-element pattern (explicit Skill() call, output capture, output gate), call site format, writing principles (position=timing, boundary not capability, binary not gradual), and anti-patterns with fixes.
+---
+
+```
+validate(skill_md, dependencies) → findings[]
+
+for each dependency invocation in skill_md:
+    check: uses explicit Skill("name", "args") syntax
+    check: captures output (downstream step references it)
+    check: has output gate (assert)
+    if natural-language invocation ("invoke X") → finding(Warning)
+```
+
 # Skill Invocation Reliability
 
 How to make an AI agent **actually call** a dependent skill at runtime — not just have it installed.
 
-## Why Agents Skip
-
-1. **Self-sufficiency bias** — agent believes it can do the task itself, skips the tool call
-2. **No downstream gate** — nothing references the skill's output, so skipping costs nothing
-3. **High-freedom instruction** — "invoke X" has multiple valid interpretations; agent picks the easiest
-
 ## The Pattern
 
 Three lines. Use at every point a skill calls another skill.
+
+Why this pattern exists: agents skip skill calls for three reasons — self-sufficiency bias (believes it can do the task itself), no downstream gate (skipping costs nothing), and high-freedom instructions ("invoke X" has multiple interpretations).
 
 ```markdown
 Run: `Skill("<name>", "<args>")`

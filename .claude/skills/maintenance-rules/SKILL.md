@@ -1,6 +1,6 @@
 ---
 name: maintenance-rules
-description: 'Maintenance rules for the skill-forge repo. MUST run Decision Test before accepting changes. MUST update platform-registry when platforms change. MUST keep SKILL.md under 500 lines. MUST verify cross-file consistency after changes. Triggers on "update skill-forge", "maintain skill-forge", "refresh platform registry".'
+description: 'Maintenance rules for the skill-forge repo. MUST run Decision Test before accepting changes. MUST update platform-registry when platforms change. MUST keep SKILL.md under 500 lines. MUST verify cross-file consistency after changes. Triggers on "update skill-forge", "maintain skill-forge", "refresh platform registry", "check community tools".'
 metadata:
   author: motiful
 ---
@@ -16,7 +16,8 @@ Constraints and procedures for maintaining the skill-forge repository.
 - MUST keep SKILL.md ↔ README ↔ references terminology consistent
 - MUST add References section entry when adding new reference files
 - MUST update "What's Inside" tree in README when references/ changes
-- MUST NOT include content that fails the Content Audience Check (see references/skill-format.md)
+- MUST NOT include content that fails the Positional Test (see references/skill-format.md)
+- MUST verify reference files follow three-layer format (frontmatter + EP + aligned Content)
 
 ## Platform Registry Updates
 
@@ -72,7 +73,8 @@ Protocol (run after significant changes):
 
 - SKILL.md description matches README positioning
 - "What's Inside" tree matches actual references/ directory
-- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5"
+- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name)
+- Current terminology: "Engagement Principles", "Execution Procedure", "Core Validation", "Content Review", "Repo Hygiene", "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Forge", "Publish" (as Step 4 of forge)
 
 ## Update Triggers
 
@@ -87,8 +89,9 @@ Protocol (run after significant changes):
 
 ## Changelog (max 5 entries)
 
+- 2026-03-23: **v7.2 — Unified forge entry.** Merged Review + Create + Push into single `forge()` EP. Publish is Step 4 (optional, trigger-gated). EP capability parity enforced in skill-format.md Three Layers table.
+- 2026-03-22: **v7.1 — Three-layer reference format.** References get frontmatter + EP. Content Audience Check → Positional Test. reference-format.md merged into skill-format.md.
+- 2026-03-20: **v7.0 — Procedure-first architecture.** SKILL.md restructured: pseudocode Execution Procedure as primary directing layer, deleted Modes + Step Reference intermediate sections. Plan = checklist (no separate output checklist). One-hop info flow (pseudocode → references/). 499→317 lines.
 - 2026-03-18: **v6.2 — Project Audit mode.** Review mode unified: Discovery → Classification → Plan File → per-item execution. Always-on vs. trigger-based rules distinction. Proactive graduation. skill_workspace rename. New references/project-audit.md.
 - 2026-03-18: **v6.1 — Maintenance as in-repo rule-skill.** Converted MAINTENANCE.md to `.claude/skills/maintenance-rules/`. Added in-repo skills concept to publishing-strategy. Restored rules-as-skills as dependency. Slimmed rule-skill-pattern.md to forge-specific logic.
-- 2026-03-17: **v6.0 — Kill Publish as standalone path.** Removed Publish mode. Step 3 invokes readme-craft. Push is single action after local ready.
-- 2026-03-17: **v5.0 — Two modes, one action.** Review + Create + Push.
-- 2026-03-16: **v4.0 — Prescription-driven practice.** Dependencies must install. setup.sh standard.
+

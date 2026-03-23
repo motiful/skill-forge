@@ -9,6 +9,8 @@
   <p>From local experiment to installable, trustworthy skill — in one command.</p>
 </div>
 
+> **Skills are code. Engineer them like it.**
+
 <div align="center">
 
 [![License: MIT][license-shield]][license-url]
@@ -40,37 +42,30 @@ The gap is not in authoring — AI agents can already help write skill content. 
 
 Skill Forge is a **skill engineering methodology, publishing pipeline, and project skills architect**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
 
-- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, reference integrity, and terminology so agents can find and correctly trigger your skill
+- **Audits entire projects** — point forge at any project directory and it discovers all skills, rules files, and agent instructions; classifies each; graduates personal tools to standalone repos; converts trigger-based rules to rule-skills
+- **Makes workflow skills actually get followed** — detects multi-step skills and adds structure so agents follow your procedure step-by-step, instead of absorbing it as background knowledge. Creates the structure when forging new skills; flags missing structure when reviewing existing ones
 - **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
+- **Reviews every file, not just SKILL.md** — a skill is a codebase. Forge reads every reference, script, and doc — checking that content is actionable for agents, scripts actually work, and docs match what SKILL.md claims
+- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, terminology, and cross-file consistency so agents can find and correctly trigger your skill
 - **Checks README claim discipline** — compares README claims against SKILL.md capabilities, flags hardcoded paths, verifies install commands and LICENSE
-- **Two modes, one action** — Review (existing skill or project → discover → classify → validate → fix → local ready) or Create (new skill → build → validate → local ready). Push is a single action you trigger when ready
-- **Audits entire projects** — point forge at any project directory and it discovers all skills, rules files, and agent instructions; classifies each (in-repo, product skill, personal tool, always-on rule); proactively graduates personal tools to standalone repos; converts trigger-based rules to rule-skills; leaves always-on rules untouched
-- **Pushes to GitHub with explicit confirmation** — confirm remote target, then `gh repo create` → push. Everything else is already done at local ready
-- **Auto-registers across platforms** — detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks them to one source of truth
+- **Review existing or create from scratch** — point forge at any project directory. Finds existing skills to review, or creates new ones from scratch. Publishing is a single action you trigger when ready
+- **Publishes and registers across platforms** — pushes to GitHub, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
-- **Respects your conventions** — scans forge config → project instructions → platform rules in priority order
 
 <details>
 <summary>Pipeline stages</summary>
 
-**Review mode** (existing skill or project):
-1. **Discovery** — traverse the full project tree; inventory all skills, rules files, and agent instructions
-2. **Classification** — classify each item: in-repo maintenance, product skill, personal tool, external (imported), or rules file
-3. **Plan** — create `/tmp/skill-forge-<name>.md`; one step per item; resumable after context compaction
-4. **Per item: Validate & Fix** — structure, frontmatter, content quality, repo hygiene, readme-craft audit, local registration → local ready
-5. **Rules** — trigger-based rules → rule-skills; always-on rules kept as-is (converting them removes unconditional activation)
-
-**Create mode** (new skill):
-0. **Config** — set up skill workspace, detect your GitHub org and preferences
-1. **Gather** — auto-detect existing skill content from project and conversation
-2. **Create** — write SKILL.md + README + LICENSE + .gitignore following the [Agent Skills](https://agentskills.io) standard
-3. **Validate & Fix** — structure, frontmatter, content quality, repo hygiene, readme-craft audit, local registration → local ready
-
-Push to GitHub is a single action after local ready — confirm target, then `gh repo create` + push.
+`def forge(target)`:
+1. **Environment** — run `setup.sh`, load config, onboard if first use
+2. **Assess** — discover existing skills (review path) or gather context for new skill (create path)
+3. **Plan** — create `/tmp/skill-forge-<name>.md` with per-item checklists; fresh each run (plan = checklist)
+4. **Per item: Validate & Fix** — Core Validation + Content Review (read every file) + Repo Hygiene → fix → `Skill("readme-craft")` → `Skill("self-review")` → local ready
+5. **Publish** (optional) — confirm target, `gh repo create` + push, set About/Topics for discoverability
 
 </details>
 
-### What Users Get
+<details>
+<summary>What Users Get</summary>
 
 | Capability | What it means for you | How forge delivers it |
 |------------|----------------------|----------------------|
@@ -82,9 +77,12 @@ Push to GitHub is a single action after local ready — confirm target, then `gh
 | **Configuration pattern** | Your skill can have user preferences, done properly | Reference pattern for declaring and reading config |
 | **Dependency installation** | Required tools and skills are installed automatically | `scripts/setup.sh` standard — install or block, no graceful skip |
 | **One-command publishing** | Local files → installable GitHub repo | Push: `gh repo create` + push (everything else done at local ready) |
-| **Ongoing maintenance** | Catch regressions when you update | Review mode: re-run validation on existing repos |
+| **Workflow execution fidelity** | Your multi-step workflow skill actually gets followed, not just read | Create: generates step-by-step structure agents treat as procedure. Review: warns if workflow skill lacks this structure |
+| **Ongoing maintenance** | Catch regressions when you update | Re-run forge on existing repos to catch regressions |
 
 **Token cost**: Review ~5-15K | Create ~10-20K | Push ~1-2K. No subagents, no Python, no surprise costs.
+
+</details>
 
 ## When to Load
 
@@ -108,21 +106,21 @@ Then tell your AI coding assistant:
 ```
 "Review this skill"          — validate, scan, fix → local ready
 "Create a skill for X"       — build from scratch → local ready
-"Push this skill to GitHub"  — one action after local ready
+"Publish this skill"         — forge + publish to GitHub
 ```
 
 ## Usage
 
 Say any of:
-- "Review this skill repo" — Review mode
-- "Audit my skill" — Review mode
-- "Create a skill for X" — Create mode
-- "Forge a skill from my notes" — Create mode
-- "Push this skill to GitHub" — Push action (after local ready)
-- "Publish this skill" — Review + Push
+- "Review this skill repo" — discover, validate, fix → local ready
+- "Audit my skill" — same as review
+- "Create a skill for X" — build from scratch → local ready
+- "Forge a skill from my notes" — same as create
+- "Publish this skill" — forge + publish to GitHub
+- "Push this skill to GitHub" — same as publish
 
 <details>
-<summary>Example: Review + Push self-review</summary>
+<summary>Example: Forge + Publish self-review</summary>
 
 This is a sample flow, not a transcript from one specific machine.
 
@@ -133,7 +131,7 @@ Step 0: Config
   ✓ ~/.config/skill-forge/config.md found
   ✓ skill_workspace: ~/skills/, github_org: motiful
 
-Step 3: Validate (Review mode — skill already exists)
+Step 3: Validate (review path — skill already exists)
   ✓ name: self-review (kebab-case, 11 chars)
   ✓ description: single-line, 133 chars
   ✓ body: 226 lines (< 500)
@@ -192,7 +190,7 @@ ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
 
 - **Git** (required)
 - **Node.js** (required for `npx skills add`)
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Review mode works without it
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) — required for publishing. Forge works without it for local validation
 
 ### Dependencies
 
@@ -232,7 +230,7 @@ references/
 ├── skill-invocation.md      — Runtime invocation reliability for skill-to-skill calls
 ├── onboarding.md            — Interactive first-use guidance pattern
 ├── skill-configuration.md   — User preferences, config location, stateless principle
-├── skill-format.md          — How to write a valid SKILL.md
+├── skill-format.md          — SKILL.md + reference file format specification
 ├── skill-composition.md     — Composition philosophy and context budget
 ├── rule-skill-pattern.md    — Forge integration: detection, auto-creation, packaging of rule-skills
 ├── publishing-strategy.md   — Skill or Collection decisions
@@ -241,8 +239,10 @@ references/
 ├── script-quality.md        — Script file structure guidelines
 ├── maintenance-guide.md     — In-repo maintenance-rules: when to create, what to include
 ├── anti-graceful-skip.md    — Default-execute principle, no implicit skip paths
+├── execution-procedure.md   — Pseudocode + plan-as-checklist + GATE pattern for workflow skills
 ├── templates.md             — README, LICENSE, .gitignore skeletons
-└── project-audit.md         — Discovery, Classification, Plan File, Rules Conversion for project-level Review
+├── project-audit.md         — Discovery, Classification, Plan File, Rules Conversion for project-level forge
+└── github-metadata.md       — GitHub repo About, Topics, and metadata workflow
 ```
 
 </details>
@@ -262,7 +262,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-6.2-blue.svg
+[version-shield]: https://img.shields.io/badge/version-7.2-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

@@ -1,3 +1,19 @@
+---
+name: onboarding
+description: Interactive first-use guidance pattern for skills that require user decisions before operation. Covers the distinction between installation, onboarding, and configuration; detection-first approach (auto-discover before asking); when to use vs skip; and the detect → ask → confirm → write flow.
+---
+
+```
+design(skill_scope) → onboarding_flow
+
+if zero-config needed → skip onboarding
+if config missing → trigger first-use flow:
+    detect what can be auto-discovered (gh api, platform roots)
+    ask only what can't be detected
+    summarize detected + collected → confirm once (HITL)
+    write config file
+```
+
 # Onboarding
 
 Interactive first-use guidance that helps users set up their environment for a skill.

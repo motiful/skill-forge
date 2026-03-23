@@ -1,3 +1,18 @@
+---
+name: maintenance-guide
+description: When and how to create an in-repo maintenance-rules skill for complex skill repos. Covers trigger conditions (3+ deps, platform paths, scripts, large files), required content (constraints, update triggers, verification protocol, changelog), cross-vendor symlink creation, and the relationship between maintenance-rules and the parent skill.
+---
+
+```
+create(skill_repo) → maintenance_rules_skill | skip
+
+check triggers: 3+ deps? platform paths? scripts? >300 lines? external URLs?
+if no triggers → skip (simple skill needs no maintenance rules)
+generate .claude/skills/maintenance-rules/SKILL.md with:
+    constraints, update triggers, verification protocol, changelog
+create cross-vendor symlink (.agents/skills/ → relative path)
+```
+
 # Maintenance Guide
 
 How to generate a maintenance-rules skill for complex skill repositories. This reference tells skill-forge when and how to create one.
