@@ -73,8 +73,8 @@ Protocol (run after significant changes):
 
 - SKILL.md description matches README positioning
 - "What's Inside" tree matches actual references/ directory
-- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name)
-- Current terminology: "Engagement Principles", "Execution Procedure", "Core Validation", "Content Review", "Repo Hygiene", "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Forge", "Publish" (as Step 4 of forge)
+- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()"
+- Current terminology: "Engagement Principles", "Execution Procedure", "Core Validation", "Content Review", "Repo Hygiene", "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Forge", "Publish" (as Step 4 of forge), "Checkpoint" (assert checkpoint() at major step boundaries)
 
 ## Update Triggers
 
