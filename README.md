@@ -51,48 +51,18 @@ Skill Forge is a **skill engineering methodology, publishing pipeline, and proje
 - **Publishes and registers across platforms** — pushes to GitHub with optimized About description and discoverable topics (3-tier selection), then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
 
-<details>
-<summary>Pipeline stages</summary>
-
-`def forge(target)`:
-1. **Environment** — run `setup.sh`, load config, onboard if first use
-2. **Assess** — discover existing skills (review path) or gather context for new skill (create path)
-3. **Plan** — create `/tmp/skill-forge-<name>.md` with per-item checklists; fresh each run (plan = checklist)
-4. **Per item: Validate & Fix** — Core Validation + Content Review (read every file) + Repo Hygiene → fix → `Skill("readme-craft")` → `Skill("self-review")` → local ready
-5. **Publish** (optional) — confirm target, `gh repo create` + push, set About/Topics for discoverability
-
-</details>
-
-<details>
-<summary>What Users Get</summary>
-
-| Capability | What it means for you | How forge delivers it |
-|------------|----------------------|----------------------|
-| **Security assurance** | Your skill won't leak API keys or credentials to GitHub | Repo hygiene scan: regex pattern matching for common secret formats |
-| **Description quality** | Agents will actually find and trigger your skill | Coverage check: does the description mention key scenarios from the body? |
-| **Cross-platform compatibility** | Works on Claude Code, Codex, Cursor, Windsurf, Copilot — not just one | Standard frontmatter validation + platform-agnostic structure |
-| **Efficient context usage** | Your skill doesn't waste the agent's context window | Body under 500 lines, instruction density check, progressive disclosure via references/ |
-| **Claim discipline** | README says what the skill actually does, no inflated promises | README ↔ SKILL.md consistency check |
-| **Configuration pattern** | Your skill can have user preferences, done properly | Reference pattern for declaring and reading config |
-| **Dependency installation** | Required tools and skills are installed automatically | `scripts/setup.sh` standard — install or block, no graceful skip |
-| **One-command publishing** | Local files → installable GitHub repo | Push: `gh repo create` + push (everything else done at local ready) |
-| **Workflow execution fidelity** | Your multi-step workflow skill actually gets followed, not just read | Create: generates step-by-step structure agents treat as procedure. Review: warns if workflow skill lacks this structure |
-| **Ongoing maintenance** | Catch regressions when you update | Re-run forge on existing repos to catch regressions |
-
 **Token cost**: Review ~5-15K | Create ~10-20K | Push ~1-2K. No subagents, no Python, no surprise costs.
 
-</details>
-
-## When to Load
-
-| You're doing... | Need skill-forge? |
-|-----------------|-------------------|
-| Writing a skill's content | No — focus on the domain, not formatting |
-| Ready to validate or publish | **Yes** — "publish this skill" or "forge a skill" |
-| Reviewing an existing repo | **Yes** — "review this skill repo" |
-| Cleaning up a project with mixed skills, rules, and agent instructions | **Yes** — "audit this project" or point forge at the directory |
-
-skill-forge is a post-authoring tool. Load it when you're done writing, not while writing.
+| Capability | What it means for you |
+|------------|----------------------|
+| **Security assurance** | Your skill won't leak API keys or credentials to GitHub |
+| **Description quality** | Agents will actually find and trigger your skill |
+| **Cross-platform compatibility** | Works on Claude Code, Codex, Cursor, Windsurf, Copilot — not just one |
+| **Efficient context usage** | Your skill doesn't waste the agent's context window |
+| **Claim discipline** | README says what the skill actually does, no inflated promises |
+| **Dependency installation** | Required tools and skills are installed automatically |
+| **One-command publishing** | Local files → installable GitHub repo |
+| **Workflow execution fidelity** | Your multi-step workflow skill actually gets followed, not just read |
 
 ## Quick Start
 
@@ -118,12 +88,22 @@ Say any of:
 - "Publish this skill" — forge + publish to GitHub
 - "Push this skill to GitHub" — same as publish
 
-<details>
-<summary>Example: Forge + Publish self-review</summary>
+## When to Load
+
+| You're doing... | Need skill-forge? |
+|-----------------|-------------------|
+| Writing a skill's content | No — focus on the domain, not formatting |
+| Ready to validate or publish | **Yes** — "publish this skill" or "forge a skill" |
+| Reviewing an existing repo | **Yes** — "review this skill repo" |
+| Cleaning up a project with mixed skills, rules, and agent instructions | **Yes** — "audit this project" or point forge at the directory |
+
+skill-forge is a post-authoring tool. Load it when you're done writing, not while writing.
+
+**Example: Forge + Publish self-review**
 
 This is a sample flow, not a transcript from one specific machine.
 
-```
+```text
 $ "Publish self-review to GitHub"
 
 Step 0: Config
@@ -149,8 +129,6 @@ Push
   ✓ Published — install with: npx skills add motiful/self-review
 ```
 
-</details>
-
 ## Install
 
 ```bash
@@ -159,31 +137,18 @@ npx skills add motiful/skill-forge -g
 
 Works with Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, and other [Agent Skills](https://agentskills.io) adopters.
 
-<details>
-<summary>Manual registration (clone + symlink)</summary>
+**Manual registration** (clone + symlink):
 
 ```bash
 git clone https://github.com/motiful/skill-forge ~/skills/skill-forge
 
 # Register only in roots you actually use.
-
-# Claude Code
-ln -sfn ~/skills/skill-forge ~/.claude/skills/skill-forge
-
-# Codex
-ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge
-
-# VS Code / GitHub Copilot
-ln -sfn ~/skills/skill-forge ~/.copilot/skills/skill-forge
-
-# Cursor
-ln -sfn ~/skills/skill-forge ~/.cursor/skills/skill-forge
-
-# Windsurf
-ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge
+ln -sfn ~/skills/skill-forge ~/.claude/skills/skill-forge      # Claude Code
+ln -sfn ~/skills/skill-forge ~/.agents/skills/skill-forge      # Codex
+ln -sfn ~/skills/skill-forge ~/.copilot/skills/skill-forge     # VS Code / GitHub Copilot
+ln -sfn ~/skills/skill-forge ~/.cursor/skills/skill-forge      # Cursor
+ln -sfn ~/skills/skill-forge ~/.codeium/windsurf/skills/skill-forge  # Windsurf
 ```
-
-</details>
 
 ### Prerequisites
 
@@ -201,50 +166,7 @@ Installed automatically by `scripts/setup.sh` on first run:
 | [`motiful/rules-as-skills`](https://github.com/motiful/rules-as-skills) | Rule-skill methodology: three-layer model, format, in-repo patterns |
 | [`motiful/self-review`](https://github.com/motiful/self-review) | 4-pillar, 6-dimension alignment audit for skill quality validation |
 
-<details>
-<summary>Positioning</summary>
-
-Skill Forge is a **skill engineering methodology and publishing pipeline**. The methodology defines what "well-engineered skill" means — referenced while writing or improving skills. The pipeline automates validation and publishing — run when ready to share.
-
-It helps you create skills that are installable, publishable, maintainable, and honestly described.
-
-It does **not** claim to prove that a generated skill's domain outputs are objectively excellent, production-safe, or aesthetically strong. Those judgments still depend on the author, the domain, and real usage.
-
-</details>
-
-<details>
-<summary>What's Inside</summary>
-
-```
-SKILL.md              — Full creation + publishing pipeline
-.claude/skills/
-└── maintenance-rules/
-    └── SKILL.md             — In-repo maintenance rules (not independently published)
-docs/
-└── quality-principles.md    — Maintainer governance: decision test, quality dimensions, boundaries
-scripts/
-└── setup.sh                 — Dependency installation (readme-craft, rules-as-skills, self-review)
-references/
-├── installation.md          — setup.sh standard: dependency detection and installation
-├── skill-invocation.md      — Runtime invocation reliability for skill-to-skill calls
-├── onboarding.md            — Interactive first-use guidance pattern
-├── skill-configuration.md   — User preferences, config location, stateless principle
-├── skill-format.md          — SKILL.md + reference file format specification
-├── skill-composition.md     — Composition philosophy and context budget
-├── rule-skill-pattern.md    — Forge integration: detection, auto-creation, packaging of rule-skills
-├── publishing-strategy.md   — Skill or Collection decisions
-├── platform-registry.md     — Where each platform looks for skills
-├── readme-quality.md        — README writing and claim discipline
-├── script-quality.md        — Script file structure guidelines
-├── maintenance-guide.md     — In-repo maintenance-rules: when to create, what to include
-├── anti-graceful-skip.md    — Default-execute principle, no implicit skip paths
-├── execution-procedure.md   — Pseudocode + plan-as-checklist + GATE pattern for workflow skills
-├── templates.md             — README, LICENSE, .gitignore skeletons
-├── project-audit.md         — Discovery, Classification, Plan File, Rules Conversion for project-level forge
-└── github-metadata.md       — GitHub repo About, Topics, and metadata workflow
-```
-
-</details>
+Skill Forge validates and publishes — it does not write skill content or test domain effectiveness. Those judgments depend on the author, the domain, and real usage.
 
 ## Contributing
 
