@@ -107,6 +107,6 @@ This naturally fits inside the skill's Step 0. See `onboarding.md` for the full 
 
 ## Cross-References
 
-- `docs/quality-principles.md` — the litmus test for config vs infrastructure (maintenance doc, not runtime)
+- `docs/skill-philosophy.md` — technical route and design principles (maintenance doc, not runtime)
 - `installation.md` — automated dependency installation (Step 0, before config check)
 - `onboarding.md` — interactive first-use guidance (may create config)

@@ -168,6 +168,12 @@ Installed automatically by `scripts/setup.sh` on first run:
 
 Skill Forge validates and publishes — it does not write skill content or test domain effectiveness. Those judgments depend on the author, the domain, and real usage.
 
+## Skill Philosophy
+
+Skills are the next unit of reusable intelligence — loadable capability extensions that give AI agents structured expertise a base model doesn't have. skill-forge exists to define what "well-engineered skill" means and to practice that discipline.
+
+→ [Vision, quality dimensions, and technical route](docs/skill-philosophy.md)
+
 ## Contributing
 
 Bug reports, validation rule ideas, and reference doc improvements are welcome. Open an issue or pull request on [GitHub](https://github.com/motiful/skill-forge).

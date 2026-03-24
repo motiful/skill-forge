@@ -11,7 +11,7 @@ Constraints and procedures for maintaining the skill-forge repository.
 
 ## Constraints
 
-- MUST run Decision Test (7 criteria from `docs/quality-principles.md`) before accepting any change
+- MUST run Decision Test (7 criteria below) before accepting any change
 - MUST NOT push SKILL.md body over 500 lines
 - MUST keep SKILL.md ↔ README ↔ references terminology consistent
 - MUST add References section entry when adding new reference files
@@ -42,7 +42,7 @@ Constraints and procedures for maintaining the skill-forge repository.
 
 ## Contribution Criteria
 
-Use the **Decision Test** from `docs/quality-principles.md`:
+Use the **Decision Test**:
 
 1. Does it help users' skills score higher on the 6 quality dimensions?
 2. Is it simple enough that an AI agent will reliably follow it?
