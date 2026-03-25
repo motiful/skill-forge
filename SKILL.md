@@ -98,7 +98,9 @@ def forge(target):
             Skill("self-review", item.path)                # see Fix Phase
             assert review_and_update_plan(plan_path, item, "self-review")
 
-        detect_and_register(item)                      # references/platform-registry.md
+        conflicts = audit_registrations(item, config)    # references/registration-audit.md
+        if conflicts.critical: resolve_or_block()        # HITL
+        detect_and_register(item)                        # references/platform-registry.md
         if not item.has_git: git_init(item)
         assert local_ready(item)                       # see Local Ready Definition
         review_and_update_plan(plan_path, item, "done")
@@ -154,6 +156,7 @@ Organization, layout, file existence, dependencies.
 | Runtime write | No data/, cache/ in skill directory |
 | Meta-skill contamination | No forge/creator as subdirectories |
 | Collection risks | `decide(skill_count, usage_pattern)` — `references/skill-composition.md`. 15+ skills → context flooding warning; generic names → namespacing warning |
+| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global → Warning; same name different source → Critical |
 
 ### Quality
 
@@ -290,3 +293,4 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 - `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern for workflow skills
 - `references/project-audit.md` — Discovery, Classification, Plan File, Rules Conversion, Execution Order for project-level forge
 - `references/github-metadata.md` — About/description rules, topic 3-tier selection, .github/repo-meta.yml format
+- `references/registration-audit.md` — Pre-registration conflict detection: workspace shadows global, broken links, copy vs symlink
