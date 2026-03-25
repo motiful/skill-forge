@@ -73,6 +73,10 @@ def forge(target):
     delete_if_exists(plan_path)                        # always fresh, no resume between runs
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
+    # Plan sub-steps MUST be derived from validation table rows, not from memory.
+    # Read Security + Structure + Quality + Publishing tables line by line.
+    # Every table row → a plan checklist item. Missing row = missed check.
+    assert plan.covers(SECURITY_CHECKS + STRUCTURE_CHECKS + QUALITY_CHECKS + PUBLISHING_CHECKS)
     # Plan template with per-item sub-steps: references/project-audit.md
     # review_and_update_plan between major steps: references/execution-procedure.md
 
