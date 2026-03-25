@@ -6,10 +6,22 @@ description: Pseudocode + plan-as-checklist + GATE assertion pattern for structu
 ```
 assess_procedure_need(skill_md) → workflow_skill | reference_only
 
+# Purpose: EP forces execution fidelity — agents follow steps instead of absorbing
+# them as knowledge. The question is: would EP significantly improve instruction-following
+# and prevent graceful skip? If any criterion below matches → workflow_skill.
+# "Natural language steps are clear enough" is NOT a valid reason to skip EP.
+# "Skill isn't complex enough" is NOT a valid reason to skip EP.
+
 if ordered multi-step flow with dependencies → workflow_skill
 if external tool calls at specific points → workflow_skill
 if step order matters (reorder causes failure) → workflow_skill
 if purely reference material (lookup, checklist) → reference_only
+# reference_only = NO ordering constraint. Content can be consulted in any order.
+# A methodology with "Step 1 → Step 2 → Step 3" where reordering breaks correctness
+# is workflow_skill, even without Skill() calls or external tool orchestration.
+
+# Consequence: workflow_skill + no EP → Warning minimum.
+# Present cost-benefit (what skips EP would prevent, what restructuring costs) to user.
 ```
 
 # Execution Procedure Pattern
@@ -24,13 +36,13 @@ How to structure workflow skills so agents execute multi-step procedures instead
 
 ## When to Detect
 
-A skill needs an Execution Procedure when:
+A skill needs an Execution Procedure when **any** of the following are true:
 - It defines an **ordered, multi-step flow** (not just a list of checks)
 - Steps have **dependencies** (step N requires output from step N-1)
 - It uses **external tool calls** that must happen at specific points (e.g., `Skill()`, API calls)
 - Step order matters — **skipping or reordering causes failure**
 
-Skills that are purely reference material (lookup tables, style guides, validation checklists) do NOT need this pattern.
+Skills that are purely reference material (lookup tables, style guides, validation checklists) do NOT need this pattern. "Purely reference" means no ordering constraints — content can be consulted in any order. A methodology with numbered steps where order matters is a workflow skill, even if the content reads like documentation.
 
 ## The Pattern
 

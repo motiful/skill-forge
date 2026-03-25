@@ -173,7 +173,7 @@ Shared checks (SKILL.md and every reference file):
 | Description clarity | Standalone comprehensible to a stranger |
 | Invocation reliability | `validate_invocations(skill_md, deps)` — `references/skill-invocation.md` |
 | Graceful skip | `audit_conditional_branches(skill_md)` — `references/anti-graceful-skip.md` |
-| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md` |
+| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md`. Result `workflow_skill` + no EP → **Warning** minimum. Present EP cost-benefit (what skips it prevents vs restructuring cost) to user for decision |
 | Entry complexity | Multiple modes must produce different deliverables |
 | Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
 | In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
