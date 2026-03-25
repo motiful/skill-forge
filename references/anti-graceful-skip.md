@@ -4,7 +4,7 @@ description: Default-execute principle and audit criteria for conditional branch
 ---
 
 ```
-audit(skill_md) → findings[]
+audit_conditional_branches(skill_md) → findings[]
 
 for each conditional branch:
     check: both sides have explicit actions

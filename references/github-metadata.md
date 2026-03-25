@@ -4,12 +4,14 @@ description: GitHub repository metadata management including About/description r
 ---
 
 ```
-validate(repo_meta) → findings[]
+validate_and_apply(repo_path) → applied | findings[]
 
+check: .github/repo-meta.yml exists and matches template format
 check: description exists, len <= 350, aligns with README + SKILL.md
 check: 8 <= topics <= 20, follow 3-tier system
-check: .github/repo-meta.yml matches template format
-if push mode → apply via gh repo edit
+assert no critical findings
+report findings to user (HITL)
+apply via gh repo edit
 ```
 
 # GitHub Metadata

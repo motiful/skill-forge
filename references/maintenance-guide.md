@@ -4,7 +4,7 @@ description: When and how to create an in-repo maintenance-rules skill for compl
 ---
 
 ```
-create(skill_repo) → maintenance_rules_skill | skip
+assess_and_create(skill_repo) → maintenance_rules_skill | skip
 
 check triggers: 3+ deps? platform paths? scripts? >300 lines? external URLs?
 if no triggers → skip (simple skill needs no maintenance rules)

@@ -4,13 +4,18 @@ description: Runtime invocation reliability pattern ensuring AI agents actually 
 ---
 
 ```
-validate(skill_md, dependencies) → findings[]
+validate_invocations(skill_md, dependencies) → findings[]
 
 for each dependency invocation in skill_md:
     check: uses explicit Skill("name", "args") syntax
     check: captures output (downstream step references it)
     check: has output gate (assert)
     if natural-language invocation ("invoke X") → finding(Warning)
+
+write_call_site(dependency, location) → call_pattern
+
+generate: Skill("name", "args") + output capture + assert gate
+position: at the exact EP line where the dependency is needed
 ```
 
 # Skill Invocation Reliability

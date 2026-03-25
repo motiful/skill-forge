@@ -1,10 +1,10 @@
 ---
 name: skill-format
-description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file three-layer format (skill-forge internal convention), Positional Test (replaces Content Audience Check), content splitting rules, alignment validation, and cross-platform compatibility.
+description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file module model (EP=interface, section=implementation, reference=imported module), positional test, content splitting rules (batch principle, non-overlapping ownership), alignment validation, and cross-platform compatibility.
 ---
 
 ```
-validate(file) → format_findings[]
+validate_format(file) → format_findings[]
 
 if SKILL.md:
     check: standard frontmatter (name, description, license, metadata)
@@ -15,7 +15,23 @@ if reference file:
     check: Execution Procedure present (pseudocode block)
     check: EP signature declares input/output
     check: Content sections map to EP lines (alignment validation)
-positional test: HITL context → stays, calibrating → stays, homeless → docs/README
+positional test: each section serves an EP line → stays. No EP line → docs/README
+
+review_reference(file) → content_findings[]
+
+check: three-layer format (frontmatter + EP + content)
+positional test: each paragraph → which EP line? (not section level)
+check: parent SKILL.md has invocation point for this module's EP (referenced ≠ invoked)
+check: terminology consistent with parent SKILL.md
+check: cross-references resolve
+check: no hardcoded paths
+check: line count reasonable (< 300 or has TOC)
+
+plan_content_split(file) → split_recommendation
+
+if independent module (own interface + own responsibility + changes independently) → reference
+if tightly coupled to parent EP (one call site, no own interface) → section
+if mixed responsibilities → split regardless of length
 ```
 
 # SKILL.md and Reference File Format Specification
@@ -29,7 +45,7 @@ positional test: HITL context → stays, calibrating → stays, homeless → doc
   - [Positional Test](#positional-test)
   - [Context Budget](#context-budget)
 - [Reference File Format](#reference-file-format)
-  - [Philosophy](#philosophy)
+  - [Module Model](#module-model)
   - [Three Layers](#three-layers)
   - [Reference Frontmatter](#reference-frontmatter)
   - [Execution Procedure](#execution-procedure)
@@ -99,18 +115,18 @@ If you're building a CC-only skill and don't care about cross-platform portabili
 
 ### Positional Test
 
-Every content block in SKILL.md (and in reference files) must pass the positional test:
-**Can this content be placed at a specific point in the Execution Procedure?**
+Every paragraph in SKILL.md (and in reference files) must pass the positional test:
+**Which EP line does this content serve?**
 
-Three ways to pass:
+Can name one → keep, placed near that EP line.
+Cannot → move to docs/ or README.
+
+Three common ways content serves an EP line:
 1. **Execution logic** — the content IS an EP operation (condition, assertion, step)
-2. **Calibrating context** — the content helps the AI judge a specific condition more accurately
+2. **Calibrating context** — helps the AI judge a specific condition more accurately
    (e.g., "3-5 skills ~ 15K-25K tokens" calibrates the "too many dependencies" threshold)
-3. **HITL context** — the content supports a `report to user (HITL)` step
+3. **HITL context** — supports a `report to user (HITL)` step
    (e.g., explaining impact so the user can approve/reject a finding)
-
-Content that passes → stays, placed at the EP point it serves.
-Content that fails (no EP point serves it) → docs/ or README.
 
 **Common violations:**
 - Concept explanations without a corresponding EP condition → translate to a Rule or move out
@@ -139,11 +155,25 @@ Count lines that are: table rows with check actions, numbered/bulleted process s
 
 ## Reference File Format
 
-### Philosophy
+### Module Model
 
-**Skills are code. The LLM is the compiler.** Structured natural language → LLM → tool calls, file edits, code. This is mechanism, not metaphor.
+A skill file is a software module. This applies to both SKILL.md and every reference file:
 
-References are **modules** in this compilation model. SKILL.md is the main program. Each reference is a callable unit with a declared interface (EP). A reference without an EP is a source file without exports — the compiler can process it, but unreliably.
+| Programming | Skill file |
+|---|---|
+| Module | File (SKILL.md or reference) |
+| Interface / signature | EP (pseudocode block) |
+| Implementation | Content sections |
+| Inline function | Section in the same file — tightly coupled, consumed at one call site |
+| Imported module | Reference file — independent concern, own interface, may have multiple callers |
+| Function call | EP line referencing a section (`# see X section`) or module (`# references/X.md`) |
+
+**EP owns control flow** — sequence, conditions, gates, module calls.
+**Sections own domain knowledge** — standards, rules, definitions, details, examples.
+
+Section format is unconstrained: tables, prose, code blocks, decision trees, examples. Whatever form fits the knowledge. Sections can reference other modules (e.g., a table row pointing to a reference file for deeper detail on one item).
+
+SKILL.md is the entry point (main program). References are imported modules. Both have the same three-layer structure. A reference without an EP is a module without an interface — the caller can read it, but cannot reliably execute it as a procedure.
 
 ### Three Layers
 
@@ -174,14 +204,25 @@ description: Complete scope description of this module — what it validates, de
 
 ### Execution Procedure
 
-Pseudocode block after frontmatter, before the first `##` section. Always present. Signature line (first line) declares input/output: `validate(skill_md) → findings[]`. Structured natural language, not strict syntax. HITL steps marked inline: `(HITL)`. 2-10 lines typical, no artificial limit.
+Pseudocode block after frontmatter, before the first `##` section. Always present. Structured natural language, not strict syntax. HITL steps marked inline: `(HITL)`. 2-10 lines typical per entry, no artificial limit.
+
+**Multiple entry points**: A reference file can declare multiple EP entries — like a module exporting multiple functions. Each entry has its own signature line. Use when one file serves multiple callers or steps (e.g., validate-time + create-time). Parent calls whichever entry applies to its current step.
+
+**Signature naming convention:**
+- Use descriptive verb (or compound verb for multi-step): `discover_and_classify`, `detect_and_create`, `validate_and_apply` — not `lookup`, `check`, `run`
+- Declare explicit result type: `→ installed | blocked`, `→ rule_skill_spec | nothing` — not `→ bool`, `→ result`
+- Multi-step flows use compound verbs: `validate_and_apply` (not just `validate` when it also applies)
+- Name should tell the caller what happens without reading the body
 
 ### Content Rules
 
-- Each `##` Section corresponds to one or more EP lines
+Sections are the **implementation** of EP lines — the domain knowledge that makes each EP line actionable. In the module model, a section is an inline function: defined where it's used, consumed at one call site.
+
+- Each `##` section serves one or more EP lines (Positional Test)
+- No orphan sections (content not mapped to any EP line)
+- Format is unconstrained — tables, prose, code, lists, decision trees, examples
 - **Inline Why**: follows the rule it serves, 1-2 lines max. Self-evident rules need no Why
-- No orphan Sections (content not mapped to any EP line)
-- Tables, lists, templates, pseudocode — whatever form fits
+- Sections can reference other modules (a table row pointing to a reference file for detail on one item)
 
 ### HITL Convention
 
@@ -191,7 +232,7 @@ Content supporting HITL presentation — impact explanations, decision context �
 
 ### Alignment Validation
 
-Mechanical EP ↔ Content alignment check, run during Content Review:
+Mechanical EP ↔ Content alignment check, run during Validation (Quality):
 
 ```
 for each reference file:
@@ -203,30 +244,47 @@ for each reference file:
 
 ## Content Splitting Rules
 
-**SKILL.md is the index and decision tree. References are the knowledge base.**
+In the module model: SKILL.md is the main program, references are imported modules, sections are inline implementations.
 
-- SKILL.md answers: *what to do, in what order, under what conditions*
-- References answer: *what specifically to check, how to check it, how to judge the result*
+- **SKILL.md** answers: *what to do, in what order, under what conditions* (the orchestrator)
+- **References** answer: *what specifically to check, how to check it, how to judge the result* (independent modules)
+- **Sections** answer: *what does this specific EP step need to know?* (inline implementation)
 
-Split content into a reference file when it meets ALL three criteria:
-1. **EP-writability test** — you can write 2+ lines of meaningful Execution Procedure for it (input → operations → output). Can't write an EP = content is either too trivial (keep inline) or purpose too vague (clarify first)
-2. **Single responsibility** — the content covers one coherent concern that can be understood on its own
-3. **Different change cadence** — you'd update this content independently of the process flow
+### When to Extract a Section into a Reference
 
-**Do NOT split** when you can't write an EP for it, content is tightly coupled to the process flow (report templates, decision tables), or would require the reader to constantly jump back to SKILL.md.
+Extract when the content is an **independent module**: it has its own meaningful interface (you can write an EP signature with input → operations → output), its own coherent responsibility, and changes independently of the parent's control flow.
 
-**Split early** when a file mixes multiple responsibilities, even if it is under 300 lines. Mixed examples:
+Keep inline when the content is **tightly coupled** to the parent EP: consumed at exactly one point, no meaningful interface of its own, or extracting would require constant back-and-forth with the parent.
+
+**Split early** when a file mixes multiple responsibilities, even if under 300 lines. Mixed examples:
 - literal templates + writing rules
 - validation logic + publishing strategy
 - setup policy + troubleshooting appendix
 
-**Index quality checklist:**
+### Batch Principle
+
+When an EP step processes multiple independent items (e.g., 30 validation checks), put them in **one section table** rather than 30 separate EP lines or 30 separate references. The AI reads the table once and processes all items — more efficient than navigating 30 individual modules.
+
+Extract individual items to references only when an item has its own complex logic (multi-step EP, conditional branches, its own domain knowledge).
+
+### Non-Overlapping Ownership
+
+When multiple EP steps touch the same type of target (e.g., two validation phases both checking reference files), each target must be **owned by exactly one step**. No file or artifact should be checked by two different steps for the same concern.
+
+If two steps overlap on a target:
+- **Consolidate** the checks into one step, or
+- **Split by target**: each file type owned by one step (e.g., Step A owns SKILL.md, Step B owns all other files), or
+- **Split by concern**: structural checks vs semantic checks — but only when a gate separates the two steps (Step A must pass before Step B starts)
+
+### Index Quality
+
 - Every reference pointer in SKILL.md states what the reference contains and when to read it
 - Conditional references have explicit gateways: "If X applies → see references/Y.md"
 - Always-needed references have direct pointers: "Detailed checks are in references/Y.md"
 - SKILL.md alone tells the AI the complete process flow — references fill in domain details
 
-**Thresholds:**
+### Thresholds
+
 - SKILL.md body: under 500 lines
 - Reference file under 100 lines: TOC not needed
 - Reference file 100-300 lines: add a TOC, no split needed purely for length

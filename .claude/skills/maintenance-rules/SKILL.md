@@ -18,6 +18,10 @@ Constraints and procedures for maintaining the skill-forge repository.
 - MUST update "What's Inside" tree in README when references/ changes
 - MUST NOT include content that fails the Positional Test (see references/skill-format.md)
 - MUST verify reference files follow three-layer format (frontmatter + EP + aligned Content)
+- MUST keep examples in standard-defining references generic — no skill-forge-specific labels in universal patterns
+- MUST verify SKILL.md pseudocode function names align with sub-module EP entry signatures
+- MUST verify lossless delegation when moving inline criteria to a sub-module: map every deleted parent line to a sub-module EP line. Unmapped criteria → add to sub-module first, then remove from parent
+- MUST verify every defined standard has a corresponding enforcement check in Validation (Structure, Quality, or Publishing). A standard without a check is dead weight — either add the check or remove the standard
 
 ## Platform Registry Updates
 
@@ -73,8 +77,8 @@ Protocol (run after significant changes):
 
 - SKILL.md description matches README positioning
 - "What's Inside" tree matches actual references/ directory
-- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()"
-- Current terminology: "Engagement Principles", "Execution Procedure", "Core Validation", "Content Review", "Repo Hygiene", "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Forge", "Publish" (as Step 4 of forge), "Checkpoint" (assert checkpoint() at major step boundaries)
+- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()", "checkpoint()", "content block" (replaced by "paragraph"), "register_locally()" (replaced by "detect_and_register()" per platform-registry.md EP), "read_repo_meta()" (replaced by "validate_and_apply()" per github-metadata.md EP), "lookup()" (replaced by "detect_and_register()"), "validate(repo_meta)" (replaced by "validate_and_apply()"), "detect(skill_md) → bool" (replaced by "assess_procedure_need() → workflow_skill | reference_only"), "design()" (replaced by "assess_config_needs()" / "assess_and_guide()"), "audit()" (replaced by "audit_conditional_branches()"), "create(skill_repo)" (replaced by "assess_and_create()"), "Execute reference" / "Read reference" (replaced by unified "reference" — file structure tells AI what to do), "Execute sub-module EPs" (replaced by "Follow module interfaces" — Engagement Principle #8), "EP-writability test" (replaced by module-based judgment: independent module with own interface → reference), "Parameterizing" (never adopted — sections are implementation, not parameters), "Core Validation" / "Content Review" / "Repo Hygiene" (replaced by unified "Security" gate + "Validation" section with Structure/Quality/Publishing sub-groups — categorize findings not execution)
+- Current terminology: "Engagement Principles", "Execution Procedure", "Security" (pre-flight gate), "Validation" (one section: Structure + Quality + Publishing), "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Module Model" (EP=interface, Section=implementation, Reference=imported module), "Forge", "Publish" (as Step 4 of forge), "review_and_update_plan" (assert review_and_update_plan() at major step boundaries), "Follow module interfaces" (Engagement Principle #8), "Batch Principle", "Non-Overlapping Ownership", "EP Comment Discipline", "Step Granularity", "Categorize findings not execution", "Lossless delegation" (maintenance practice)
 
 ## Update Triggers
 
@@ -89,6 +93,7 @@ Protocol (run after significant changes):
 
 ## Changelog (max 5 entries)
 
+- 2026-03-25: **v8.0 — Module Model architecture.** EP=interface, Section=implementation, Reference=imported module. Added EP Comment Discipline, Step Granularity, Batch Principle, Non-Overlapping Ownership. Dropped Execute/Read reference distinction. Pseudocode cleaned: decision logic converted from comments to code. Merged Core Validation + Content Review + Repo Hygiene into Security gate + unified Validation (Structure/Quality/Publishing). Lossless delegation moved to maintenance-rules.
 - 2026-03-23: **v7.2 — Unified forge entry.** Merged Review + Create + Push into single `forge()` EP. Publish is Step 4 (optional, trigger-gated). EP capability parity enforced in skill-format.md Three Layers table.
 - 2026-03-22: **v7.1 — Three-layer reference format.** References get frontmatter + EP. Content Audience Check → Positional Test. reference-format.md merged into skill-format.md.
 - 2026-03-20: **v7.0 — Procedure-first architecture.** SKILL.md restructured: pseudocode Execution Procedure as primary directing layer, deleted Modes + Step Reference intermediate sections. Plan = checklist (no separate output checklist). One-hop info flow (pseudocode → references/). 499→317 lines.

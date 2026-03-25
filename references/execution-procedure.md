@@ -1,15 +1,15 @@
 ---
 name: execution-procedure
-description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the five required components (pseudocode, plan-as-checklist, GATE, inline references, directing vs content separation), and common anti-patterns.
+description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the seven components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, EP vs content separation), and common anti-patterns.
 ---
 
 ```
-detect(skill_md) → needs_procedure (bool)
+assess_procedure_need(skill_md) → workflow_skill | reference_only
 
-if ordered multi-step flow with dependencies → true
-if external tool calls at specific points → true
-if step order matters (reorder causes failure) → true
-if purely reference material (lookup, checklist) → false
+if ordered multi-step flow with dependencies → workflow_skill
+if external tool calls at specific points → workflow_skill
+if step order matters (reorder causes failure) → workflow_skill
+if purely reference material (lookup, checklist) → reference_only
 ```
 
 # Execution Procedure Pattern
@@ -28,7 +28,7 @@ Skills that are purely reference material (lookup tables, style guides, validati
 
 ## The Pattern
 
-Five components, all required for workflow skills:
+Seven components, all required for workflow skills:
 
 ### 1. Pseudocode Procedure
 
@@ -48,13 +48,13 @@ def main_workflow(input):
     # STEP 3: Execute
     for item in plan.items:
         process(item)
-        assert checkpoint(plan_path, item, "processed")
+        assert review_and_update_plan(plan_path, item, "processed")
 
         Skill("other-skill", item.path)           # explicit Skill() call
-        assert checkpoint(plan_path, item, "reviewed")
+        assert review_and_update_plan(plan_path, item, "reviewed")
 
         assert done(item)
-        checkpoint(plan_path, item, "done")
+        review_and_update_plan(plan_path, item, "done")
 ```
 
 ### 2. Plan = Checklist
@@ -66,19 +66,18 @@ The runtime plan file IS the execution checklist. Not two separate concepts.
 | **Procedure** (in SKILL.md) | Template — defines what steps exist |
 | **Plan** (runtime file) | Instance — tracks progress through those steps |
 
-The plan is created fresh each run with per-item sub-steps matching the checkpoint boundaries:
+The plan is created fresh each run with per-item sub-steps matching the `review_and_update_plan` boundaries:
 
 ```markdown
 - [ ] 1. Item A
-  - [ ] validated
-  - [ ] readme-craft
-  - [ ] self-review
+  - [ ] step-1-label    # matches first review_and_update_plan() call
+  - [ ] step-2-label    # matches second
   - [ ] done
 ```
 
-Plan sub-steps correspond 1:1 to `checkpoint()` calls in the EP. Each checkpoint reads the plan, updates status, and asserts success before the next major step begins.
+Plan sub-steps correspond 1:1 to `review_and_update_plan()` calls in the EP.
 
-### 3. GATE Assertions and Checkpoints
+### 3. GATEs and Plan Progress
 
 `assert` statements between dependent steps force completion before proceeding:
 
@@ -87,36 +86,65 @@ write_plan(plan_path, data)
 assert file_exists(plan_path)          # cannot proceed without plan
 ```
 
-GATEs prevent the most common drift pattern: skipping prerequisite steps and jumping to execution.
-
-**Checkpoints** are GATEs applied to plan progress. Place `assert checkpoint()` at **major step boundaries only** — between phases that produce distinct deliverables (e.g., validation → readme-craft → self-review), not between every sub-task.
+**`review_and_update_plan`** — GATEs applied to plan progress. The name IS the instruction: read the plan file, update the checkbox, assert success. Place at **major step boundaries only** — between phases that produce distinct deliverables, not between every sub-task.
 
 ```python
-# checkpoint = read plan + update status + assert success
-assert checkpoint(plan_path, item, "validated")   # after all validation + fixes
-assert checkpoint(plan_path, item, "readme-craft") # after readme-craft completes
-assert checkpoint(plan_path, item, "self-review")  # after self-review completes
-checkpoint(plan_path, item, "done")                # final — no assert needed
+assert review_and_update_plan(plan_path, item, "step-1")   # after first major phase
+assert review_and_update_plan(plan_path, item, "step-2")   # after second major phase
+review_and_update_plan(plan_path, item, "done")             # final — no assert needed
 ```
 
-**Why checkpoints work**: LLMs reliably follow `assert` (GATE) but skip suggestions. `review_plan()` and `update_plan()` without assert are suggestions — they will be ignored when conversation momentum carries the agent forward. Wrapping plan updates in `assert` makes them mandatory.
+**Where to place**: between steps that each take significant effort and produce a distinct result. If two steps always run back-to-back with no decision point between them, a single review_and_update_plan after both is sufficient.
 
-**Where to place checkpoints**: between steps that each take significant effort and produce a distinct result. If two steps always run back-to-back with no decision point between them, a single checkpoint after both is sufficient.
+### 4. Module References
 
-### 4. Inline References (One-Hop)
-
-Comments in pseudocode point directly to reference files:
+Pseudocode references two kinds of targets:
 
 ```python
-config = read_or_create_config()       # references/onboarding.md
-findings = core_validate(item)         # see Core Validation section
+findings = validate_format(item)       # references/skill-format.md  (reference file)
+findings = validate(item)              # see Validation section  (inline section)
+template = read("references/templates.md")
 ```
 
-One hop: pseudocode → reference file. No intermediate layer.
+**Reference file** — an independent module. Read the file and follow its three-layer structure: if it has an EP, follow the EP; if it only has content, read the content. Function name in parent aligns with the module's EP entry signature.
 
-### 5. Execution Procedure vs Content Separation
+**Inline section** — an implementation block in the same file. The EP line says "see X section"; the section provides the domain knowledge that EP line needs.
 
-Both live in the same file (SKILL.md or reference), but in different formats. This is the three-layer model applied to workflow structure:
+Both are one hop from the EP line. No intermediate layer. No inline summary of a module's standards — the module's own EP is the authority.
+
+**Sub-module EP = complete business flow.** Skills share one context window — the AI retains parent context when entering a sub-module. Sub-module EPs should own their entire domain: validate → gate → execute. Parent orchestrates sequence (when to call); sub-module owns domain logic (what to check, what to do).
+
+### 5. EP Comment Discipline
+
+EP pseudocode comments are **annotations**, not instructions. If removing a comment would change the EP's behavior, it is not a comment — it is pseudocode or section content in disguise.
+
+**Allowed comments:**
+- Reference pointer: `# references/X.md` or `# see Section Name`
+- Constraint: `# exit non-zero → STOP`
+- Calibrating hint (≤ 2 lines): helps the AI execute the adjacent EP line more accurately
+
+**Not allowed as comments — extract to pseudocode or section:**
+- Decision logic spanning 3+ lines (classification maps, dispatch tables)
+- Inline summaries of what a sub-module checks
+- Multi-line instructions the AI must follow
+
+### 6. Step Granularity
+
+When to split one EP step into two:
+
+```
+Does step B depend on step A's result (gate between them)?
+  YES → two EP steps: A, assert, B
+  NO  → one EP step, detail in section
+```
+
+A section can contain ordered sub-steps within one EP step (e.g., "fix critical, then fix warnings"). But if those sub-steps have independent gates, conditions, or Skill() calls that the parent EP needs to know about → elevate them to the EP.
+
+**Corollary — categorize findings, not execution.** When one EP step produces multiple types of findings (e.g., structural issues, quality issues, publishing issues), don't split into separate EP steps per finding type. Run one pass, tag each finding by category. Categories organize the **report** (grouped findings for the user) and **fix priority** (which category to fix first), not the execution flow. Separate EP steps are only justified when a gate separates them.
+
+### 7. Execution Procedure vs Content Separation
+
+Both live in the same file (SKILL.md or reference), but in different formats. In the module model: EP is the interface, sections are the implementation.
 
 | Layer | Format | Position | Agent behavior |
 |-------|--------|----------|----------------|
@@ -131,8 +159,10 @@ The agent follows the pseudocode (Execution Procedure) and consults Content sect
 |-------------|-------------|-----|
 | Natural language numbered steps | Treated as knowledge, not instructions | Convert to pseudocode |
 | Separate "output checklist" from "plan" | Duplication → one drifts | Plan IS the checklist |
-| Two-hop references (step → intermediate section → reference file) | Information loss at each hop | One-hop: pseudocode → reference |
+| Two-hop references (step → intermediate section → reference file) | Information loss at each hop | One-hop: pseudocode → section or reference |
 | Methodology explanation mixed with execution instructions | Agent absorbs execution as knowledge | Pseudocode at top, explanation below |
 | Resumable plan files across runs | Stale state from previous context | Fresh plan each run |
-| `review_plan()` / `update_plan()` as suggestions | LLM skips non-GATE actions when conversation momentum carries forward | Use `assert checkpoint()` — makes plan update mandatory |
-| Checkpoint on every sub-task | High friction, low value — agent starts skipping all of them | Checkpoint only at major step boundaries (distinct deliverables) |
+| Plan update without `assert` wrapper | Skipped when conversation momentum carries forward | `assert review_and_update_plan()` — assert makes it mandatory |
+| review_and_update_plan on every sub-task | High friction — agent starts skipping all of them | Major step boundaries only (distinct deliverables) |
+| Parent EP summarizes sub-module standards inline | Agent uses summary, never enters sub-module — precision loss | Reference the module; its own EP is the authority |
+| Decision logic as EP comments (3+ lines) | Looks optional, AI may skip comments | Convert to pseudocode (if/elif) or extract to section table |

@@ -115,14 +115,14 @@ When ambiguous, default to **separate standalone repos** — easier to install s
 
 ## Steps
 - [ ] 1. Validate .claude/skills/booth/ (in-place)
-  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Validation (SKILL.md Step 3)
   - [ ] Fix Critical/Warning issues
   - [ ] Skill("readme-craft", "review <path>")
   - [ ] readme-quality.md skill-specific checks
   - [ ] Skill("self-review", "<path>")
   - [ ] Verify Local Ready
 - [ ] 2. Validate .claude/skills/deck/ (in-place)
-  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Validation (SKILL.md Step 3)
   - [ ] Fix Critical/Warning issues
   - [ ] Skill("readme-craft", "review <path>")
   - [ ] readme-quality.md skill-specific checks
@@ -130,7 +130,7 @@ When ambiguous, default to **separate standalone repos** — easier to install s
   - [ ] Verify Local Ready
 - [ ] 3. Graduate .claude/skills/formatter/ → ~/skills/formatter/
   - [ ] Copy to skill_workspace + git init
-  - [ ] Core Validation (SKILL.md Step 3)
+  - [ ] Validation (SKILL.md Step 3)
   - [ ] Fix Critical/Warning issues
   - [ ] Skill("readme-craft", "review <path>")
   - [ ] readme-quality.md skill-specific checks
@@ -140,7 +140,7 @@ When ambiguous, default to **separate standalone repos** — easier to install s
 - [ ] 5. Convert .claude/rules/api.md → rule-skill
   - [ ] Skill("rules-as-skills")
   - [ ] Create rule-skill
-  - [ ] Core Validation + Fix + Skill("readme-craft") + Skill("self-review") + Local Ready
+  - [ ] Validation + Fix + Skill("readme-craft") + Skill("self-review") + Local Ready
 
 ## Progress
 Completed: 0 / 5

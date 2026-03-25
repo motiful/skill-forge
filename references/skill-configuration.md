@@ -4,9 +4,9 @@ description: User preferences pattern for skills that need configurable behavior
 ---
 
 ```
-design(preferences) → config_spec
+assess_config_needs(skill_scope) → config_spec | none
 
-if no user-adjustable behavior → skip config
+if no user-adjustable behavior → none
 location: ~/.config/<skill-name>/config.md
 litmus test: delete config → skill rebuilds defaults → still works?
 first-run: detect auto-discoverable values → ask remainder → confirm (HITL) → write

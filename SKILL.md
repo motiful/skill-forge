@@ -4,7 +4,7 @@ description: 'Create, validate, scan for security issues, and review skills as p
 license: MIT
 metadata:
   author: motiful
-  version: "7.2"
+  version: "8.0"
 ---
 
 # Skill Forge
@@ -22,6 +22,7 @@ These rules always apply. Read them before acting.
 5. **One skill at a time for changes** — diagnose in batch, modify one by one with user confirmation
 6. **Local-ready = publish-ready** — publishing only sends to remote, never re-validates
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
+8. **Follow module interfaces** — when the procedure calls a reference file, read the file and follow its EP. The module's own EP is the authority, not any inline summary in the parent
 
 ## Execution Procedure
 
@@ -36,12 +37,7 @@ def forge(target):
     # STEP 0: Environment
     run("scripts/setup.sh")                            # exit non-zero → STOP
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
-    # First use? Onboard: detect github_org, ask skill_workspace, write config
-    # references/onboarding.md — ask workspace path, don't assume default
-    # Scan user conventions: forge config → CLAUDE.md/AGENTS.md → platform rules
-    # Follow user's conventions; provide defaults only if none exist
-    # Positioning: skill-forge creates independent, publishable repos
-    # User wants quick project-internal skill? → guide to platform's built-in creator
+    if not config: assess_and_guide(target)            # references/onboarding.md
 
     # STEP 1: Assess
     items = discover(target)                           # traverse FULL project tree
@@ -49,42 +45,26 @@ def forge(target):
     # references/project-audit.md — discovery signals + classification framework
 
     if items:                                          # --- Review path ---
-        classified = classify(items)
-        # in-repo    → validate in-place, relative cross-vendor symlinks
-        # product    → validate + check distribution structure
-        # personal   → proactive graduation to skill_workspace (don't ask, just do)
-        # external   → inventory only, do not touch
-        # rules      → always-on: keep as-is. trigger-based: convert to rule-skill
-        # Ambiguous? → ask user once with your reasoning
+        classified = classify(items)                   # references/project-audit.md
 
     else:                                              # --- Create path ---
-        context = detect_existing()
-        # Scan: .claude/skills/*/SKILL.md, skill/SKILL.md, skill_workspace/*/SKILL.md
-        # Also: conversation context, explicit user references
-        # One match → proceed. Multiple → ask. None → ask user:
-        if not context:
-            ask_user("What does this skill do? When should it trigger?")
+        context = detect_existing()                    # scan skills dirs + conversation
+        if len(context) > 1: context = ask_user("Which existing skill?")
+        elif not context: ask_user("What does this skill do? When should it trigger?")
         search_ecosystem(target)                       # npx skills find / skills.sh
-        # Good match? → depend on it (setup.sh). Partial? → fork. None? → create
-        capabilities = detect_capabilities(context)    # not optional — detect and act
-        # dependencies?    → add setup.sh              (references/installation.md)
-        # invokes skills?  → Skill() pattern           (references/skill-invocation.md)
-        # onboarding?      → first-use flow            (references/onboarding.md)
-        # 3+ MUST/NEVER?   → auto-create rule-skill    (references/rule-skill-pattern.md)
-        # >300 lines/3+ deps? → maintenance-rules      (references/maintenance-guide.md)
-        # multi-step workflow? → Execution Procedure    (references/execution-procedure.md)
-        # Rule-Skill Split is detection-driven: if detected, create automatically
-        # Location: existing path → in-place. New → skill_workspace/<name>/
-        # One skill → SKILL.md at root. Coupled set → references/publishing-strategy.md
+
+        caps = detect_capabilities(context)            # not optional — detect and act
+        if caps.deps:      install(caps.deps)          # references/installation.md
+        if caps.invokes:   write_call_site(dep, loc)   # references/skill-invocation.md
+        if caps.onboard:   assess_and_guide(scope)     # references/onboarding.md
+        if caps.rules:     detect_and_create(skill_md) # references/rule-skill-pattern.md
+        if caps.complex:   assess_and_create(repo)     # references/maintenance-guide.md
+        if caps.workflow:  assess_procedure_need(md)    # references/execution-procedure.md
+
         path = f"{config.skill_workspace}/{name}/"
-        write_skill_md(path, context, capabilities)    # references/skill-format.md
-        # Write for AI agents, not humans. Body < 500 lines. Bake capabilities in:
-        # Installation → setup.sh + Step 0. Invocation → explicit Skill() at every call site.
-        # Onboarding → first-use guidance. Rule-Skill → Skill("rules-as-skills") + paired skill.
-        # Maintenance → in-repo .claude/skills/maintenance-rules/ + cross-vendor symlink.
-        # Workflow → Execution Procedure pseudocode + plan-as-checklist + GATE assertions.
-        write_artifacts(path)                          # README, LICENSE, .gitignore
-        # README via Skill("readme-craft"). Templates: references/templates.md
+        write_skill_md(path, context, caps)            # references/skill-format.md
+        Skill("readme-craft", f"create {path}")        # references/templates.md for skeletons
+        write_artifacts(path)                          # LICENSE, .gitignore
         items = [SkillItem(path)]
 
     # STEP 2: Plan — GATE: file must exist before Step 3
@@ -92,44 +72,35 @@ def forge(target):
     delete_if_exists(plan_path)                        # always fresh, no resume between runs
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
-    # Plan = instantiated procedure with per-item SUB-STEPS:
-    #   - [ ] 1. Validate X
-    #     - [ ] validated (Core Validation + Content Review + Repo Hygiene + Fix)
-    #     - [ ] readme-craft
-    #     - [ ] self-review
-    #     - [ ] done (Local Ready)
-    # Full template: references/project-audit.md
-    # Checkpoints between major steps — see references/execution-procedure.md
+    # Plan template with per-item sub-steps: references/project-audit.md
+    # review_and_update_plan between major steps: references/execution-procedure.md
 
     # STEP 3: Validate & Fix
-    # Priority: security > in-repo > personal > product > rules
+    plan.items.sort(priority="security > in-repo > personal > product > rules")
     for item in plan.items:
 
         # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
-        # → additional checks on top of Core Validation
-        findings = core_validate(item)                 # see Core Validation section
-        findings += content_review(item)               # see Content Review section — read EVERY file
-        findings += repo_hygiene(item)                 # see Repo Hygiene section
-        report_to_user(findings)
-        # Severity: Critical = must fix. Warning = user confirms. Info = report only
+        if security_scan(item).has_critical: report_and_block()  # see Security section
+        findings = validate(item)                      # see Validation section
+        report_to_user(findings)                       # findings grouped by category
 
         fix_critical(findings)                         # mandatory
         if user_approves: fix_warnings(findings)
-        assert checkpoint(plan_path, item, "validated")
+        assert review_and_update_plan(plan_path, item, "validated")
 
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
         if not item.is_in_repo:
             Skill("readme-craft", f"review {item.path}")   # see Fix Phase
-            assert checkpoint(plan_path, item, "readme-craft")
+            assert review_and_update_plan(plan_path, item, "readme-craft")
 
             Skill("self-review", item.path)                # see Fix Phase
-            assert checkpoint(plan_path, item, "self-review")
+            assert review_and_update_plan(plan_path, item, "self-review")
 
-        register_locally(item)                         # references/platform-registry.md
+        detect_and_register(item)                      # references/platform-registry.md
         if not item.has_git: git_init(item)
         assert local_ready(item)                       # see Local Ready Definition
-        checkpoint(plan_path, item, "done")
+        review_and_update_plan(plan_path, item, "done")
 
     # STEP 4: Publish (optional — only when trigger includes publish intent)
     # Triggers: "publish this skill", "push this to GitHub", "put this on GitHub"
@@ -137,10 +108,7 @@ def forge(target):
         confirm_with_user(org=config.github_org, name=skill_name, visibility="public")
         run(f"gh repo create {org}/{name} --public --source=. --push")
         # Non-GitHub: git remote add origin <url> && git push -u origin main
-        meta = read_repo_meta(skill_path)              # references/github-metadata.md
-        assert meta.description and len(meta.description) <= 350
-        assert 8 <= len(meta.topics) <= 20
-        apply_github_metadata(org, name, meta)         # gh repo edit
+        validate_and_apply(skill_path)                 # references/github-metadata.md
         update_forge_config(skill_name)                # add to Published Skills
         # CC Market: check cc_market in config. Not set? → ask, recommend skip
         print(f"Install with: npx skills add {org}/{name}")
@@ -150,69 +118,82 @@ def forge(target):
 
 If your platform supports sub-agents (e.g., Claude Code `Agent` tool): setup.sh and discovery can run in parallel; independent items can validate in parallel; readme-craft then self-review are sequential.
 
-## Core Validation
+## Security
 
-Before running checks, scan the target project for its own quality standards (`CLAUDE.md`, `AGENTS.md`, `.editorconfig`, rules directories). These become additional criteria on top of the table below. Report violations attributed to the project's own standard.
+Pre-flight gate. If Critical findings → block push, stop validation.
 
 | Check | Criteria |
 |-------|----------|
-| Frontmatter fields | Only standard top-level fields: `name`, `description`, `license`, `metadata`, `compatibility`, `allowed-tools`. Put CC-specific or custom fields inside `metadata` |
-| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. Must not start/end with hyphen, no consecutive hyphens (`--`), must match parent directory name |
-| `description` | Present, < 1024 chars, **single-line** (no YAML multi-line `>-` or `|` — causes skills to silently disappear in CC). If value contains `: ` (colon-space), must be quoted — strict YAML parsers (e.g. Codex) will reject unquoted colons as mapping indicators |
-| Description coverage | Does the description mention the key trigger scenarios from the SKILL.md body? For each major capability or workflow in the body, check if the description includes a corresponding trigger phrase. Report gaps as warnings. Report description claims absent from body as over-promises |
-| Body | Under 500 lines, has meaningful content (not just TODOs) |
-| References exist | All files referenced in SKILL.md actually exist. Orphan files (in references/ but not referenced) → Warning |
-| No junk files | For multi-skill repos: no README.md, CHANGELOG.md, or docs inside `skills/<name>/`. For single-skill repos: SKILL.md, references/, assets/, scripts/ at root alongside README.md and LICENSE is the expected structure |
-| Dependencies | If the skill declares dependencies, verify `scripts/setup.sh` exists and handles each one. Dependencies must be installed, not optional |
-| Invocation reliability | For each skill dependency: does every invocation point use explicit `Skill(...)` syntax + output gate? Natural-language invocations ("invoke X", "run X") are flagged. See `references/skill-invocation.md` |
-| Runtime write | Skill directory should have no runtime-written data files. Flag data/, cache/, or any non-published file |
-| Assets misuse | `assets/` only holds AI-consumed source material. Logo, screenshots, repo infrastructure belong in `.github/` or root level |
-| Meta-skill contamination | Skill repo should not contain tooling skills (skill-forge, skill-creator) as subdirectories. Remediation: `rm -rf <path>` then `npx skills add <org>/<name> -g` |
-| Collection context budget | For multi-skill repos: 15+ skills → warn about context flooding. Recommend selective install (`--skill`) in README |
-| Collection name collision | For multi-skill repos: flag generic names likely to collide. Recommend namespacing (`<domain>-<name>`) |
-| Terminology consistency | Extract core terms. Check for: conflicts with skill name, different meanings across sections, conflicts with platform concepts. Report — don't auto-fix |
-| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard dirs referenced by SKILL.md → Warning. Not referenced → not skill content, don't flag |
-| Script quality | No file >500 lines; CLI parsing separated from business logic. See `references/script-quality.md` |
-| README quality | Deferred to Fix Phase. Flag only obvious issues (missing file, stale content). Full assessment after readme-craft, combined with `references/readme-quality.md` |
-| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback only |
-| Dependency mirroring | If SKILL.md declares dependencies, mirror them in README "Dependencies" section |
+| Leaked secrets | Scan for: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords, private keys (`-----BEGIN.*PRIVATE KEY-----`). **Critical — block push** |
+| Credential files | `.env`, `credentials.json`, `*.pem`, `*.key` tracked → **Critical** |
+| .gitignore coverage | `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files → Warning |
+
+## Validation
+
+One pass, read every file, check everything. Each finding tagged by category. Before running, scan the project for its own quality standards (`CLAUDE.md`, `AGENTS.md`, `.editorconfig`, rules directories) — these add to the checks below. Break per-file review into plan sub-tasks; use sub-agents for parallelism.
+
+**Severity**: Critical = must fix. Warning = user confirms. Info = report only.
+**Fix priority**: Structure first (reorganize), Quality second (improve content), Publishing last (polish).
+
+### Structure
+
+Organization, layout, file existence, dependencies.
+
+| Check | Criteria |
+|-------|----------|
+| Frontmatter fields | Standard top-level fields only: `name`, `description`, `license`, `metadata`, `compatibility`, `allowed-tools`. CC-specific inside `metadata` |
+| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. No start/end hyphen, no `--`, must match parent directory name |
+| `description` format | Present, < 1024 chars, **single-line** (YAML multi-line `>-`/`|` causes silent disappear in CC). If contains `: ` → must be quoted |
+| Body | Under 500 lines, meaningful content (not just TODOs) |
+| References exist | All SKILL.md references resolve. Orphan files → Warning |
+| Dependencies | `scripts/setup.sh` exists and handles each declared dependency |
+| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md → Warning |
+| No junk files | Correct structure for single-skill / multi-skill repos |
+| Assets location | AI-consumed source material only. Logo, screenshots → `.github/` |
+| Runtime write | No data/, cache/ in skill directory |
+| Meta-skill contamination | No forge/creator as subdirectories |
+| Collection context budget | 15+ skills → warn about context flooding |
+| Collection name collision | Generic names → recommend namespacing |
+
+### Quality
+
+SKILL.md + references + scripts + assets reviewed as **one unit**. Read SKILL.md first, follow module references, check coherence across all files.
+
+Shared checks (SKILL.md and every reference file):
+- Three-layer format + Positional Test + EP-Content alignment → `validate_format()` + `review_reference()` — `references/skill-format.md`
+- EP comment discipline — `references/execution-procedure.md` §5
+- Terminology consistency across all files
+
+| Check | Criteria |
+|-------|----------|
+| Description coverage | Description mentions key trigger scenarios from body. Gaps → Warning. Over-promises → Warning |
+| Description clarity | Standalone comprehensible to a stranger |
+| Invocation reliability | `validate_invocations(skill_md, deps)` — `references/skill-invocation.md` |
+| Graceful skip | `audit_conditional_branches(skill_md)` — `references/anti-graceful-skip.md` |
+| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md` |
+| Entry complexity | Multiple modes must produce different deliverables |
+| Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
+| In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
+| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md (EP pseudocode or Validation table). Listed in References section but never invoked → Warning: standard exists but isn't enforced |
+| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Warning |
+
+### Publishing
+
+External-facing presentation and packaging.
+
+| Check | Criteria |
+|-------|----------|
+| README quality | Deferred to Fix Phase (readme-craft). Flag only obvious issues. Full: `validate_readme()` — `references/readme-quality.md` |
+| Dependency mirroring | SKILL.md dependencies mirrored in README "Dependencies" section |
+| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback |
 | No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
 | LICENSE exists | Required for community platforms |
-| Description clarity | Description alone should tell a stranger what this skill does and when to use it |
-| Script documentation | If scripts exist, document what they do and what permissions they need |
-| Discoverability claims | Do not imply GitHub publication guarantees immediate listing or search placement |
-| Graceful skip | Conditional branches must have actions on both sides. Flag "if applicable" / "optionally" / "if exists" that suppress capabilities. See `references/anti-graceful-skip.md` |
-| Entry complexity | Multiple modes must produce different deliverables or follow different core workflows. Flag capability gaps between modes |
-| Execution Procedure | Workflow skills (ordered multi-step flow with dependencies between steps) without pseudocode Execution Procedure → Warning. See `references/execution-procedure.md` |
-| Reference format | Reference files follow three-layer format: frontmatter (name, description) + Execution Procedure (pseudocode with input/output signature) + Content. EP ↔ Content aligned. See `references/skill-format.md` |
-| GitHub metadata | `.github/repo-meta.yml` exists. Description ≤ 350 chars, aligns with README one-liner and SKILL.md description. Topics cover 3 tiers (Tier 1 universal, Tier 2 domain-researched, Tier 3 platform). See `references/github-metadata.md` |
-
-## Content Review
-
-Read **every file** in the skill repo. A skill is a codebase — validating SKILL.md alone is like reviewing main.py and assuming utils.py is fine. Break per-file review into plan sub-tasks; use sub-agents for parallelism.
-
-| File type | What to check |
-|-----------|---------------|
-| `references/*.md` | **Three-Layer Format**: frontmatter present (name, description), Execution Procedure present (pseudocode with input/output signature), Content sections map to EP lines. **Positional Test**: each content block must serve a specific EP line — HITL context stays, calibrating context stays, homeless content → docs/README. Also: terminology consistent with SKILL.md, cross-references resolve, no hardcoded paths, line count reasonable |
-| `scripts/*.sh` | Read and understand. Does it do what SKILL.md claims? Functional correctness, no dead code, no hardcoded paths, error handling for both outcomes (success/failure). See `references/script-quality.md` |
-| `docs/*.md` | For humans, so Positional Test does not apply. Check: accuracy vs SKILL.md claims, no stale content, no contradictions with current version |
-| `.claude/skills/**/SKILL.md` | In-repo skills: apply Core Validation recursively (frontmatter, description, body, terminology). Cross-vendor symlinks use relative paths |
-| `assets/` | Every file is referenced by SKILL.md or references/. Unreferenced assets → Warning. AI-consumed source material only |
-| `README.md` | Deferred to Fix Phase (readme-craft). Flag only obvious issues here |
+| Script documentation | If scripts exist, document what they do and permissions needed |
+| Discoverability claims | No implied guarantees of immediate listing or search placement |
+| GitHub metadata | `validate_and_apply(skill_path)` — `references/github-metadata.md` |
+| docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
+| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Warning |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
-
-**Severity**: Positional Test violations (homeless content) in references/ → Warning. Stale or contradictory docs/ → Warning. Script functional issues → Critical.
-
-## Repo Hygiene
-
-| Check | Criteria |
-|-------|----------|
-| Leaked secrets | Scan for: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords, private keys (`-----BEGIN.*PRIVATE KEY-----`). **Block push** until resolved |
-| .gitignore coverage | Verify: `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files. Flag tracked files matching these patterns |
-| Credential files | Warn if `.env`, `credentials.json`, `*.pem`, `*.key` are tracked |
-| Unnecessary files | Lock files without `scripts/` runtime, large media (>1 MB), build artifacts, IDE workspace files |
-
-**Severity**: Critical (secrets, credentials) — block push. Warning (gitignore, unnecessary files) — recommend, don't block.
 
 ## Fix Phase
 

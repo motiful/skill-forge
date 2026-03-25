@@ -4,13 +4,20 @@ description: Script file structure guidelines including line count thresholds, m
 ---
 
 ```
-validate(script_path) → findings[]
+validate_script(script_path) → findings[]
 
 check: line count (< 200 ideal, < 500 acceptable, > 500 needs split)
 check: responsibility count (> 3 → split)
 check: CLI parsing separated from business logic
 check: complexity indicators (functions > 15, nesting > 3)
 check: dependency policy (zero for pure computation)
+
+review_script(script_path, skill_md) → content_findings[]
+
+check: does it do what SKILL.md claims?
+check: functional correctness
+check: no dead code, no hardcoded paths
+check: error handling for both outcomes (success/failure)
 ```
 
 # Script Quality Standard

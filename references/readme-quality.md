@@ -4,13 +4,19 @@ description: Skill-specific README content standards that complement readme-craf
 ---
 
 ```
-validate(readme, skill_md) → findings[]
+validate_readme(readme, skill_md) → findings[]
 
 check: value proposition before install steps
 check: no fake paths, dependencies mirrored, "What's Inside" accurate
 extract claims from README
 for each claim → find backing in SKILL.md
     backed → pass. unbacked → flag as over-promise
+
+guide_writing(skill_md) → writing_rules[]
+
+provide: core rules (value-first, claim discipline, no hardcoded paths)
+provide: common mistakes to avoid
+provide: promise-capability alignment criteria
 ```
 
 # README Quality

@@ -4,14 +4,14 @@ description: Interactive first-use guidance pattern for skills that require user
 ---
 
 ```
-design(skill_scope) → onboarding_flow
+assess_and_guide(skill_scope) → onboarded | skipped
 
-if zero-config needed → skip onboarding
+if zero-config needed → skipped
 if config missing → trigger first-use flow:
     detect what can be auto-discovered (gh api, platform roots)
     ask only what can't be detected
     summarize detected + collected → confirm once (HITL)
-    write config file
+    write config file → onboarded
 ```
 
 # Onboarding
