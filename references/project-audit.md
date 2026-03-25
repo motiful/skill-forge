@@ -3,6 +3,14 @@ name: project-audit
 description: Discovery, classification, and plan file creation for project-level forge. Covers full-tree traversal for agent-related files, five classification types (in-repo, product, personal, external, rules), plan file template with per-item checklists, rules quality assessment, and execution priority ordering.
 ---
 
+# Project Audit
+
+Discovery, Classification, and Plan File logic for forge's review path.
+
+Every forge run — single skill or full project — starts with Discovery. The plan file is always created. Discovery determines what the plan contains.
+
+## Execution Procedure
+
 ```
 discover_and_classify(project_path) → classified_items[]
 
@@ -13,12 +21,6 @@ for each item:
 create plan file: /tmp/skill-forge-<name>.md with per-item checklists
 execution priority: security > in-repo > personal > product > rules
 ```
-
-# Project Audit
-
-Discovery, Classification, and Plan File logic for forge's review path.
-
-Every forge run — single skill or full project — starts with Discovery. The plan file is always created. Discovery determines what the plan contains.
 
 ## TOC
 

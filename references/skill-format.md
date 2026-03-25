@@ -3,18 +3,24 @@ name: skill-format
 description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file module model (EP=interface, section=implementation, reference=imported module), positional test, alignment validation, and cross-platform compatibility. Reference extraction rules delegated to reference-extraction.md.
 ---
 
+# SKILL.md and Reference File Format Specification
+
+## Execution Procedure
+
 ```
 validate_format(file) → format_findings[]
 
 if SKILL.md:
     check: standard frontmatter (name, description, license, metadata)
     check: body under 500 lines
-    check: Execution Procedure present for workflow skills
+    check: ## Execution Procedure heading with pseudocode block for workflow skills
+    check: file ordering (title → description → [preamble] → EP → content)
 if reference file:
     check: frontmatter (name, description)
-    check: Execution Procedure present (pseudocode block)
+    check: ## Execution Procedure heading with pseudocode block
     check: EP signature declares input/output
     check: Content sections map to EP lines (alignment validation)
+    check: file ordering (title → description → [preamble] → EP → content)
 positional test: each section serves an EP line → stays. No EP line → docs/README
 
 review_reference(file) → content_findings[]
@@ -29,8 +35,6 @@ check: line count reasonable (< 300 or has TOC)
 # Reference extraction: references/reference-extraction.md
 ```
 
-# SKILL.md and Reference File Format Specification
-
 ## TOC
 
 - [Agent Skills Open Standard](#agent-skills-open-standard)
@@ -42,6 +46,7 @@ check: line count reasonable (< 300 or has TOC)
 - [Reference File Format](#reference-file-format)
   - [Module Model](#module-model)
   - [Three Layers](#three-layers)
+  - [File Ordering](#file-ordering)
   - [Reference Frontmatter](#reference-frontmatter)
   - [Execution Procedure](#execution-procedure)
   - [Content Rules](#content-rules)
@@ -179,7 +184,31 @@ Every reference file has three layers — the same pattern as SKILL.md, at modul
 | Execution Procedure | Same spec — entry point, triggered by platform/user | Same spec — module, called by SKILL.md |
 | Content | Sections expanding EP steps | Sections expanding EP lines |
 
-Same EP specification, no functional restrictions. Only difference: SKILL.md is the entry point, references are called modules.
+Same EP specification, same structural capabilities, no functional restrictions. Only difference: SKILL.md is the entry point, references are called modules.
+
+### File Ordering
+
+Canonical section order — applies equally to SKILL.md and reference files:
+
+| Position | Section | Required |
+|----------|---------|----------|
+| 1 | `---` Frontmatter `---` | Yes |
+| 2 | `# Title` | Yes |
+| 3 | Description (1+ paragraphs) | Yes |
+| 4 | Preamble sections | Optional |
+| 5 | `## Execution Procedure` | Yes (workflow) / No (reference-only exemption) |
+| 6 | `## TOC` | Optional (recommended at 100+ lines) |
+| 7 | Content sections | Yes |
+
+**Strict order**: sections must appear in this sequence. No content sections before EP. No EP before title.
+
+**`# Title`** must immediately follow frontmatter. States the module's name in human-readable form.
+
+**Description** follows title. At least 1 paragraph. States what this module does and its scope.
+
+**Preamble sections**: `##`-level sections between description and EP. Contain universal rules that apply to ALL EP paths (e.g., Engagement Principles, Security constraints). Must pass the Positional Test — they serve every EP line, not just one. Expected in complex skills; rare in reference modules.
+
+**SKILL.md vs reference files**: the ordering is identical. The only structural differences are frontmatter format (Agent Skills standard vs skill-forge convention) and the role (entry point vs imported module). EP, preamble, content sections — all follow the same rules in both.
 
 ### Reference Frontmatter
 
@@ -198,9 +227,21 @@ description: Complete scope description of this module — what it validates, de
 
 ### Execution Procedure
 
-Pseudocode block after frontmatter, before the first `##` section. Always present. Structured natural language, not strict syntax. HITL steps marked inline: `(HITL)`. 2-10 lines typical per entry, no artificial limit.
+Always under a `## Execution Procedure` heading. The heading is the identifier — same heading, same capabilities in both SKILL.md and reference files.
 
-**Multiple entry points**: A reference file can declare multiple EP entries — like a module exporting multiple functions. Each entry has its own signature line. Use when one file serves multiple callers or steps (e.g., validate-time + create-time). Parent calls whichever entry applies to its current step.
+**Structure** (all elements available in both SKILL.md and reference files):
+
+| Element | Required | Description |
+|---------|----------|-------------|
+| `## Execution Procedure` heading | Yes | Section identifier |
+| Instruction paragraph | No | Brief execution guidance before pseudocode |
+| `###` sub-procedures | No | Multiple triggers or entry points (e.g., `### Forge`, `### Create`) |
+| Pseudocode block(s) | Yes (≥1) | Structured natural language in code fences, not strict syntax |
+| `(HITL)` markers | When applicable | Inline in pseudocode to mark human-in-the-loop steps |
+
+2-10 lines typical per entry, no artificial limit.
+
+**Multiple entry points**: A file can declare multiple EP entries — like a module exporting multiple functions. Each entry has its own signature line. Use when one file serves multiple callers or steps (e.g., validate-time + create-time). Parent calls whichever entry applies to its current step.
 
 **Signature naming convention:**
 - Use descriptive verb (or compound verb for multi-step): `discover_and_classify`, `detect_and_create`, `validate_and_apply` — not `lookup`, `check`, `run`

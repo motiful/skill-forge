@@ -3,6 +3,12 @@ name: registration-audit
 description: Pre-registration conflict detection for skill developers. Checks workspace-level registrations that shadow global ones, broken symlinks to owned skills, and real copies instead of symlinks. Scoped to skills the developer owns (source under config.skill_root). Does not audit consumer-installed skills.
 ---
 
+# Registration Audit
+
+Pre-registration conflict detection scoped to skills the developer maintains.
+
+## Execution Procedure
+
 ```
 audit_registrations(item, config) → findings[]
 
@@ -22,10 +28,6 @@ for each owned skill across all roots:
 report findings (HITL)
 if critical and unresolved → block registration
 ```
-
-# Registration Audit
-
-Pre-registration conflict detection scoped to skills the developer maintains.
 
 ## TOC
 

@@ -3,6 +3,14 @@ name: rule-skill-pattern
 description: How skill-forge detects MUST/NEVER constraint patterns, auto-creates paired rule-skills using the rules-as-skills methodology, and packages them with setup.sh and README for distribution.
 ---
 
+# Rule-Skill Pattern — Forge Integration
+
+How skill-forge detects, creates, and packages rule-skills.
+
+For the complete rule-skill methodology (three-layer model, anatomy, decision tree, platform adaptation), see [rules-as-skills](https://github.com/motiful/rules-as-skills).
+
+## Execution Procedure
+
 ```
 detect_and_create(skill_md) → rule_skill_spec | nothing
 
@@ -12,12 +20,6 @@ if found → auto-create paired <name>-rules skill
     package with setup.sh + README
 if not found → no action
 ```
-
-# Rule-Skill Pattern — Forge Integration
-
-How skill-forge detects, creates, and packages rule-skills.
-
-For the complete rule-skill methodology (three-layer model, anatomy, decision tree, platform adaptation), see [rules-as-skills](https://github.com/motiful/rules-as-skills).
 
 ## Detection
 

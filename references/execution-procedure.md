@@ -3,30 +3,34 @@ name: execution-procedure
 description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the nine components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, batch principle, non-overlapping ownership, EP vs content separation), and common anti-patterns.
 ---
 
-```
-assess_procedure_need(skill_md) → workflow_skill | reference_only
-
-# Purpose: EP forces execution fidelity — agents follow steps instead of absorbing
-# them as knowledge. The question is: would EP significantly improve instruction-following
-# and prevent graceful skip? If any criterion below matches → workflow_skill.
-# "Natural language steps are clear enough" is NOT a valid reason to skip EP.
-# "Skill isn't complex enough" is NOT a valid reason to skip EP.
-
-if ordered multi-step flow with dependencies → workflow_skill
-if external tool calls at specific points → workflow_skill
-if step order matters (reorder causes failure) → workflow_skill
-if purely reference material (lookup, checklist) → reference_only
-# reference_only = NO ordering constraint. Content can be consulted in any order.
-# A methodology with "Step 1 → Step 2 → Step 3" where reordering breaks correctness
-# is workflow_skill, even without Skill() calls or external tool orchestration.
-
-# Consequence: workflow_skill + no EP → Warning minimum.
-# Present cost-benefit (what skips EP would prevent, what restructuring costs) to user.
-```
-
 # Execution Procedure Pattern
 
 How to structure workflow skills so agents execute multi-step procedures instead of absorbing them as knowledge.
+
+## Execution Procedure
+
+```
+assess_procedure_need(skill_md) → needs_ep (default) | reference_only (exemption)
+
+# Default: every skill gets an EP.
+# EP forces execution fidelity — agents follow steps instead of absorbing
+# them as knowledge. The burden of proof is on NOT having EP.
+
+default → needs_ep
+if purely reference material (no ordering constraint) → reference_only
+# reference_only = content can be consulted in any order.
+# A methodology with "Step 1 → Step 2 → Step 3" where reordering breaks correctness
+# is NOT reference_only, even without Skill() calls or external tool orchestration.
+
+# NOT valid exemptions:
+# - "Natural language steps are clear enough"
+# - "Skill isn't complex enough"
+# - "Functional workflow format, works correctly without EP"
+# - "Steps are already numbered and readable"
+# These are all forms of graceful skip. If it has steps, it gets EP.
+
+# Consequence: no EP + no valid exemption → Warning, must fix.
+```
 
 ## TOC
 
@@ -34,15 +38,19 @@ How to structure workflow skills so agents execute multi-step procedures instead
 - [The Pattern](#the-pattern)
 - [Anti-Patterns](#anti-patterns)
 
-## When to Detect
+## Default: Every Skill Gets EP
 
-A skill needs an Execution Procedure when **any** of the following are true:
-- It defines an **ordered, multi-step flow** (not just a list of checks)
-- Steps have **dependencies** (step N requires output from step N-1)
-- It uses **external tool calls** that must happen at specific points (e.g., `Skill()`, API calls)
-- Step order matters — **skipping or reordering causes failure**
+**EP is the default.** Every skill has an Execution Procedure unless it qualifies for the single exemption below.
 
-Skills that are purely reference material (lookup tables, style guides, validation checklists) do NOT need this pattern. "Purely reference" means no ordering constraints — content can be consulted in any order. A methodology with numbered steps where order matters is a workflow skill, even if the content reads like documentation.
+**Exemption: purely reference material.** Lookup tables, style guides, data catalogs — content with no ordering constraints, consultable in any order. If removing or reordering any section would change the skill's correctness, it is NOT purely reference.
+
+**Common signals that confirm EP is needed** (non-exhaustive):
+- Ordered, multi-step flow (not just a list of checks)
+- Steps have dependencies (step N requires output from step N-1)
+- External tool calls at specific points (`Skill()`, API calls, script execution)
+- Step order matters — skipping or reordering causes failure
+
+These signals are **confirmations**, not prerequisites. A skill does not need to match any of these to require EP — EP is the default. It only needs to match the exemption to NOT have EP.
 
 ## The Pattern
 
@@ -50,7 +58,7 @@ Nine components, all required for workflow skills:
 
 ### 1. Pseudocode Procedure
 
-Python-like pseudocode at the **top** of the SKILL.md body, before any reference sections.
+Python-like pseudocode under a `## Execution Procedure` heading. Both SKILL.md and reference files use this same heading — the heading is the identifier, not position.
 
 ```python
 def main_workflow(input):
@@ -199,3 +207,5 @@ The agent follows the pseudocode (Execution Procedure) and consults Content sect
 | review_and_update_plan on every sub-task | High friction — agent starts skipping all of them | Major step boundaries only (distinct deliverables) |
 | Parent EP summarizes sub-module standards inline | Agent uses summary, never enters sub-module — precision loss | Reference the module; its own EP is the authority |
 | Decision logic as EP comments (3+ lines) | Looks optional, AI may skip comments | Convert to pseudocode (if/elif) or extract to section table |
+| Opt-in EP framing ("does this need EP?") | Agent finds reasons to skip — "works correctly", "steps are clear enough" | Opt-out framing: EP is default, exemption requires proof of no ordering constraints |
+| Flagging missing EP then accepting it | Warning exists but reviewer soft-skips the fix — "functional, keep as-is" | No EP + no valid exemption = must fix, not "accepted" |

@@ -3,6 +3,12 @@ name: script-quality
 description: Script file structure guidelines including line count thresholds, module split triggers (responsibility count, complexity indicators), CLI/logic/data separation principle, dependency policy, and before/after decomposition examples.
 ---
 
+# Script Quality Standard
+
+Applies to any skill that includes a `scripts/` directory. Scripts are executable artifacts shipped with the skill — they must meet a higher bar than reference docs because users run them directly.
+
+## Execution Procedure
+
 ```
 validate_script(script_path) → findings[]
 
@@ -19,10 +25,6 @@ check: functional correctness
 check: no dead code, no hardcoded paths
 check: error handling for both outcomes (success/failure)
 ```
-
-# Script Quality Standard
-
-Applies to any skill that includes a `scripts/` directory. Scripts are executable artifacts shipped with the skill — they must meet a higher bar than reference docs because users run them directly.
 
 ## TOC
 

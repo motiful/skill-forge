@@ -3,6 +3,12 @@ name: onboarding
 description: Interactive first-use guidance pattern for skills that require user decisions before operation. Covers the distinction between installation, onboarding, and configuration; detection-first approach (auto-discover before asking); when to use vs skip; and the detect → ask → confirm → write flow.
 ---
 
+# Onboarding
+
+Interactive first-use guidance that helps users set up their environment for a skill.
+
+## Execution Procedure
+
 ```
 assess_and_guide(skill_scope) → onboarded | skipped
 
@@ -13,10 +19,6 @@ if config missing → trigger first-use flow:
     summarize detected + collected → confirm once (HITL)
     write config file → onboarded
 ```
-
-# Onboarding
-
-Interactive first-use guidance that helps users set up their environment for a skill.
 
 ## TOC
 

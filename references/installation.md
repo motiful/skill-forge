@@ -3,6 +3,12 @@ name: installation
 description: Standard mechanism for declaring and installing skill dependencies via scripts/setup.sh. Covers the two-outcome principle (installed or blocked), dependency types (CLI tools, skills, npm packages), skill detection across platform directories, install scope (global vs project), two-tier declaration model, and setup.sh guidelines (idempotent, fast, non-interactive).
 ---
 
+# Installation
+
+Standard mechanism for declaring and installing skill dependencies.
+
+## Execution Procedure
+
 ```
 install(dependencies) → installed | blocked
 
@@ -13,10 +19,6 @@ for each dependency:
     if cannot install → error with resolution, exit non-zero
 all present → exit 0
 ```
-
-# Installation
-
-Standard mechanism for declaring and installing skill dependencies.
 
 ## TOC
 

@@ -3,6 +3,12 @@ name: skill-invocation
 description: Runtime invocation reliability pattern ensuring AI agents actually call dependent skills instead of skipping them. Covers the three-element pattern (explicit Skill() call, output capture, output gate), call site format, writing principles (position=timing, boundary not capability, binary not gradual), and anti-patterns with fixes.
 ---
 
+# Skill Invocation Reliability
+
+How to make an AI agent **actually call** a dependent skill at runtime — not just have it installed.
+
+## Execution Procedure
+
 ```
 validate_invocations(skill_md, dependencies) → findings[]
 
@@ -17,10 +23,6 @@ write_call_site(dependency, location) → call_pattern
 generate: Skill("name", "args") + output capture + assert gate
 position: at the exact EP line where the dependency is needed
 ```
-
-# Skill Invocation Reliability
-
-How to make an AI agent **actually call** a dependent skill at runtime — not just have it installed.
 
 ## The Pattern
 

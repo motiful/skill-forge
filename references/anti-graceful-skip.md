@@ -3,6 +3,12 @@ name: anti-graceful-skip
 description: Default-execute principle and audit criteria for conditional branches in skills. Covers four principles (default execute, narrow skip conditions, no-downside enhancements, binary not gradual) and Step 3 audit patterns for detecting implicit skip paths.
 ---
 
+# Anti-Graceful-Skip
+
+Graceful skip = conditional branches that let capabilities be silently skipped, where the AI takes the implicit "do nothing" path.
+
+## Execution Procedure
+
 ```
 audit_conditional_branches(skill_md) → findings[]
 
@@ -11,10 +17,6 @@ for each conditional branch:
     check: no "if applicable" / "optionally" suppressing capability
     check: no-downside enhancements default to execution
 ```
-
-# Anti-Graceful-Skip
-
-Graceful skip = conditional branches that let capabilities be silently skipped, where the AI takes the implicit "do nothing" path.
 
 ## Principles
 

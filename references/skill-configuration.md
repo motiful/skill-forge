@@ -3,6 +3,12 @@ name: skill-configuration
 description: User preferences pattern for skills that need configurable behavior. Covers config location convention (~/.config/<skill-name>/), the litmus test (delete config → skill rebuilds defaults), stateless skill principle (skill directory is read-only), first-run initialization flow (detect → ask → confirm → write), and boundary between config and infrastructure.
 ---
 
+# Skill Configuration
+
+Engineering pattern: giving a skill user-adjustable preferences that persist across sessions.
+
+## Execution Procedure
+
 ```
 assess_config_needs(skill_scope) → config_spec | none
 
@@ -12,10 +18,6 @@ litmus test: delete config → skill rebuilds defaults → still works?
 first-run: detect auto-discoverable values → ask remainder → confirm (HITL) → write
 skill directory = read-only, config lives outside
 ```
-
-# Skill Configuration
-
-Engineering pattern: giving a skill user-adjustable preferences that persist across sessions.
 
 ## TOC
 

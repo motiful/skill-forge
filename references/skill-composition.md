@@ -3,6 +3,12 @@ name: skill-composition
 description: How skills declare dependencies and manage context budget. Covers the context budget constraint (~15K-25K tokens safe), collection risks (context flooding, name collision, unenforced internal deps), publishing model decision (skill vs collection), two dependency tiers (must-install vs informational), and current tooling landscape.
 ---
 
+# Skill Composition
+
+How skills declare dependencies, manage context budget, and when multiple skills belong in one repo.
+
+## Execution Procedure
+
 ```
 decide(skill_count, usage_pattern) → composition_strategy
 
@@ -12,10 +18,6 @@ if all skills auto-activate → critical warning
 default: separate repos, dependencies via Step 0 + setup.sh
 two tiers only: Dependencies (must install) or Informational (README only)
 ```
-
-# Skill Composition
-
-How skills declare dependencies, manage context budget, and when multiple skills belong in one repo.
 
 ## TOC
 

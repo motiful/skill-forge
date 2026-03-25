@@ -3,6 +3,10 @@ name: publishing-strategy
 description: Three publishing models (Skill, Collection, In-Repo) with decision framework and directory standards. Covers single-skill repo structure, collection multi-skill structure, in-repo skill placement, graduation path, and npx skills add discovery priority.
 ---
 
+# Publishing Strategy
+
+## Execution Procedure
+
 ```
 decide(skill_structure) → publishing_model
 
@@ -12,8 +16,6 @@ if multiple skills:
     if always consumed together → collection repo
     if independent → separate skill repos
 ```
-
-# Publishing Strategy
 
 ## TOC
 

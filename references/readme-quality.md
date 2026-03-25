@@ -3,6 +3,14 @@ name: readme-quality
 description: Skill-specific README content standards that complement readme-craft's universal quality checks. Covers value-first structure, claim discipline (promise-capability alignment), common mistakes (fake paths, missing dependencies section), and dependency mirroring requirement.
 ---
 
+# README Quality
+
+For layout strategy (3-tier hierarchy), badge selection, tone/voice, section overflow, and example provenance rules, use readme-craft (`npx skills add motiful/readme-craft`). This file covers skill-specific content requirements that readme-craft does not address.
+
+Use this file during the create path (Step 1) when writing README prose, during Step 3 (Validate) when checking community readiness, and during the fix phase when creating or updating README.
+
+## Execution Procedure
+
 ```
 validate_readme(readme, skill_md) → findings[]
 
@@ -18,12 +26,6 @@ provide: core rules (value-first, claim discipline, no hardcoded paths)
 provide: common mistakes to avoid
 provide: promise-capability alignment criteria
 ```
-
-# README Quality
-
-For layout strategy (3-tier hierarchy), badge selection, tone/voice, section overflow, and example provenance rules, use readme-craft (`npx skills add motiful/readme-craft`). This file covers skill-specific content requirements that readme-craft does not address.
-
-Use this file during the create path (Step 1) when writing README prose, during Step 3 (Validate) when checking community readiness, and during the fix phase when creating or updating README.
 
 ## Core Rules
 

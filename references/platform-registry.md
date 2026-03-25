@@ -3,6 +3,10 @@ name: platform-registry
 description: Mapping of agent platforms (Claude Code, Codex, Copilot, Cursor, Windsurf) to their skill directory paths with detection logic. Covers strong vs weak signals, per-platform path tables, detection strategy, community tools (npx skills add, skills.sh), community directories, and CC Market assessment.
 ---
 
+# Platform Registry
+
+## Execution Procedure
+
 ```
 detect_and_register(platforms) → registered | skipped
 
@@ -19,8 +23,6 @@ true → include CC Market in publish flow
 false → skip silently
 not set → ask once with recommendation (default: skip), save to config
 ```
-
-# Platform Registry
 
 ## TOC
 

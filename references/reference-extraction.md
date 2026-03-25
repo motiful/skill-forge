@@ -3,14 +3,6 @@ name: reference-extraction
 description: Decision framework for when to extract SKILL.md sections into reference files. Covers the module-vs-inline test, index quality (how SKILL.md points to references), and line count thresholds. EP design principles (batch, non-overlapping ownership) are in execution-procedure.md.
 ---
 
-```
-plan_reference_extraction(file) → split_recommendation
-
-if independent module (own interface + own responsibility + changes independently) → reference
-if tightly coupled to parent EP (one call site, no own interface) → section
-if mixed responsibilities → split regardless of length
-```
-
 # Reference Extraction
 
 When to extract SKILL.md content into a reference file, and how to maintain the connection.
@@ -20,6 +12,16 @@ In the module model: SKILL.md is the main program, references are imported modul
 - **SKILL.md** answers: *what to do, in what order, under what conditions* (the orchestrator)
 - **References** answer: *what specifically to check, how to check it, how to judge the result* (independent modules)
 - **Sections** answer: *what does this specific EP step need to know?* (inline implementation)
+
+## Execution Procedure
+
+```
+plan_reference_extraction(file) → split_recommendation
+
+if independent module (own interface + own responsibility + changes independently) → reference
+if tightly coupled to parent EP (one call site, no own interface) → section
+if mixed responsibilities → split regardless of length
+```
 
 ## When to Extract a Section into a Reference
 
