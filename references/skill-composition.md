@@ -106,6 +106,8 @@ Two models, simple decision:
 
 No middle ground. "Works better with" is not a tier — if the skill needs it, declare it as a dependency.
 
+**Self-containment**: A forged skill must function without skill-forge installed. "Self-contained from forge" does NOT mean "independent from everything" — skills can and should declare their own runtime dependencies.
+
 ## Current Tooling Landscape
 
 As of March 2026, no tool fully solves skill composition.

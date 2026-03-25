@@ -11,6 +11,13 @@ for each detected root → add to registration plan
 report plan to user → get approval (HITL)
 if approved → create symlinks to source of truth
 no roots found → skip registration
+
+assess_cc_market(config) → include | skip
+
+check config.cc_market setting
+true → include CC Market in publish flow
+false → skip silently
+not set → ask once with recommendation (default: skip), save to config
 ```
 
 # Platform Registry

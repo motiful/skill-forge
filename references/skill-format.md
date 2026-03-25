@@ -1,6 +1,6 @@
 ---
 name: skill-format
-description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file module model (EP=interface, section=implementation, reference=imported module), positional test, content splitting rules (batch principle, non-overlapping ownership), alignment validation, and cross-platform compatibility.
+description: Format specification for SKILL.md and reference files. Covers SKILL.md frontmatter (Agent Skills community standard), body rules, context budget, reference file module model (EP=interface, section=implementation, reference=imported module), positional test, alignment validation, and cross-platform compatibility. Reference extraction rules delegated to reference-extraction.md.
 ---
 
 ```
@@ -26,12 +26,7 @@ check: terminology consistent with parent SKILL.md
 check: cross-references resolve
 check: no hardcoded paths
 check: line count reasonable (< 300 or has TOC)
-
-plan_content_split(file) → split_recommendation
-
-if independent module (own interface + own responsibility + changes independently) → reference
-if tightly coupled to parent EP (one call site, no own interface) → section
-if mixed responsibilities → split regardless of length
+# Reference extraction: references/reference-extraction.md
 ```
 
 # SKILL.md and Reference File Format Specification
@@ -52,7 +47,6 @@ if mixed responsibilities → split regardless of length
   - [Content Rules](#content-rules)
   - [HITL Convention](#hitl-convention)
   - [Alignment Validation](#alignment-validation)
-- [Content Splitting Rules](#content-splitting-rules)
 - [File Structure](#file-structure)
   - [Directory Taxonomy](#directory-taxonomy)
 - [Cross-Platform Compatibility](#cross-platform-compatibility)
@@ -244,54 +238,7 @@ for each reference file:
 
 ## Content Splitting Rules
 
-In the module model: SKILL.md is the main program, references are imported modules, sections are inline implementations.
-
-- **SKILL.md** answers: *what to do, in what order, under what conditions* (the orchestrator)
-- **References** answer: *what specifically to check, how to check it, how to judge the result* (independent modules)
-- **Sections** answer: *what does this specific EP step need to know?* (inline implementation)
-
-### When to Extract a Section into a Reference
-
-Extract when the content is an **independent module**: it has its own meaningful interface (you can write an EP signature with input → operations → output), its own coherent responsibility, and changes independently of the parent's control flow.
-
-Keep inline when the content is **tightly coupled** to the parent EP: consumed at exactly one point, no meaningful interface of its own, or extracting would require constant back-and-forth with the parent.
-
-**Split early** when a file mixes multiple responsibilities, even if under 300 lines. Mixed examples:
-- literal templates + writing rules
-- validation logic + publishing strategy
-- setup policy + troubleshooting appendix
-
-### Batch Principle
-
-When an EP step processes multiple independent items (e.g., 30 validation checks), put them in **one section table** rather than 30 separate EP lines or 30 separate references. The AI reads the table once and processes all items — more efficient than navigating 30 individual modules.
-
-Extract individual items to references only when an item has its own complex logic (multi-step EP, conditional branches, its own domain knowledge).
-
-### Non-Overlapping Ownership
-
-When multiple EP steps touch the same type of target (e.g., two validation phases both checking reference files), each target must be **owned by exactly one step**. No file or artifact should be checked by two different steps for the same concern.
-
-If two steps overlap on a target:
-- **Consolidate** the checks into one step, or
-- **Split by target**: each file type owned by one step (e.g., Step A owns SKILL.md, Step B owns all other files), or
-- **Split by concern**: structural checks vs semantic checks — but only when a gate separates the two steps (Step A must pass before Step B starts)
-
-### Index Quality
-
-- Every reference pointer in SKILL.md states what the reference contains and when to read it
-- Conditional references have explicit gateways: "If X applies → see references/Y.md"
-- Always-needed references have direct pointers: "Detailed checks are in references/Y.md"
-- SKILL.md alone tells the AI the complete process flow — references fill in domain details
-
-### Thresholds
-
-- SKILL.md body: under 500 lines
-- Reference file under 100 lines: TOC not needed
-- Reference file 100-300 lines: add a TOC, no split needed purely for length
-- Reference file above 300 lines: split by default
-- Multi-responsibility reference files: split regardless of length
-- Budget is per-file (peak load), not sum-of-all-files — references load on-demand
-- Don't split a 250-line single-purpose reference into 6 tiny files — splitting has overhead too
+Extracted to `references/reference-extraction.md` — covers module-vs-inline decision, index quality, and thresholds. EP design principles (batch, non-overlapping ownership) are in `references/execution-procedure.md`.
 
 ## File Structure
 
@@ -333,24 +280,3 @@ For maximum portability:
 - Avoid CC-specific extensions unless the skill truly needs them
 - README.md serves as the human-readable + other-AI-tool-readable entry point
 - Skill's core knowledge in SKILL.md body is platform-agnostic markdown
-
-## Skill Relationships
-
-### Self-Containment
-
-Each generated skill must function without skill-forge installed — this is what "self-contained" means. It does NOT mean "has no dependencies on other skills or tools." Skills can and should declare their own dependencies, which `scripts/setup.sh` installs automatically.
-
-**"Self-contained from forge" ≠ "independent from everything."**
-
-### Dependencies and Composition
-
-Skills declare dependencies in SKILL.md Step 0 and install them via `scripts/setup.sh`. This is normal engineering, not package management.
-
-**Do:**
-- Declare dependencies in SKILL.md Step 0 and `scripts/setup.sh`
-- Mirror dependencies in README's "Dependencies" section
-- Bundle related skills in the same repo for convenience
-
-**Don't:**
-- Silently depend on a tool without declaring it
-- Use "works better with" language for things that are actually required

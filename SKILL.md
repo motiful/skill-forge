@@ -1,10 +1,10 @@
 ---
 name: skill-forge
-description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Structures workflow skills for execution fidelity. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", or points to a project directory with mixed skills and rules. Forge entry: discover existing → review path, nothing found → create path. Both → validate → fix → local ready. Publish to GitHub when requested (Step 4).'
+description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Structures workflow skills for execution fidelity. Registers skills across platforms via symlinks and guides first-use onboarding. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", or points to a project directory with mixed skills and rules. Forge entry: discover existing → review path, nothing found → create path. Both → validate → fix → local ready. Publish to GitHub when requested (Step 4).'
 license: MIT
 metadata:
   author: motiful
-  version: "8.0"
+  version: "8.1"
 ---
 
 # Skill Forge
@@ -55,6 +55,8 @@ def forge(target):
         search_ecosystem(target)                       # npx skills find / skills.sh
 
         caps = detect_capabilities(context)            # not optional — detect and act
+        if not any(caps.values()):
+            report_to_user("Simple skill — no deps, invocations, rules, config, or workflow detected")
         if caps.deps:      install(caps.deps)          # references/installation.md
         if caps.invokes:   write_call_site(dep, loc)   # references/skill-invocation.md
         if caps.onboard:   assess_and_guide(scope)     # references/onboarding.md
@@ -65,7 +67,8 @@ def forge(target):
 
         path = f"{config.skill_workspace}/{name}/"
         write_skill_md(path, context, caps)            # references/skill-format.md
-        Skill("readme-craft", f"create {path}")        # references/templates.md for skeletons
+        readme = Skill("readme-craft", f"create {path}")  # references/templates.md for skeletons
+        assert readme.delivered                        # README required for local ready
         write_artifacts(path)                          # LICENSE, .gitignore
         items = [SkillItem(path)]
 
@@ -83,6 +86,7 @@ def forge(target):
 
     # STEP 3: Validate & Fix
     plan.items.sort(priority="security > in-repo > personal > product > rules")
+    # ↑ Priority definitions: references/project-audit.md §Execution Order
     for item in plan.items:
 
         # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
@@ -97,10 +101,12 @@ def forge(target):
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
         if not item.is_in_repo:
-            Skill("readme-craft", f"review {item.path}")   # see Fix Phase
+            rc_result = Skill("readme-craft", f"review {item.path}")
+            assert rc_result.delivered                 # do not substitute with manual README review
             assert review_and_update_plan(plan_path, item, "readme-craft")
 
-            Skill("self-review", item.path)                # see Fix Phase
+            sr_result = Skill("self-review", item.path)
+            assert sr_result.no_broken_dimensions      # do not substitute with manual quality check
             assert review_and_update_plan(plan_path, item, "self-review")
 
         conflicts = audit_registrations(item, config)    # references/registration-audit.md
@@ -116,9 +122,10 @@ def forge(target):
         confirm_with_user(org=config.github_org, name=skill_name, visibility="public")
         run(f"gh repo create {org}/{name} --public --source=. --push")
         # Non-GitHub: git remote add origin <url> && git push -u origin main
-        validate_and_apply(skill_path)                 # references/github-metadata.md
+        meta = Skill("readme-craft", f"apply metadata {skill_path}")
+        assert meta.applied                            # description + topics required for discoverability
         update_forge_config(skill_name)                # add to Published Skills
-        # CC Market: check cc_market in config. Not set? → ask, recommend skip
+        assess_cc_market(config)                       # references/platform-registry.md
         print(f"Install with: npx skills add {org}/{name}")
 ```
 
@@ -198,7 +205,7 @@ External-facing presentation and packaging.
 | LICENSE exists | Required for community platforms |
 | Script documentation | If scripts exist, document what they do and permissions needed |
 | Discoverability claims | No implied guarantees of immediate listing or search placement |
-| GitHub metadata | `validate_and_apply(skill_path)` — `references/github-metadata.md` |
+| GitHub metadata | Deferred to readme-craft. `Skill("readme-craft", "apply metadata <path>")` |
 | docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
 | Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Warning |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
@@ -277,7 +284,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 
 4. **Report**: *"Your skill is on GitHub. Install with `npx skills add <org>/<skill-name>`."*
 
-**CC Market**: check `cc_market` in forge config. `true` → include. `false` → skip. Not set → ask once, recommend skip. See `references/platform-registry.md`.
+**CC Market**: `assess_cc_market(config)` — `references/platform-registry.md`.
 
 ## References
 
@@ -295,7 +302,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 - `references/script-quality.md` — Script size limits, module split triggers, dependency policy
 - `references/maintenance-guide.md` — In-repo maintenance-rules skill: when to create, required content, template
 - `references/anti-graceful-skip.md` — Default-execute principle, skip conditions, no-downside enhancements, Step 3 audit criteria
-- `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern for workflow skills
+- `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern + batch principle + non-overlapping ownership for workflow skills
 - `references/project-audit.md` — Discovery, Classification, Plan File, Rules Conversion, Execution Order for project-level forge
-- `references/github-metadata.md` — About/description rules, topic 3-tier selection, .github/repo-meta.yml format
+- `references/reference-extraction.md` — When to extract sections into references, index quality, line count thresholds
 - `references/registration-audit.md` — Pre-registration conflict detection: workspace shadows global, broken links, copy vs symlink

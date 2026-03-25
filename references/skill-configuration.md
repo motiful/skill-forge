@@ -117,9 +117,3 @@ This naturally fits inside the skill's Step 0. See `onboarding.md` for the full 
 - Don't interrogate — detect, summarize, confirm
 - Skills never write to each other's config
 - All config lives in `~/.config/<skill-name>/`, never in the skill directory
-
-## Cross-References
-
-- `docs/skill-philosophy.md` — technical route and design principles (maintenance doc, not runtime)
-- `installation.md` — automated dependency installation (Step 0, before config check)
-- `onboarding.md` — interactive first-use guidance (may create config)

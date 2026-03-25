@@ -42,27 +42,18 @@ The gap is not in authoring — AI agents can already help write skill content. 
 
 Skill Forge is a **skill engineering methodology, publishing pipeline, and project skills architect**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
 
-- **Audits entire projects** — point forge at any project directory and it organizes scattered skills, rules, and agent instructions into clean, maintainable structures — graduating personal tools to standalone repos and converting trigger-based rules to rule-skills
-- **Makes workflow skills actually get followed** — detects multi-step skills and adds structure so agents follow your procedure step-by-step, instead of absorbing it as background knowledge. Creates the structure when forging new skills; flags missing structure when reviewing existing ones
+- **Audits entire projects** — point forge at any project directory and it discovers scattered skills, rules, and agent instructions, classifies each (in-repo, personal tool, product skill), and fixes them one by one — graduating personal tools to standalone repos and converting constraint-pattern rules to publishable skills
+- **Makes workflow skills actually get followed** — detects multi-step skills and adds pseudocode structure so agents follow your procedure step-by-step, instead of absorbing it as background knowledge
 - **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
-- **Reviews every file, not just SKILL.md** — a skill is a codebase. Forge reads every reference, script, and doc — checking that content is actionable for agents, references follow the three-layer format, scripts actually work, and docs match what SKILL.md claims
-- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, terminology, and cross-file consistency so agents can find and correctly trigger your skill
+- **Reviews every file as one unit** — reads every reference, script, and doc — checking that content is actionable for agents, references have proper format (frontmatter + procedure + content), scripts work, and docs match SKILL.md claims
+- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, terminology, cross-file consistency, and context budget so agents can find and correctly trigger your skill without wasting their context window
 - **Keeps your README honest** — flags claims that exceed what your skill actually does, catches hardcoded paths, and verifies install commands and LICENSE
-- **Publishes and registers across platforms** — pushes to GitHub with optimized About description and discoverable topics (3-tier selection), then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
-- **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
+- **Detects registration conflicts** — audits existing symlinks to catch workspace registrations that shadow global ones, broken links, and copies that should be symlinks
+- **Installs dependencies automatically** — `scripts/setup.sh` detects and installs required CLI tools and skill dependencies on first run, so your skill works out of the box
+- **Publishes and registers across platforms** — pushes to GitHub with optimized metadata, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
+- **Guides first-use setup** — when a skill needs user decisions before it can operate (config location, org name, default license), forge runs an interactive onboarding flow instead of silently using defaults
 
 **Token cost**: Review ~10-25K | Create ~15-30K | Push ~1-2K. Excludes dependent skill invocations (readme-craft, self-review). No Python, no surprise costs.
-
-| Capability | What it means for you |
-|------------|----------------------|
-| **Security assurance** | Your skill won't leak API keys or credentials to GitHub |
-| **Description quality** | Agents will actually find and trigger your skill |
-| **Cross-platform compatibility** | Works on Claude Code, Codex, Cursor, Windsurf, Copilot — not just one |
-| **Efficient context usage** | Your skill doesn't waste the agent's context window |
-| **Claim discipline** | README says what the skill actually does, no inflated promises |
-| **Dependency installation** | Required tools and skills are installed automatically |
-| **One-command publishing** | Local files → installable GitHub repo |
-| **Workflow execution fidelity** | Your multi-step workflow skill actually gets followed, not just read |
 
 ## Quick Start
 
@@ -75,7 +66,8 @@ Then tell your AI coding assistant:
 ```text
 "Review this skill"          — validate, scan, fix → local ready
 "Create a skill for X"       — build from scratch → local ready
-"Publish this skill"         — forge + publish to GitHub
+"Audit this project"         — discover all skills + rules in a directory, classify, fix each
+"Publish this skill"         — any of the above + push to GitHub
 ```
 
 ## Usage
@@ -170,7 +162,7 @@ Skill Forge validates and publishes — it does not write skill content or test 
 
 ## Skill Philosophy
 
-Skills are the next unit of reusable intelligence — loadable capability extensions that give AI agents structured expertise a base model doesn't have. skill-forge exists to define what "well-engineered skill" means and to practice that discipline.
+Skills are the next unit of reusable intelligence — loadable capability extensions that give AI agents structured expertise a base model doesn't have. skill-forge defines six quality dimensions (discoverable, reliable, efficient, trustworthy, bounded, valuable) and validates against them using prompts instead of scripts — keeping skills platform-agnostic and installable without runtimes.
 
 → [Vision, quality dimensions, and technical route](docs/skill-philosophy.md)
 
@@ -189,7 +181,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-8.0-blue.svg
+[version-shield]: https://img.shields.io/badge/version-8.1-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

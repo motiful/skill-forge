@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# skill-forge dependency checker
+# Verifies CLI tools (git, gh, node, npx) and installs skill dependencies
+# (readme-craft, rules-as-skills, self-review) via npx skills add.
+# No special permissions required. Safe to re-run (idempotent).
 set -euo pipefail
 
 echo "skill-forge: checking dependencies..."
@@ -7,12 +11,13 @@ echo ""
 errors=0
 
 # --- CLI tools ---
-for tool in gh node npx; do
+for tool in git gh node npx; do
   if command -v "$tool" &>/dev/null; then
     echo "  $tool: $(command -v "$tool")"
   else
     echo "  ERROR: $tool not found"
     case "$tool" in
+      git)  echo "  Install: https://git-scm.com" ;;
       gh)   echo "  Install: https://cli.github.com" ;;
       node) echo "  Install: https://nodejs.org" ;;
       npx)  echo "  Install: comes with Node.js — https://nodejs.org" ;;
