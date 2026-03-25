@@ -51,7 +51,7 @@ Skill Forge is a **skill engineering methodology, publishing pipeline, and proje
 - **Publishes and registers across platforms** — pushes to GitHub with optimized About description and discoverable topics (3-tier selection), then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
 - **Generates community-ready artifacts** — README (with readme-craft integration), LICENSE, .gitignore following the Agent Skills standard
 
-**Token cost**: Review ~5-15K | Create ~10-20K | Push ~1-2K. No subagents, no Python, no surprise costs.
+**Token cost**: Review ~10-25K | Create ~15-30K | Push ~1-2K. Excludes dependent skill invocations (readme-craft, self-review). No Python, no surprise costs.
 
 | Capability | What it means for you |
 |------------|----------------------|
@@ -189,7 +189,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-7.2-blue.svg
+[version-shield]: https://img.shields.io/badge/version-8.0-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

@@ -59,6 +59,7 @@ def forge(target):
         if caps.onboard:   assess_and_guide(scope)     # references/onboarding.md
         if caps.rules:     detect_and_create(skill_md) # references/rule-skill-pattern.md
         if caps.complex:   assess_and_create(repo)     # references/maintenance-guide.md
+        if caps.config:    assess_config_needs(scope)    # references/skill-configuration.md
         if caps.workflow:  assess_procedure_need(md)    # references/execution-procedure.md
 
         path = f"{config.skill_workspace}/{name}/"
@@ -152,8 +153,7 @@ Organization, layout, file existence, dependencies.
 | Assets location | AI-consumed source material only. Logo, screenshots → `.github/` |
 | Runtime write | No data/, cache/ in skill directory |
 | Meta-skill contamination | No forge/creator as subdirectories |
-| Collection context budget | 15+ skills → warn about context flooding |
-| Collection name collision | Generic names → recommend namespacing |
+| Collection risks | `decide(skill_count, usage_pattern)` — `references/skill-composition.md`. 15+ skills → context flooding warning; generic names → namespacing warning |
 
 ### Quality
 
