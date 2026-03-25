@@ -27,6 +27,14 @@ if critical and unresolved → block registration
 
 Pre-registration conflict detection scoped to skills the developer maintains.
 
+## TOC
+
+- [Scope](#scope)
+- [Three Valid Registration States](#three-valid-registration-states)
+- [Violations](#violations)
+- [When This Runs](#when-this-runs)
+- [Team Collaboration Model](#team-collaboration-model)
+
 ## Scope
 
 **Audits only skills the developer owns.** Ownership is determined by resolving symlink targets:

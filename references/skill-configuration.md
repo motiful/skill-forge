@@ -17,6 +17,19 @@ skill directory = read-only, config lives outside
 
 Engineering pattern: giving a skill user-adjustable preferences that persist across sessions.
 
+## TOC
+
+- [When to Use](#when-to-use)
+- [When NOT to Use](#when-not-to-use)
+- [Boundary Principle: Skill Directory = Read-Only](#boundary-principle-skill-directory--read-only)
+- [Location Convention](#location-convention)
+- [Config File Format](#config-file-format)
+- [The Litmus Test](#the-litmus-test)
+- [Skills Are Stateless](#skills-are-stateless)
+- [First-Run Initialization](#first-run-initialization)
+- [Guidelines](#guidelines)
+- [Cross-References](#cross-references)
+
 ## When to Use
 
 Include a configuration pattern when the skill has preferences that:

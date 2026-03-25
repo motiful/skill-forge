@@ -16,6 +16,12 @@ if purely reference material (lookup, checklist) → reference_only
 
 How to structure workflow skills so agents execute multi-step procedures instead of absorbing them as knowledge.
 
+## TOC
+
+- [When to Detect](#when-to-detect)
+- [The Pattern](#the-pattern)
+- [Anti-Patterns](#anti-patterns)
+
 ## When to Detect
 
 A skill needs an Execution Procedure when:

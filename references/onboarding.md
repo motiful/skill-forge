@@ -18,6 +18,18 @@ if config missing → trigger first-use flow:
 
 Interactive first-use guidance that helps users set up their environment for a skill.
 
+## TOC
+
+- [What Onboarding Is](#what-onboarding-is)
+- [When to Use](#when-to-use)
+- [When NOT to Use](#when-not-to-use)
+- [Relationship with Installation and Configuration](#relationship-with-installation-and-configuration)
+- [Onboarding Can Include](#onboarding-can-include)
+- [Detection: When to Trigger](#detection-when-to-trigger)
+- [Guidelines](#guidelines)
+- [Examples](#examples)
+- [Cross-References](#cross-references)
+
 ## What Onboarding Is
 
 Onboarding is the **user-facing, interactive experience** when someone uses a skill for the first time. It orients the user, collects necessary input, and ensures the skill is ready to deliver value.

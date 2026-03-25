@@ -18,6 +18,17 @@ all present → exit 0
 
 Standard mechanism for declaring and installing skill dependencies.
 
+## TOC
+
+- [Core Principle](#core-principle)
+- [scripts/setup.sh](#scriptssetupsh)
+- [Dependency Types](#dependency-types)
+- [Skill Installation Detection](#skill-installation-detection)
+- [Install Scope: Global vs Project](#install-scope-global-vs-project)
+- [Declaration: Two Tiers](#declaration-two-tiers)
+- [Example: skill-forge's own setup.sh](#example-skill-forges-own-setupsh)
+- [Guidelines](#guidelines)
+
 ## Core Principle
 
 **Dependencies must be installed. Not "works better with". Not graceful skip.**

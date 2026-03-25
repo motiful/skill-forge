@@ -15,7 +15,7 @@ Constraints and procedures for maintaining the skill-forge repository.
 - MUST NOT push SKILL.md body over 500 lines
 - MUST keep SKILL.md ↔ README ↔ references terminology consistent
 - MUST add References section entry when adding new reference files
-- MUST update "What's Inside" tree in README when references/ changes
+- MUST update "Dependencies" table in README when SKILL.md dependencies or setup.sh changes
 - MUST NOT include content that fails the Positional Test (see references/skill-format.md)
 - MUST verify reference files follow three-layer format (frontmatter + EP + aligned Content)
 - MUST keep examples in standard-defining references generic — no skill-forge-specific labels in universal patterns
@@ -76,7 +76,7 @@ Protocol (run after significant changes):
 ## Consistency Checks
 
 - SKILL.md description matches README positioning
-- "What's Inside" tree matches actual references/ directory
+- README "Dependencies" table matches SKILL.md Step 0 + setup.sh
 - No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()", "checkpoint()", "content block" (replaced by "paragraph"), "register_locally()" (replaced by "detect_and_register()" per platform-registry.md EP), "read_repo_meta()" (replaced by "validate_and_apply()" per github-metadata.md EP), "lookup()" (replaced by "detect_and_register()"), "validate(repo_meta)" (replaced by "validate_and_apply()"), "detect(skill_md) → bool" (replaced by "assess_procedure_need() → workflow_skill | reference_only"), "design()" (replaced by "assess_config_needs()" / "assess_and_guide()"), "audit()" (replaced by "audit_conditional_branches()"), "create(skill_repo)" (replaced by "assess_and_create()"), "Execute reference" / "Read reference" (replaced by unified "reference" — file structure tells AI what to do), "Execute sub-module EPs" (replaced by "Follow module interfaces" — Engagement Principle #8), "EP-writability test" (replaced by module-based judgment: independent module with own interface → reference), "Parameterizing" (never adopted — sections are implementation, not parameters), "Core Validation" / "Content Review" / "Repo Hygiene" (replaced by unified "Security" gate + "Validation" section with Structure/Quality/Publishing sub-groups — categorize findings not execution)
 - Current terminology: "Engagement Principles", "Execution Procedure", "Security" (pre-flight gate), "Validation" (one section: Structure + Quality + Publishing), "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Module Model" (EP=interface, Section=implementation, Reference=imported module), "Forge", "Publish" (as Step 4 of forge), "review_and_update_plan" (assert review_and_update_plan() at major step boundaries), "Follow module interfaces" (Engagement Principle #8), "Batch Principle", "Non-Overlapping Ownership", "EP Comment Discipline", "Step Granularity", "Categorize findings not execution", "Lossless delegation" (maintenance practice), "Registration Audit" (pre-registration conflict detection), "audit_registrations()" (owned skills only, scoped by config.skill_root)
 
@@ -87,8 +87,8 @@ Protocol (run after significant changes):
 | Agent Skills standard changes | SKILL.md frontmatter, `references/skill-format.md` |
 | New platform adopts Agent Skills | `references/platform-registry.md`, README install examples, SKILL.md Fix Phase |
 | `npx skills add` breaking change | README install commands, Quick Start |
-| skill-forge SKILL.md changes | README alignment, "What's Inside", version badge |
-| New reference file added | SKILL.md References section, README "What's Inside" |
+| skill-forge SKILL.md changes | README alignment, Dependencies table, version badge |
+| New reference file added | SKILL.md References section |
 | Community feedback or bug report | Relevant validation checks in SKILL.md Step 3 |
 | Registration audit logic changes | `references/registration-audit.md`, SKILL.md EP audit_registrations() call |
 

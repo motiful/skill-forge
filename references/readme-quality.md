@@ -1,13 +1,13 @@
 ---
 name: readme-quality
-description: Skill-specific README content standards that complement readme-craft's universal quality checks. Covers value-first structure, claim discipline (promise-capability alignment), common mistakes (fake paths, missing dependencies section), and the "What's Inside" accuracy requirement.
+description: Skill-specific README content standards that complement readme-craft's universal quality checks. Covers value-first structure, claim discipline (promise-capability alignment), common mistakes (fake paths, missing dependencies section), and dependency mirroring requirement.
 ---
 
 ```
 validate_readme(readme, skill_md) → findings[]
 
 check: value proposition before install steps
-check: no fake paths, dependencies mirrored, "What's Inside" accurate
+check: no fake paths, dependencies mirrored, Dependencies table matches SKILL.md
 extract claims from README
 for each claim → find backing in SKILL.md
     backed → pass. unbacked → flag as over-promise
@@ -35,7 +35,6 @@ Use this file during the create path (Step 1) when writing README prose, during 
 - **Default path first.** A reader should understand the single-skill happy path without learning advanced packaging or ecosystem taxonomy.
 - **Default language is English.** For reusable, internationally shared skills, keep README prose in English unless the skill itself is language-specific or culture-specific.
 - **Mirror dependencies.** If SKILL.md declares dependencies, mirror them in a "Dependencies" section in README.
-- **"What's Inside" shows skill content only.** List SKILL.md, references/, scripts/ — not repo-root support files.
 - **Separate installability from discoverability.** Publishing to GitHub makes a repo directly installable by path; do not promise instant directory listings, search placement, or leaderboard visibility unless the downstream platform documents that behavior.
 - **Footer required.** End generated READMEs with `Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [Readme Craft](https://github.com/motiful/readme-craft)` when both tools were used, or just the one that applies.
 

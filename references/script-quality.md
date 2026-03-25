@@ -24,6 +24,14 @@ check: error handling for both outcomes (success/failure)
 
 Applies to any skill that includes a `scripts/` directory. Scripts are executable artifacts shipped with the skill — they must meet a higher bar than reference docs because users run them directly.
 
+## TOC
+
+- [Line Count Guidance](#line-count-guidance)
+- [Module Split Triggers](#module-split-triggers)
+- [Complexity Indicators](#complexity-indicators)
+- [Dependency Policy](#dependency-policy)
+- [Example: readme-craft generate-logo.mjs](#example-readme-craft-generate-logomjs)
+
 ## Line Count Guidance
 
 | Threshold | Interpretation |

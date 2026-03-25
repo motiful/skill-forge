@@ -177,7 +177,7 @@ Shared checks (SKILL.md and every reference file):
 | Entry complexity | Multiple modes must produce different deliverables |
 | Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
 | In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
-| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md (EP pseudocode or Validation table). Listed in References section but never invoked → Warning: standard exists but isn't enforced |
+| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively → Warning: standard exists but isn't enforced |
 | Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Warning |
 
 ### Publishing
@@ -283,7 +283,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 - `references/skill-format.md` — Format specification for SKILL.md and reference files (frontmatter, Execution Procedure, content alignment, positional test)
 - `references/skill-composition.md` — Composition philosophy: context budget, dependency tiers
 - `references/rule-skill-pattern.md` — Forge integration: detection, auto-creation, and packaging of rule-skills
-- `references/publishing-strategy.md` — Skill vs Collection publishing models
+- `references/publishing-strategy.md` — Skill vs Collection publishing models (called by project-audit.md Classification)
 - `references/platform-registry.md` — Platform skill paths, detection logic, community directories
 - `references/templates.md` — README, LICENSE, and .gitignore skeletons
 - `references/readme-quality.md` — README writing, claim discipline, example rules

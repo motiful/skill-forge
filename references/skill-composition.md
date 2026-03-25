@@ -17,6 +17,15 @@ two tiers only: Dependencies (must install) or Informational (README only)
 
 How skills declare dependencies, manage context budget, and when multiple skills belong in one repo.
 
+## TOC
+
+- [Why Composition Matters](#why-composition-matters)
+- [Context Budget Constraint](#context-budget-constraint)
+- [Collection Risks](#collection-risks)
+- [Publishing Models](#publishing-models)
+- [Dependency Tiers](#dependency-tiers)
+- [Current Tooling Landscape](#current-tooling-landscape)
+
 ## Why Composition Matters
 
 A single skill solves a single problem. But users face workflows that span multiple skills — and those skills may overlap across product lines. Without composition guidance, skills either become monoliths (cramming everything into one SKILL.md) or isolated silos (each skill reinvents shared logic).
