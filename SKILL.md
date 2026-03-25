@@ -23,6 +23,7 @@ These rules always apply. Read them before acting.
 6. **Local-ready = publish-ready** — publishing only sends to remote, never re-validates
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
 8. **Follow module interfaces** — when the procedure calls a reference file, read the file and follow its EP. The module's own EP is the authority, not any inline summary in the parent
+9. **Report discrepancies, don't pre-filter** — when a check reveals a discrepancy, report it as a finding. Do not soften severity based on expected fix effort or assumed user preference. Severity follows the check's own criteria. The user decides what to fix, not the auditor
 
 ## Execution Procedure
 
