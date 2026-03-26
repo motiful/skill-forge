@@ -81,6 +81,17 @@ The invoking skill should not describe the dependency's implementation. It chang
 |-------|---------|----------|
 | Invocation reliability | For each skill dependency: does every invocation point use explicit `Skill(...)` syntax + output gate? Natural-language invocations ("invoke X", "run X") without these are flagged | Warning |
 
+## Delivered Contract
+
+When a parent invokes a sub-module via `Skill()`, `delivered` means the sub-module's **complete EP was executed** — all steps, all gates. The parent asserts `delivered` and trusts the sub-module handled its full scope.
+
+**Rules:**
+- Parent must NOT duplicate sub-module steps. A parent-side gate for a specific sub-module step (e.g., asserting metadata after a README review) signals the sub-module's delivered contract is incomplete — fix the sub-module, not the parent
+- Parent must NOT split one sub-module concern into multiple calls. `Skill("X", "review")` + `Skill("X", "apply metadata")` = parent micro-managing X's internals. If "review" should include metadata, X's EP must guarantee it
+- Sub-module must gate its own completion. If a step can be skipped without breaking `delivered`, the sub-module needs an internal gate
+
+**Diagnostic:** If you find yourself adding parent-side gates for sub-module internals, ask: "Is the sub-module's delivered contract broken?" Fix the contract, not the caller.
+
 ## Anti-Patterns
 
 | Pattern | Problem | Fix |

@@ -122,8 +122,7 @@ def forge(target):
         confirm_with_user(org=config.github_org, name=skill_name, visibility="public")
         run(f"gh repo create {org}/{name} --public --source=. --push")
         # Non-GitHub: git remote add origin <url> && git push -u origin main
-        meta = Skill("readme-craft", f"apply metadata {skill_path}")
-        assert meta.applied                            # description + topics required for discoverability
+        # GitHub metadata (description + topics) already applied by readme-craft Step 7
         update_forge_config(skill_name)                # add to Published Skills
         assess_cc_market(config)                       # references/platform-registry.md
         print(f"Install with: npx skills add {org}/{name}")
@@ -205,7 +204,7 @@ External-facing presentation and packaging.
 | LICENSE exists | Required for community platforms |
 | Script documentation | If scripts exist, document what they do and permissions needed |
 | Discoverability claims | No implied guarantees of immediate listing or search placement |
-| GitHub metadata | Deferred to readme-craft. `Skill("readme-craft", "apply metadata <path>")` |
+| GitHub metadata | Covered by readme-craft Step 7. `delivered` contract includes metadata — do not duplicate |
 | docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
 | Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Warning |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
