@@ -116,13 +116,12 @@ def forge(target):
     # review_and_update_plan between major steps: references/execution-procedure.md
 
     # STEP 3a: Validate — content reading and checking, per item, no fixes
-    # Each item validated independently. When delegating to sub-agents, each agent
-    # must read the Security, Structure, Quality, and Publishing validation tables
-    # in THIS file before checking. The tables define WHAT to check.
+    # ONE AGENT PER ITEM. Do not batch multiple items into one agent.
+    # Each agent must read the validation tables in THIS file before checking.
     plan.items.sort(priority="security > in-repo > personal > product > rules")
     # ↑ Priority definitions: references/project-audit.md §Execution Order
     all_findings = {}
-    for item in plan.items:
+    for item in plan.items:                            # each iteration = one agent
         read(item.skill_md)                            # read SKILL.md body NOW, not before
         read(item.references)                          # read reference files NOW, not before
         if security_scan(item).has_critical: report_and_block()
