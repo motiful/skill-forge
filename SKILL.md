@@ -162,6 +162,8 @@ def forge(target):
 
 If your platform supports sub-agents (e.g., Claude Code `Agent` tool): setup.sh and discovery can run in parallel; independent items can validate in parallel; readme-craft then self-review are sequential.
 
+**One agent per item.** Each Step 3 validation agent handles exactly one discovered item — do not batch multiple items into a single agent. This ensures each item gets isolated context and full validation depth. Launch all item agents in parallel.
+
 ## Security
 
 Pre-flight gate. If Critical findings → block push, stop validation.
