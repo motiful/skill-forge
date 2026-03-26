@@ -72,16 +72,38 @@ def forge(target):
         write_artifacts(path)                          # LICENSE, .gitignore
         items = [SkillItem(path)]
 
-    # STEP 2: Plan — GATE: file must exist before Step 3
+    # STEP 2: Plan — GATE: file must exist AND be per-item structured before Step 3
     plan_path = f"/tmp/skill-forge-{name}.md"
     delete_if_exists(plan_path)                        # always fresh, no resume between runs
+
+    # Plan MUST be organized per-item, NOT per-check-type.
+    # Each discovered item gets its own top-level checklist entry with sub-steps.
+    # Step 3 iterates this plan item by item — no plan means no loop.
+    #
+    # Plan structure (every plan follows this, no exceptions):
+    #
+    #   ## Steps
+    #   - [ ] 1. <action> <item-path>
+    #     - [ ] Security scan
+    #     - [ ] Validate (read SKILL.md, check frontmatter, references, quality)
+    #     - [ ] Fix Critical/Warning issues
+    #     - [ ] Skill("readme-craft", "review <path>")   # skip for in-repo items
+    #     - [ ] Skill("self-review", "<path>")            # skip for in-repo items
+    #     - [ ] Verify Local Ready
+    #   - [ ] 2. <action> <item-path>
+    #     - [ ] ...
+    #   ## Progress
+    #   Completed: 0 / N
+    #
+    # Sub-steps within each item are derived from validation tables (Security,
+    # Structure, Quality, Publishing). Read the tables line by line.
+
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
-    # Plan sub-steps MUST be derived from validation table rows, not from memory.
-    # Read Security + Structure + Quality + Publishing tables line by line.
-    # Every table row → a plan checklist item. Missing row = missed check.
-    assert plan.covers(SECURITY_CHECKS + STRUCTURE_CHECKS + QUALITY_CHECKS + PUBLISHING_CHECKS)
-    # Plan template with per-item sub-steps: references/project-audit.md
+    assert plan.is_per_item_structured                 # GATE: each item = top-level entry + sub-steps
+    # ↑ If the plan groups checks by type (all security, then all structure...),
+    #   STOP and restructure. Per-item organization drives the Step 3 for-loop.
+    #   Per-type organization destroys it.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
     # STEP 3: Validate & Fix

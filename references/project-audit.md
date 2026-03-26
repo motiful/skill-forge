@@ -94,6 +94,8 @@ When ambiguous, default to **separate standalone repos** — easier to install s
 
 **Building the Steps section:** For every Validate or Graduate step, expand into sub-steps that mirror SKILL.md's Fix Phase. This ensures skill invocations (`Skill("readme-craft")`, `Skill("self-review")`) are explicit checkboxes — not implicit steps the agent might skip. Read SKILL.md Fix Phase before building the plan.
 
+**Critical: per-item structure.** The plan MUST be organized per-item (one top-level entry per discovered item), NOT per-check-type. The plan structure and gate assertion are defined in SKILL.md STEP 2 — that is the authority. This section provides the extended template below.
+
 **Format:**
 
 ```markdown
