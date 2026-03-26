@@ -101,9 +101,11 @@ def forge(target):
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
     assert plan.is_per_item_structured                 # GATE: each item = top-level entry + sub-steps
-    # ↑ If the plan groups checks by type (all security, then all structure...),
-    #   STOP and restructure. Per-item organization drives the Step 3 for-loop.
-    #   Per-type organization destroys it.
+    assert plan.top_level_step_count >= len(items)     # GATE: mechanical count — cannot batch
+    # ↑ Count top-level `- [ ]` entries under ## Steps. Must be ≥ discovered items.
+    #   If count < items: the plan batched multiple items into one entry. STOP and
+    #   expand — one top-level entry per discovered item, no exceptions.
+    #   This gate is arithmetic, not semantic — AI cannot self-rationalize past it.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
     # STEP 3: Validate & Fix
