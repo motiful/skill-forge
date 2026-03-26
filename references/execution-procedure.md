@@ -200,6 +200,29 @@ Both live in the same file (SKILL.md or reference), but in different formats. In
 
 The agent follows the pseudocode (Execution Procedure) and consults Content sections when the pseudocode references them. This pattern applies to both SKILL.md and reference files.
 
+### 10. Observe-Then-Act in Parallel Workflows
+
+When an EP delegates work to parallel sub-agents (e.g., validating N items), separate the observation phase from the action phase:
+
+```
+# Phase A: gather (parallel, no side effects)
+for item in items:
+    findings[item] = observe(item)     # agents return data, do NOT act
+
+# Phase B: aggregate (parent, full picture)
+patterns = cross_item_analysis(findings)
+
+# Phase C: act (after user sees full picture)
+for item in items:
+    fix(item, findings[item], patterns)
+```
+
+**Why:** When observation and action are mixed in a single parallel loop, each agent acts in isolation — it never sees findings from sibling agents. Collection-wide patterns (terminology drift, missing conventions, inconsistent depth) go undetected because no single agent has the full picture.
+
+**When to apply:** Any EP step that processes multiple independent items in parallel AND needs cross-item consistency. If items are truly independent with no need for cross-comparison, a single-phase loop is fine.
+
+**Isomorphic for N=1:** Phase B becomes a no-op — same behavior as a single-phase loop, zero overhead.
+
 ## Anti-Patterns
 
 | Anti-pattern | Why it fails | Fix |
