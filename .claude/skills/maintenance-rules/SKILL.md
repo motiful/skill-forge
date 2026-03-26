@@ -9,6 +9,25 @@ metadata:
 
 Constraints and procedures for maintaining the skill-forge repository.
 
+## Execution Procedure
+
+```
+maintain(trigger) → updated | no_change
+
+if "platform registry" in trigger:
+    follow Platform Registry Updates steps 1-11
+    update downstream: SKILL.md Fix Phase, README install, Detection logic
+if "community tools" in trigger:
+    follow Community Tools Updates steps 1-4
+if change proposed:
+    run Decision Test (7 criteria) → accept | reject
+    verify all Constraints (MUST/NEVER)
+    run Consistency Checks
+    update Changelog (max 5, trim oldest)
+after significant changes:
+    run Self-Governance protocol (4 steps)
+```
+
 ## Constraints
 
 - MUST run Decision Test (7 criteria below) before accepting any change

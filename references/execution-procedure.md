@@ -83,6 +83,12 @@ def main_workflow(input):
         review_and_update_plan(plan_path, item, "done")
 ```
 
+**Signature naming convention:**
+- Use descriptive verb (or compound verb for multi-step): `discover_and_classify`, `detect_and_create`, `validate_and_apply` — not `lookup`, `check`, `run`
+- Declare explicit result type: `→ installed | blocked`, `→ rule_skill_spec | nothing` — not `→ bool`, `→ result`
+- Multi-step flows use compound verbs: `validate_and_apply` (not just `validate` when it also applies)
+- Name should tell the caller what happens without reading the body
+
 ### 2. Plan = Checklist
 
 The runtime plan file IS the execution checklist. Not two separate concepts.

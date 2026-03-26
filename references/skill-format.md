@@ -37,7 +37,6 @@ check: line count reasonable (< 300 or has TOC)
 
 ## TOC
 
-- [Agent Skills Open Standard](#agent-skills-open-standard)
 - [Standard Frontmatter](#standard-frontmatter)
 - [CC-Specific Extensions](#cc-specific-extensions)
 - [Body](#body)
@@ -56,13 +55,9 @@ check: line count reasonable (< 300 or has TOC)
   - [Directory Taxonomy](#directory-taxonomy)
 - [Cross-Platform Compatibility](#cross-platform-compatibility)
 
-## Agent Skills Open Standard
-
-Skills follow the **Agent Skills open standard** (agentskills.io), adopted by Claude Code, Microsoft Copilot, OpenAI ChatGPT, GitHub, Cursor, Atlassian, and Figma.
-
 ## Standard Frontmatter
 
-Works on all Agent Skills platforms:
+Skills follow the [Agent Skills open standard](https://agentskills.io). Works on all platforms:
 
 ```yaml
 ---
@@ -170,9 +165,7 @@ A skill file is a software module. This applies to both SKILL.md and every refer
 **EP owns control flow** — sequence, conditions, gates, module calls.
 **Sections own domain knowledge** — standards, rules, definitions, details, examples.
 
-Section format is unconstrained: tables, prose, code blocks, decision trees, examples. Whatever form fits the knowledge. Sections can reference other modules (e.g., a table row pointing to a reference file for deeper detail on one item).
-
-SKILL.md is the entry point (main program). References are imported modules. Both have the same three-layer structure. A reference without an EP is a module without an interface — the caller can read it, but cannot reliably execute it as a procedure.
+Section format is unconstrained — tables, prose, code, decision trees. Sections can reference other modules for deeper detail. SKILL.md is the entry point; references are imported modules — both follow the same three-layer structure.
 
 ### Three Layers
 
@@ -241,23 +234,15 @@ Always under a `## Execution Procedure` heading. The heading is the identifier �
 
 2-10 lines typical per entry, no artificial limit.
 
-**Multiple entry points**: A file can declare multiple EP entries — like a module exporting multiple functions. Each entry has its own signature line. Use when one file serves multiple callers or steps (e.g., validate-time + create-time). Parent calls whichever entry applies to its current step.
-
-**Signature naming convention:**
-- Use descriptive verb (or compound verb for multi-step): `discover_and_classify`, `detect_and_create`, `validate_and_apply` — not `lookup`, `check`, `run`
-- Declare explicit result type: `→ installed | blocked`, `→ rule_skill_spec | nothing` — not `→ bool`, `→ result`
-- Multi-step flows use compound verbs: `validate_and_apply` (not just `validate` when it also applies)
-- Name should tell the caller what happens without reading the body
+**Multiple entry points**: A file can declare multiple EP entries (like a module exporting multiple functions), each with its own signature. Use when one file serves multiple callers or steps. Signature naming conventions are in `references/execution-procedure.md`.
 
 ### Content Rules
 
-Sections are the **implementation** of EP lines — the domain knowledge that makes each EP line actionable. In the module model, a section is an inline function: defined where it's used, consumed at one call site.
+Sections are the **implementation** of EP lines — inline functions consumed at one call site.
 
-- Each `##` section serves one or more EP lines (Positional Test)
-- No orphan sections (content not mapped to any EP line)
-- Format is unconstrained — tables, prose, code, lists, decision trees, examples
+- Each `##` section serves one or more EP lines (Positional Test). No orphan sections
+- Format is unconstrained — tables, prose, code, decision trees, examples
 - **Inline Why**: follows the rule it serves, 1-2 lines max. Self-evident rules need no Why
-- Sections can reference other modules (a table row pointing to a reference file for detail on one item)
 
 ### HITL Convention
 
@@ -276,10 +261,6 @@ for each reference file:
     for each EP line:
         if no Content section expands it → Warning: possible drift
 ```
-
-## Content Splitting Rules
-
-Extracted to `references/reference-extraction.md` — covers module-vs-inline decision, index quality, and thresholds. EP design principles (batch, non-overlapping ownership) are in `references/execution-procedure.md`.
 
 ## File Structure
 
@@ -316,8 +297,4 @@ The Agent Skills open standard names three skill directories: `references/`, `as
 
 ## Cross-Platform Compatibility
 
-For maximum portability:
-- Use only standard frontmatter fields (name, description, license, compatibility, metadata)
-- Avoid CC-specific extensions unless the skill truly needs them
-- README.md serves as the human-readable + other-AI-tool-readable entry point
-- Skill's core knowledge in SKILL.md body is platform-agnostic markdown
+For maximum portability, use only standard frontmatter fields and keep CC-specific settings inside `metadata`. Skill core knowledge in SKILL.md body is platform-agnostic markdown.

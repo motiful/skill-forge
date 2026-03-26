@@ -158,12 +158,13 @@ echo ""
 errors=0
 
 # --- CLI tools ---
-for tool in gh node npx; do
+for tool in git gh node npx; do
   if command -v "$tool" &>/dev/null; then
     echo "  $tool: $(command -v "$tool")"
   else
     echo "  ERROR: $tool not found"
     case "$tool" in
+      git)  echo "  Install: https://git-scm.com" ;;
       gh)   echo "  Install: https://cli.github.com" ;;
       node) echo "  Install: https://nodejs.org" ;;
       npx)  echo "  Install: comes with Node.js — https://nodejs.org" ;;
