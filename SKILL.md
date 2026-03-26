@@ -122,6 +122,10 @@ def forge(target):
         read(item.skill_md)                            # read SKILL.md body NOW, not before
         read(item.references)                          # read reference files NOW, not before
 
+        # IMPORTANT: when delegating to a sub-agent, the agent must read the
+        # Security, Structure, Quality, and Publishing validation tables in THIS
+        # file before checking. The tables define WHAT to check — without them,
+        # the agent will improvise and miss systematic checks like EP assessment.
         # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
         if security_scan(item).has_critical: report_and_block()  # see Security section
         findings = validate(item)                      # see Validation section
