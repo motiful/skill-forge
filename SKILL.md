@@ -49,6 +49,9 @@ def forge(target):
     # Discovery also reads project standards (CLAUDE.md, AGENTS.md) — shared context.
     # Discovery does NOT read: SKILL.md body, reference file content.
     # Discovery does NOT validate: quality, structure, reference integrity.
+    # Discovery does NOT check git log, git diff, or previous review reports.
+    # Every review is a FULL review — no incremental/delta mode, no "nothing changed
+    # since last review" shortcuts. Prior results do not reduce current scope.
     # Content reading and validation happen in STEP 3, driven by the plan.
     # If you finish STEP 1 having already validated content → you collapsed the loop.
 
