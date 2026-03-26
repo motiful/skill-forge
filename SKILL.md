@@ -40,10 +40,17 @@ def forge(target):
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
-    # STEP 1: Assess
+    # STEP 1: Discover — paths and classification ONLY
     items = discover(target)                           # traverse FULL project tree
     # Find: SKILL.md (any depth), rules files, project instructions, setup scripts
     # references/project-audit.md — discovery signals + classification framework
+    #
+    # BOUNDARY: Discovery reads file PATHS and FRONTMATTER (for classification).
+    # Discovery also reads project standards (CLAUDE.md, AGENTS.md) — shared context.
+    # Discovery does NOT read: SKILL.md body, reference file content.
+    # Discovery does NOT validate: quality, structure, reference integrity.
+    # Content reading and validation happen in STEP 3, driven by the plan.
+    # If you finish STEP 1 having already validated content → you collapsed the loop.
 
     if items:                                          # --- Review path ---
         classified = classify(items)                   # references/project-audit.md
@@ -105,10 +112,12 @@ def forge(target):
     # ↑ If the plan batched N items into fewer entries, this fails. Rewrite: one entry per item.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
-    # STEP 3: Validate & Fix
+    # STEP 3: Validate & Fix — content reading happens HERE, per item
     plan.items.sort(priority="security > in-repo > personal > product > rules")
     # ↑ Priority definitions: references/project-audit.md §Execution Order
     for item in plan.items:
+        read(item.skill_md)                            # read SKILL.md body NOW, not before
+        read(item.references)                          # read reference files NOW, not before
 
         # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
         if security_scan(item).has_critical: report_and_block()  # see Security section
