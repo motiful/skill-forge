@@ -190,6 +190,7 @@ Shared checks (SKILL.md and every reference file):
 | In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
 | Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively → Warning: standard exists but isn't enforced |
 | Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Warning |
+| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` → Warning |
 
 ### Publishing
 
@@ -206,6 +207,7 @@ External-facing presentation and packaging.
 | Discoverability claims | No implied guarantees of immediate listing or search placement |
 | GitHub metadata | Covered by readme-craft Step 7. `delivered` contract includes metadata — do not duplicate |
 | docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
+| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) → Warning |
 | Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Warning |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
 
