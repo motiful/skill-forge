@@ -115,35 +115,42 @@ def forge(target):
     # ↑ If the plan batched N items into fewer entries, this fails. Rewrite: one entry per item.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
-    # STEP 3: Validate & Fix — content reading happens HERE, per item
+    # STEP 3a: Validate — content reading and checking, per item, no fixes
+    # Each item validated independently. When delegating to sub-agents, each agent
+    # must read the Security, Structure, Quality, and Publishing validation tables
+    # in THIS file before checking. The tables define WHAT to check.
     plan.items.sort(priority="security > in-repo > personal > product > rules")
     # ↑ Priority definitions: references/project-audit.md §Execution Order
+    all_findings = {}
     for item in plan.items:
         read(item.skill_md)                            # read SKILL.md body NOW, not before
         read(item.references)                          # read reference files NOW, not before
+        if security_scan(item).has_critical: report_and_block()
+        all_findings[item] = validate(item)            # return findings, do NOT fix yet
+        review_and_update_plan(plan_path, item, "validated")
 
-        # IMPORTANT: when delegating to a sub-agent, the agent must read the
-        # Security, Structure, Quality, and Publishing validation tables in THIS
-        # file before checking. The tables define WHAT to check — without them,
-        # the agent will improvise and miss systematic checks like EP assessment.
-        # Scan project-specific standards (CLAUDE.md, AGENTS.md, linter configs, rules/)
-        if security_scan(item).has_critical: report_and_block()  # see Security section
-        findings = validate(item)                      # see Validation section
-        report_to_user(findings)                       # findings grouped by category
+    # STEP 3b: Cross-item analysis — parent aggregates, finds patterns
+    # This runs in the parent context with ALL findings visible.
+    # Look for: cross-item consistency (terminology, naming, conventions),
+    # collection-wide gaps (e.g., all workflow skills missing EP),
+    # patterns that only emerge from comparing items side by side.
+    patterns = cross_item_analysis(all_findings)
+    report_to_user(all_findings, patterns)             # per-item + cross-item together
 
-        fix_critical(findings)                         # mandatory
-        if user_approves: fix_warnings(findings)
-        assert review_and_update_plan(plan_path, item, "validated")
+    # STEP 3c: Fix — after user sees the full picture and approves
+    for item in plan.items:
+        fix_critical(all_findings[item])               # mandatory
+        if user_approves: fix_warnings(all_findings[item], patterns)
 
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
         if not item.is_in_repo:
             rc_result = Skill("readme-craft", f"review {item.path}")
-            assert rc_result.delivered                 # do not substitute with manual README review
+            assert rc_result.delivered
             assert review_and_update_plan(plan_path, item, "readme-craft")
 
             sr_result = Skill("self-review", item.path)
-            assert sr_result.no_broken_dimensions      # do not substitute with manual quality check
+            assert sr_result.no_broken_dimensions
             assert review_and_update_plan(plan_path, item, "self-review")
 
         conflicts = audit_registrations(item, config)    # references/registration-audit.md
