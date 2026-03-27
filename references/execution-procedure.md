@@ -231,6 +231,22 @@ Every EP line competes for the agent's finite attention. More lines = less atten
 
 For complex, dynamic tasks: LLM generates a concrete plan/manifest (fusing knowledge + control), then the plan executes mechanically with LLM called for analysis at each step. The LLM designs the control flow; the control flow drives the LLM.
 
+### 13. Assert as Attention Checkpoint
+
+`assert` creates a moment where the agent must evaluate a condition before proceeding. Without it, the agent flows from step to step without verifying. The assert forces a pause — and that pause IS the attention allocation.
+
+**Assert effectiveness depends on standard clarity:**
+
+| Type | Example | Skip risk | Why |
+|------|---------|-----------|-----|
+| No assert | (step just runs) | High | No checkpoint, no pause |
+| Semantic assert | `assert plan.is_well_structured` | Medium | Agent can rationalize "yes it is" |
+| Arithmetic assert | `assert count >= 17` | Low | Number comparison is non-negotiable |
+
+**Placement:** Assert at phase boundaries only (between major steps). Too many asserts compete for the same attention budget they're trying to protect.
+
+**M × N delegation:** Coarse asserts (M items exist) belong in the parent EP where attention is scarce. Fine asserts (N checks per item covered) belong in sub-modules where attention is fresh. Each assert level matches the attention budget of its execution context.
+
 ## Anti-Patterns
 
 | Anti-pattern | Why it fails | Fix |
