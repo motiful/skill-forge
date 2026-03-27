@@ -131,7 +131,7 @@ def forge(target):
         ))
     run_parallel(agents)                               # all agents launch at once
 
-    # Feedback: check coverage, retry gaps
+    # Feedback: check coverage, retry gaps — do NOT skip this loop
     for item, agent in zip(plan.items, agents):
         all_findings[item] = agent.findings
         covered = agent.findings.checked_rows
@@ -139,6 +139,7 @@ def forge(target):
         if missing:
             extra = Agent(f"Check ONLY these for {item.path}: {missing}")
             all_findings[item].merge(extra.findings)
+        assert len(all_findings[item]) > 0                 # every item must have findings
         review_and_update_plan(plan_path, item, "validated")
 
     # STEP 3b: Cross-item analysis — parent aggregates, finds patterns

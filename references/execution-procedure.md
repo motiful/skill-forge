@@ -223,6 +223,25 @@ for item in items:
 
 **Isomorphic for N=1:** Phase B becomes a no-op — same behavior as a single-phase loop, zero overhead.
 
+### 11. EP as Attention Budget Allocation
+
+An EP is not a control flow diagram. It is an **attention budget allocation scheme**.
+
+Every line of pseudocode tells the LLM: "right now, focus your attention HERE." The model already has the capability to plan, evaluate, and iterate — what it lacks is the discipline to allocate finite attention correctly when context is large.
+
+This is architectural (Transformer attention), not a capability gap. It will not be "fixed" by better models. It CAN be mitigated by: smaller tasks per agent (attention pools), explicit checkpoints (assert), and coverage feedback (detect and retry skipped checks — `references/attention-feedback.md`).
+
+### 12. Compile-Then-Execute
+
+When an EP processes complex, dynamic tasks, separate generation from execution:
+
+- **Generation phase**: LLM uses intelligence + domain knowledge to design the control flow (plan, manifest, script). Knowledge and control fuse here.
+- **Execution phase**: The generated artifact runs deterministically. LLM is called for analysis at each step but does not control the flow.
+
+> LLM's intelligence generates the control flow. Deterministic mechanism executes the control flow. Knowledge and control fuse during generation, separate during execution.
+
+This resolves the knowledge-control coupling problem: you need knowledge to design good control flow, but execution should be disciplined, not intelligent. The design phase is where intelligence belongs; the execution phase is where discipline belongs.
+
 ## Anti-Patterns
 
 | Anti-pattern | Why it fails | Fix |
