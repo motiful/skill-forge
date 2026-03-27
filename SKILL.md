@@ -47,15 +47,11 @@ def forge(target):
     # Find: SKILL.md (any depth), rules files, project instructions, setup scripts
     # references/project-audit.md — discovery signals + classification framework
     #
-    # BOUNDARY: Discovery reads file PATHS and FRONTMATTER (for classification).
-    # Discovery also reads project standards (CLAUDE.md, AGENTS.md) — shared context.
-    # Discovery does NOT read: SKILL.md body, reference file content.
-    # Discovery does NOT validate: quality, structure, reference integrity.
-    # Discovery does NOT check git log, git diff, or previous review reports.
-    # Every review is a FULL review — no incremental/delta mode, no "nothing changed
-    # since last review" shortcuts. Prior results do not reduce current scope.
-    # Content reading and validation happen in STEP 3, driven by the plan.
-    # If you finish STEP 1 having already validated content → you collapsed the loop.
+    # BOUNDARY — Discovery reads ONLY:  paths, frontmatter, project standards.
+    # Discovery does NOT read: SKILL.md body, reference content.
+    # Discovery does NOT check: git log, git diff, previous review reports.
+    # Every review is a FULL review. No incremental shortcuts.
+    # Content reading happens in STEP 3b agents, not here.
 
     if items:                                          # --- Review path ---
         classified = classify(items)                   # references/project-audit.md
@@ -88,27 +84,13 @@ def forge(target):
     plan_path = f"/tmp/skill-forge-{name}.md"
     delete_if_exists(plan_path)                        # always fresh, no resume between runs
 
-    # Plan MUST be organized per-item, NOT per-check-type.
-    # Each discovered item gets its own top-level checklist entry with sub-steps.
-    # Step 3 iterates this plan item by item — no plan means no loop.
-    #
-    # Plan structure (every plan follows this, no exceptions):
-    #
-    #   ## Steps
+    # Plan: per-item structure. One top-level entry per discovered item.
     #   - [ ] 1. <action> <item-path>
-    #     - [ ] Security scan
-    #     - [ ] Validate (read SKILL.md, check frontmatter, references, quality)
-    #     - [ ] Fix Critical/Warning issues
-    #     - [ ] Skill("readme-craft", "review <path>")   # skip for in-repo items
-    #     - [ ] Skill("self-review", "<path>")            # skip for in-repo items
-    #     - [ ] Verify Local Ready
-    #   - [ ] 2. <action> <item-path>
-    #     - [ ] ...
+    #     - [ ] Validate (frontmatter, structure, quality, publishing)
+    #     - [ ] Fix issues
+    #   - [ ] 2. ...
     #   ## Progress
     #   Completed: 0 / N
-    #
-    # Sub-steps within each item are derived from validation tables (Security,
-    # Structure, Quality, Publishing). Read the tables line by line.
 
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
