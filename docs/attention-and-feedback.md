@@ -134,16 +134,85 @@ Practical rule: **critical mechanisms must be visible at the call site, not hidd
 | T6 | 3a/3b/3c split | EP assessment + cross-item patterns | Observe-then-act enables pattern detection |
 | T7 | Plan count gate | 17 per-item entries, plan updated | Plan structure ≠ execution structure |
 | T8 | Explicit Agent() calls | 14 agents (70% 1:1), deepest findings | Making Agent calls structural prevents batching |
-| T9 | Compressed to one-liner | Regression to 3W | **Abstraction removed attention guidance** |
+| T9 | Compressed to one-liner | Regression to 3W | Abstraction removed attention guidance |
+| T10 | Upfront read() + one-liner | 13 findings, 5 grouped agents | read() helps but can't replace explicit code |
+| T11 | Restored explicit Agent() | 27 findings, 5 agents, best grouped | Explicit code > abstract calls, even with read() |
+| T12 | **Compile-then-execute manifest** | **44 findings, 100% 1:1, EP+graceful skip found** | **Manifest as assertable intermediate artifact** |
+| T13 | Simplified (removed guards) | Crashed — read all bodies, ran git log | **Each phase needs its own guard** |
+| T14 | Compressed guards (-18 lines) | 40 findings, 29% 1:1 | Guards work compressed but less effectively |
 
-## What Persists
+## Finding 8: Compile-Then-Execute (Round 12)
 
-**As long as Transformers have finite attention:**
-- EP as attention budget allocation
-- Sub-agents as attention pools
-- Coverage feedback (detect and retry attention failures)
-- Assert as attention checkpoint
-- Domain knowledge encoded in skills
+The breakthrough. Instead of telling agents "validate this skill" (which they interpret freely), we added an intermediate step: **compile a validation manifest first, then execute it.**
+
+```
+STEP 3a: Compile manifest — for each item, list its path + ALL validation table rows
+         assert len(manifest) >= len(items)
+         assert all checks are ALL_ROWS (no filtering)
+
+STEP 3b: Execute manifest — one Agent per manifest entry, prompt includes EXACT check list
+
+Coverage: compare findings against manifest → retry missing rows
+```
+
+The manifest is a **visible, assertable artifact** between the "intelligence" phase (deciding what to check) and the "discipline" phase (executing the checks). T12 achieved 100% 1:1 agents and found EP assessment + graceful skip detection for the first time — because each agent's prompt listed the EXACT checks to run.
+
+## Finding 9: Guards Are Per-Phase, Not Global (Round 13-14)
+
+T13 removed guards from STEP 1 and STEP 2, reasoning that the manifest in STEP 3 would compensate. It crashed — the AI read all SKILL.md bodies in STEP 1 and ran git log before the manifest even existed.
+
+T14 compressed guards (same constraints, fewer words). Quality dropped from 100% to 29% 1:1.
+
+**Each phase of an EP needs its own attention guard.** A guard in STEP 3 cannot protect STEP 1, because STEP 1 executes before STEP 3 exists. Guards are temporal — they protect the moment they appear in, not the moments after.
+
+This also means: **you cannot simplify an EP by merging guards.** Each guard is bound to a specific moment in the execution timeline. Removing it opens a gap at that moment, regardless of what comes later.
+
+## Three Principles (What to推广)
+
+The 14 rounds produced many EP-specific fixes, but only three principles have lasting, generalizable value:
+
+### Principle 1: Granularity — One Agent, One Item
+
+When a task has N items to process, each item must get its own attention pool (sub-agent). Batching N items into one agent divides attention by N, causing graceful skip of lower-priority checks.
+
+**The trigger:** items × checks > single-agent attention budget.
+**The fix:** spawn N agents, each processing exactly one item.
+
+### Principle 2: Compile-Then-Execute — Manifest as Contract
+
+Before executing, generate a concrete, inspectable intermediate artifact (manifest/checklist) that lists exactly what each agent must do. Then execute the manifest mechanically.
+
+**Why it works:**
+- The manifest is assertable (count items, verify check completeness)
+- The agent prompt includes EXACT checks (no interpretation needed)
+- Coverage feedback compares findings against the manifest (not against vague expectations)
+
+> LLM's intelligence generates the control flow. Deterministic mechanism executes the control flow. Knowledge and control fuse during generation, separate during execution.
+
+### Principle 3: Phase Guards — Each Step Protects Itself
+
+Every phase of an EP needs its own boundary constraint. A guard in a later phase cannot protect an earlier phase, because execution is sequential. Guards are temporally bound.
+
+**Common phase guards:**
+- Discovery: "read paths and frontmatter ONLY, no content, no git history"
+- Plan: "per-item structure, assert count"
+- Execution: manifest assert, agent-per-item, coverage feedback
+
+**You cannot simplify by merging guards across phases.** T13 and T14 proved this.
+
+## What Persists, What Fades
+
+**Principles (permanent — as long as attention is finite):**
+- Granularity: one agent, one item
+- Compile-then-execute: manifest as contract
+- Phase guards: each step protects itself
+- Coverage feedback: detect and retry attention failures
+
+**Implementation (temporary — will evolve with models and platforms):**
+- Specific BOUNDARY comment wording
+- Plan template format
+- Manifest JSON structure
+- Assert placement
 
 **What the attention lens clarifies:**
 - LLM autonomy vs external control = who allocates the attention budget
