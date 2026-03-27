@@ -40,6 +40,12 @@ def forge(target):
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
+    # Load critical module: attention-feedback pattern
+    # Read references/attention-feedback.md NOW — it defines validate_with_feedback(),
+    # the core validation loop used in STEP 3a. One agent per item, coverage check
+    # after each agent returns, retry missing validation rows. Do NOT batch items.
+    read("references/attention-feedback.md")
+
     # STEP 1: Discover — paths and classification ONLY
     items = discover(target)                           # traverse FULL project tree
     # Find: SKILL.md (any depth), rules files, project instructions, setup scripts
@@ -121,6 +127,7 @@ def forge(target):
     all_findings, patterns = validate_with_feedback(plan.items, VALIDATION_TABLES)
     # ↑ One agent per item, coverage check + retry gaps, cross-item analysis.
     #   Read references/attention-feedback.md for the full pattern.
+    assert len(all_findings) >= len(plan.items)        # every item must have findings
     report_to_user(all_findings, patterns)
 
     # STEP 3c: Fix — after user sees the full picture and approves
