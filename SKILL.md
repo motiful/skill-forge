@@ -127,11 +127,10 @@ def forge(target):
             "path": item.path,
             "skill_md": item.skill_md,
             "references": item.references,
-            "checks": select_checks(item, SECURITY_CHECKS + STRUCTURE_CHECKS
-                                    + QUALITY_CHECKS + PUBLISHING_CHECKS)
+            "checks": ALL_VALIDATION_TABLE_ROWS          # every row, no filtering
         })
-    assert len(manifest) >= len(plan.items)            # every item in manifest
-    assert all(len(m["checks"]) >= 10 for m in manifest) # Security + Structure + Quality minimum
+    assert len(manifest) >= len(plan.items)              # every item in manifest
+    assert all(m["checks"] == ALL_VALIDATION_TABLE_ROWS for m in manifest)  # no rows dropped
 
     # STEP 3b: Execute validation manifest — one agent per manifest entry
     all_findings = {}
