@@ -115,17 +115,21 @@ def forge(target):
     # ↑ If the plan batched N items into fewer entries, this fails. Rewrite: one entry per item.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
-    # STEP 3a: Validate — content reading and checking, per item, no fixes
-    # ONE AGENT PER ITEM. Do not batch multiple items into one agent.
-    # Each agent must read the validation tables in THIS file before checking.
+    # STEP 3a: Validate — one agent per item, all in parallel, no fixes
     plan.items.sort(priority="security > in-repo > personal > product > rules")
     # ↑ Priority definitions: references/project-audit.md §Execution Order
     all_findings = {}
-    for item in plan.items:                            # each iteration = one agent
-        read(item.skill_md)                            # read SKILL.md body NOW, not before
-        read(item.references)                          # read reference files NOW, not before
-        if security_scan(item).has_critical: report_and_block()
-        all_findings[item] = validate(item)            # return findings, do NOT fix yet
+    agents = []
+    for item in plan.items:
+        agents.append(Agent(
+            f"Validate ONE skill: {item.path}. "
+            f"Read the Security/Structure/Quality/Publishing validation tables "
+            f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
+            f"references. Return findings only, do NOT fix."
+        ))
+    run_parallel(agents)                               # all agents launch at once
+    for item, agent in zip(plan.items, agents):
+        all_findings[item] = agent.findings
         review_and_update_plan(plan_path, item, "validated")
 
     # STEP 3b: Cross-item analysis — parent aggregates, finds patterns
