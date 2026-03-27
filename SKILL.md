@@ -40,7 +40,7 @@ def forge(target):
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
-    read("references/attention-feedback.md")              # defines validate_with_feedback() — used in STEP 3a
+    read("references/attention-feedback.md")              # coverage feedback pattern — read before STEP 3a
 
     # STEP 1: Discover — paths and classification ONLY
     items = discover(target)                           # traverse FULL project tree
@@ -117,10 +117,33 @@ def forge(target):
     # ↑ If the plan batched N items into fewer entries, this fails. Rewrite: one entry per item.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
-    # STEP 3a: Validate
+    # STEP 3a: Validate — one agent per item, all in parallel, no fixes
     plan.items.sort(priority="security > in-repo > personal > product > rules")
-    all_findings, patterns = validate_with_feedback(plan.items, VALIDATION_TABLES)
-    assert len(all_findings) >= len(plan.items)
+    all_findings = {}
+    agents = []
+    for item in plan.items:
+        agents.append(Agent(
+            f"Validate ONE skill: {item.path}. "
+            f"Read the Security/Structure/Quality/Publishing validation tables "
+            f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
+            f"references. Return findings only, do NOT fix. "
+            f"List which validation table rows you checked."
+        ))
+    run_parallel(agents)                               # all agents launch at once
+
+    # Coverage feedback — check what each agent covered, retry gaps
+    for item, agent in zip(plan.items, agents):
+        all_findings[item] = agent.findings
+        covered = agent.findings.checked_rows
+        missing = VALIDATION_TABLE_ROWS - covered
+        if missing:
+            extra = Agent(f"Check ONLY these for {item.path}: {missing}")
+            all_findings[item].merge(extra.findings)
+        assert len(all_findings[item]) > 0
+        review_and_update_plan(plan_path, item, "validated")
+
+    # STEP 3b: Cross-item analysis
+    patterns = cross_item_analysis(all_findings)
     report_to_user(all_findings, patterns)
 
     # STEP 3c: Fix — after user sees the full picture and approves
