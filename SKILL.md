@@ -116,6 +116,7 @@ def forge(target):
     # review_and_update_plan between major steps: references/execution-procedure.md
 
     # STEP 3a: Validate — one agent per item, all in parallel, no fixes
+    # references/attention-feedback.md — why this works and when to apply
     plan.items.sort(priority="security > in-repo > personal > product > rules")
     # ↑ Priority definitions: references/project-audit.md §Execution Order
     all_findings = {}
@@ -125,11 +126,19 @@ def forge(target):
             f"Validate ONE skill: {item.path}. "
             f"Read the Security/Structure/Quality/Publishing validation tables "
             f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
-            f"references. Return findings only, do NOT fix."
+            f"references. Return findings only, do NOT fix. "
+            f"List which validation table rows you checked."
         ))
     run_parallel(agents)                               # all agents launch at once
+
+    # Feedback: check coverage, retry gaps
     for item, agent in zip(plan.items, agents):
         all_findings[item] = agent.findings
+        covered = agent.findings.checked_rows
+        missing = VALIDATION_TABLE_ROWS - covered
+        if missing:
+            extra = Agent(f"Check ONLY these for {item.path}: {missing}")
+            all_findings[item].merge(extra.findings)
         review_and_update_plan(plan_path, item, "validated")
 
     # STEP 3b: Cross-item analysis — parent aggregates, finds patterns
