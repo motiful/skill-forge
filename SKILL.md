@@ -131,7 +131,7 @@ def forge(target):
                                     + QUALITY_CHECKS + PUBLISHING_CHECKS)
         })
     assert len(manifest) >= len(plan.items)            # every item in manifest
-    assert all(len(m["checks"]) >= 3 for m in manifest)  # no empty check lists
+    assert all(len(m["checks"]) >= 10 for m in manifest) # Security + Structure + Quality minimum
 
     # STEP 3b: Execute validation manifest — one agent per manifest entry
     all_findings = {}
