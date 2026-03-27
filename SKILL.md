@@ -117,36 +117,51 @@ def forge(target):
     # ↑ If the plan batched N items into fewer entries, this fails. Rewrite: one entry per item.
     # review_and_update_plan between major steps: references/execution-procedure.md
 
-    # STEP 3a: Validate — one agent per item, all in parallel, no fixes
+    # STEP 3a: Compile validation manifest
+    # LLM reads validation tables → generates a concrete manifest listing
+    # each item + its specific checks. This is the "compile" phase.
     plan.items.sort(priority="security > in-repo > personal > product > rules")
+    manifest = []
+    for item in plan.items:
+        manifest.append({
+            "path": item.path,
+            "skill_md": item.skill_md,
+            "references": item.references,
+            "checks": select_checks(item, SECURITY_CHECKS + STRUCTURE_CHECKS
+                                    + QUALITY_CHECKS + PUBLISHING_CHECKS)
+        })
+    assert len(manifest) >= len(plan.items)            # every item in manifest
+    assert all(len(m["checks"]) >= 3 for m in manifest)  # no empty check lists
+
+    # STEP 3b: Execute validation manifest — one agent per manifest entry
     all_findings = {}
     agents = []
-    for item in plan.items:
+    for entry in manifest:
         agents.append(Agent(
-            f"Validate ONE skill: {item.path}. "
-            f"Read the Security/Structure/Quality/Publishing validation tables "
-            f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
-            f"references. Return findings only, do NOT fix. "
-            f"List which validation table rows you checked."
+            f"Validate ONE skill: {entry['path']}. "
+            f"Check EXACTLY these: {entry['checks']}. "
+            f"Read {entry['skill_md']} and {entry['references']}. "
+            f"Return findings per check row. Do NOT fix."
         ))
-    run_parallel(agents)                               # all agents launch at once
+    run_parallel(agents)
 
-    # Coverage feedback — check what each agent covered, retry gaps
-    for item, agent in zip(plan.items, agents):
-        all_findings[item] = agent.findings
-        covered = agent.findings.checked_rows
-        missing = VALIDATION_TABLE_ROWS - covered
+    # Coverage: compare agent findings against manifest checks
+    for entry, agent in zip(manifest, agents):
+        findings = agent.findings
+        covered = [c for c in entry["checks"] if findings.mentions(c)]
+        missing = [c for c in entry["checks"] if c not in covered]
         if missing:
-            extra = Agent(f"Check ONLY these for {item.path}: {missing}")
-            all_findings[item].merge(extra.findings)
-        assert len(all_findings[item]) > 0
-        review_and_update_plan(plan_path, item, "validated")
+            extra = Agent(f"Check ONLY these for {entry['path']}: {missing}")
+            findings.merge(extra.findings)
+        assert len(findings) > 0
+        all_findings[entry["path"]] = findings
+        review_and_update_plan(plan_path, entry["path"], "validated")
 
-    # STEP 3b: Cross-item analysis
+    # STEP 3c: Cross-item analysis
     patterns = cross_item_analysis(all_findings)
     report_to_user(all_findings, patterns)
 
-    # STEP 3c: Fix — after user sees the full picture and approves
+    # STEP 3d: Fix — after user sees the full picture and approves
     for item in plan.items:
         fix_critical(all_findings[item])               # mandatory
         if user_approves: fix_warnings(all_findings[item], patterns)
