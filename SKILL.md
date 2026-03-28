@@ -190,7 +190,7 @@ Pre-flight gate. If Fix-severity findings → block push, stop validation.
 |-------|----------|
 | Leaked secrets | Scan for: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords, private keys (`-----BEGIN.*PRIVATE KEY-----`). **Fix — block push** |
 | Credential files | `.env`, `credentials.json`, `*.pem`, `*.key` tracked → **Fix** |
-| .gitignore coverage | `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files → Improve |
+| .gitignore coverage | `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files |
 
 ## Validation
 
@@ -215,15 +215,15 @@ Organization, layout, file existence, dependencies.
 | `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. No start/end hyphen, no `--`, must match parent directory name |
 | `description` format | Present, < 1024 chars, **single-line** (YAML multi-line `>-`/`|` causes silent disappear in CC). If contains `: ` → must be quoted |
 | Body | Under 500 lines, meaningful content (not just TODOs) |
-| References exist | All SKILL.md references resolve. Orphan files → Improve |
+| References exist | All SKILL.md references resolve. Orphan files |
 | Dependencies | `scripts/setup.sh` exists and handles each declared dependency |
-| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md → Improve |
+| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md |
 | No junk files | Correct structure for single-skill / multi-skill repos |
 | Assets location | AI-consumed source material only. Logo, screenshots → `.github/` |
 | Runtime write | No data/, cache/ in skill directory |
 | Meta-skill contamination | No forge/creator as subdirectories |
 | Collection risks | `decide(skill_count, usage_pattern)` — `references/skill-composition.md`. 15+ skills → context flooding warning; generic names → namespacing warning |
-| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global → Improve; same name different source → Fix |
+| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global; same name different source |
 
 ### Quality
 
@@ -236,7 +236,7 @@ Shared checks (SKILL.md and every reference file):
 
 | Check | Criteria |
 |-------|----------|
-| Description coverage | Description mentions key trigger scenarios from body. Gaps → Improve. Over-promises → Improve |
+| Description coverage | Description mentions key trigger scenarios from body. Gaps. Over-promises |
 | Description clarity | Standalone comprehensible to a stranger |
 | Invocation reliability | `validate_invocations(skill_md, deps)` — `references/skill-invocation.md` |
 | Graceful skip | `audit_conditional_branches(skill_md)` — `references/anti-graceful-skip.md` |
@@ -244,9 +244,9 @@ Shared checks (SKILL.md and every reference file):
 | Entry complexity | Multiple modes must produce different deliverables |
 | Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
 | In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
-| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively → Improve: standard exists but isn't enforced |
-| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Improve |
-| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` → Improve |
+| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively: standard exists but isn't enforced |
+| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced |
+| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` |
 
 ### Publishing
 
@@ -263,8 +263,8 @@ External-facing presentation and packaging.
 | Discoverability claims | No implied guarantees of immediate listing or search placement |
 | GitHub metadata | Covered by readme-craft Step 7. `delivered` contract includes metadata — do not duplicate |
 | docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
-| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) → Improve |
-| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Improve |
+| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) |
+| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
 
 ## Fix Phase
