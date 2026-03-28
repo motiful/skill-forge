@@ -139,7 +139,8 @@ def forge(target):
 
     # STEP 3b: Cross-item analysis
     patterns = cross_item_analysis(all_findings)
-    report_to_user(all_findings, patterns)
+    strengths = identify_what_meets_or_exceeds_standards(all_findings)
+    report_to_user(all_findings, patterns, strengths)  # problems + good patterns
 
     # STEP 3d: Fix — after user sees the full picture and approves
     for item in plan.items:
@@ -208,21 +209,18 @@ For each finding, explain the user impact — not which rule was violated. Stand
 
 Organization, layout, file existence, dependencies.
 
-| Check | Criteria |
-|-------|----------|
-| Frontmatter fields | Standard top-level fields only: `name`, `description`, `license`, `metadata`, `compatibility`, `allowed-tools`. CC-specific inside `metadata` |
-| `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. No start/end hyphen, no `--`, must match parent directory name |
-| `description` format | Present, < 1024 chars, **single-line** (YAML multi-line `>-`/`|` causes silent disappear in CC). If contains `: ` → must be quoted |
-| Body | Under 500 lines, meaningful content (not just TODOs) |
-| References exist | All SKILL.md references resolve. Orphan files |
-| Dependencies | `scripts/setup.sh` exists and handles each declared dependency |
-| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md |
+| Check | Standard |
+|-------|---------|
+| Frontmatter fields | `references/skill-format.md` §Standard Frontmatter |
+| `name` | `references/skill-format.md` §Standard Frontmatter — kebab-case, matches directory |
+| `description` format | `references/skill-format.md` §Standard Frontmatter — single-line, < 1024 chars |
+| Body size | `references/skill-format.md` §Body — under 500 lines |
+| References exist | All SKILL.md references resolve, no orphans |
+| Dependencies | `references/installation.md` — setup.sh handles each declared dependency |
+| Directory names | `references/skill-format.md` §Directory Taxonomy |
 | No junk files | Correct structure for single-skill / multi-skill repos |
-| Assets location | AI-consumed source material only. Logo, screenshots → `.github/` |
-| Runtime write | No data/, cache/ in skill directory |
-| Meta-skill contamination | No forge/creator as subdirectories |
-| Collection risks | `decide(skill_count, usage_pattern)` — `references/skill-composition.md`. 15+ skills → context flooding warning; generic names → namespacing warning |
-| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global; same name different source |
+| Collection risks | `references/skill-composition.md` — 15+ skills, context flooding, naming |
+| Registration conflicts | `references/registration-audit.md` — workspace shadows, broken links |
 
 ### Quality
 
@@ -233,38 +231,35 @@ Shared checks (SKILL.md and every reference file):
 - EP comment discipline — `references/execution-procedure.md` §5
 - Terminology consistency across all files
 
-| Check | Criteria |
-|-------|----------|
-| Description coverage | Description mentions key trigger scenarios from body. Gaps. Over-promises |
-| Description clarity | Standalone comprehensible to a stranger |
-| Invocation reliability | `validate_invocations(skill_md, deps)` — `references/skill-invocation.md` |
-| Graceful skip | `audit_conditional_branches(skill_md)` — `references/anti-graceful-skip.md` |
-| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md`. Result `workflow_skill` + no EP → **Improve** minimum. Present EP cost-benefit (what skips it prevents vs restructuring cost) to user for decision |
+| Check | Standard |
+|-------|---------|
+| Description coverage | Description covers key trigger scenarios from body |
+| Description clarity | Comprehensible to a stranger without project context |
+| Invocation reliability | `references/skill-invocation.md` |
+| Graceful skip | `references/anti-graceful-skip.md` |
+| Execution Procedure | `references/execution-procedure.md` — workflow skill + no EP = must fix |
 | Entry complexity | Multiple modes must produce different deliverables |
-| Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
-| In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
-| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively: standard exists but isn't enforced |
-| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced |
-| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` |
+| Script quality | `references/script-quality.md` |
+| In-repo skills | Full validation recursively; cross-vendor symlinks use relative paths |
+| Standard enforcement | Every reference with EP must have an invocation point from SKILL.md |
+| Assets referenced | Every asset file referenced by SKILL.md or references |
+| Maintenance-rules need | `references/maintenance-guide.md` |
 
 ### Publishing
 
 External-facing presentation and packaging.
 
-| Check | Criteria |
-|-------|----------|
-| README quality | Deferred to Fix Phase (readme-craft). Flag only obvious issues. Full: `validate_readme()` — `references/readme-quality.md` |
-| Dependency mirroring | SKILL.md dependencies mirrored in README "Dependencies" section |
-| Install command | Primary: `npx skills add <org>/<repo>`. Manual clone as fallback |
-| No hardcoded paths | No personal paths (~/ expanded, /Users/specific/) in published files |
-| LICENSE exists | Required for community platforms |
-| Script documentation | If scripts exist, document what they do and permissions needed |
-| Discoverability claims | No implied guarantees of immediate listing or search placement |
-| GitHub metadata | Covered by readme-craft Step 7. `delivered` contract includes metadata — do not duplicate |
-| docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
-| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) |
-| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files |
-| `LICENSE`, `.gitignore` | Existence + content matches expected template |
+| Check | Standard |
+|-------|---------|
+| README quality | `references/readme-quality.md` — deferred to readme-craft in Fix Phase |
+| Dependency mirroring | SKILL.md dependencies mirrored in README |
+| Install command | `npx skills add <org>/<repo>` as primary |
+| No hardcoded paths | No personal paths (~/, /Users/) in published files |
+| LICENSE, .gitignore | `references/templates.md` — existence + content |
+| Script documentation | Document what scripts do and permissions needed |
+| GitHub metadata | Covered by readme-craft — do not duplicate |
+| docs/ accuracy | No stale content vs SKILL.md claims |
+| Unnecessary files | No lock files, > 1MB media, build artifacts |
 
 ## Fix Phase
 
