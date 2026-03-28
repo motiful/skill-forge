@@ -129,7 +129,7 @@ def forge(target):
                 f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
                 f"references. Check every row in the validation tables. "
                 f"For each non-PASS finding, explain the impact on end users. "
-                f"Return one finding per row (PASS/WARN/N-A). Do NOT fix."
+                f"Return one finding per row (PASS/must-fix/suggestion). Do NOT fix."
             ))
         run_parallel(agents)                           # launch this batch
         for item, agent in zip(batch, agents):         # collect before next batch
@@ -142,7 +142,7 @@ def forge(target):
     strengths = identify_what_meets_or_exceeds_standards(all_findings)
     report_to_user(all_findings, patterns, strengths)  # problems + good patterns
 
-    # STEP 3d: Fix — after user sees the full picture and approves
+    # STEP 3c: Fix — after user sees the full picture and approves
     for item in plan.items:
         fix_items(all_findings[item], type="must_fix")     # deviates from standard → mandatory
         if user_approves: fix_items(all_findings[item], type="suggestion")
