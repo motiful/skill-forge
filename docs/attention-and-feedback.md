@@ -137,57 +137,61 @@ Practical rule: **critical mechanisms must be visible at the call site, not hidd
 | T9 | Compressed to one-liner | Regression to 3W | Abstraction removed attention guidance |
 | T10 | Upfront read() + one-liner | 13 findings, 5 grouped agents | read() helps but can't replace explicit code |
 | T11 | Restored explicit Agent() | 27 findings, 5 agents, best grouped | Explicit code > abstract calls, even with read() |
-| T12 | **Compile-then-execute manifest** | **44 findings, 100% 1:1, EP+graceful skip found** | **Manifest as assertable intermediate artifact** |
-| T13 | Simplified (removed guards) | Crashed — read all bodies, ran git log | **Each phase needs its own guard** |
-| T14 | Compressed guards (-18 lines) | 40 findings, 29% 1:1 | Guards work compressed but less effectively |
+| T12 | Compile-then-execute manifest | 44 findings, 100% 1:1 | Manifest as assertable artifact (but not reproducible — T15 failed) |
+| T13 | Simplified (removed guards) | Crashed | Each phase needs its own guard |
+| T14 | Compressed guards (-18 lines) | 40 findings, 29% 1:1 | Guards resist compression |
+| T15 | Same EP as T12 | 30 findings, 0% 1:1 | EP execution is stochastic — same EP, different results |
+| T16 | **Batch of 5 + row-count assert** | **36 findings, 100% 1:1** | **Work WITH LLM's natural batch size, not against it** |
+| T17 | Same batch approach | **3 patterns (covering 46 skills) + 7 per-skill, 100% 1:1** | **EP assessment found ALL 17 skills with expert judgment** |
 
-## Finding 8: Compile-Then-Execute (Round 12)
+## Finding 8: Manifest Works But Isn't Reproducible (Round 12, 15)
 
-The breakthrough. Instead of telling agents "validate this skill" (which they interpret freely), we added an intermediate step: **compile a validation manifest first, then execute it.**
+T12 introduced a compile-then-execute manifest — a concrete artifact listing each item + ALL validation table rows, executed by 1:1 agents. Result: 100% 1:1, 44 findings, EP assessment found.
 
+But T15 used the EXACT same EP and got 0% 1:1, 30 findings. **EP execution is stochastic.** The manifest was a good idea but its success depended on the LLM choosing to follow it — which it doesn't always do.
+
+## Finding 9: Batch of 5 — Simple, Reliable, Reproducible (Round 16-17)
+
+The final breakthrough. Instead of fighting the LLM's tendency to batch items into 3-5 agents, **work with it**: process items in batches of up to 5, each batch launches 1:1 agents, wait for completion before next batch.
+
+```python
+for batch in chunk(plan.items, 5):          # at most 5 per round
+    agents = [Agent(f"Validate {item}...") for item in batch]
+    run_parallel(agents)                     # 5 agents, naturally 1:1
+    collect(agents)                          # wait before next batch
 ```
-STEP 3a: Compile manifest — for each item, list its path + ALL validation table rows
-         assert len(manifest) >= len(items)
-         assert all checks are ALL_ROWS (no filtering)
 
-STEP 3b: Execute manifest — one Agent per manifest entry, prompt includes EXACT check list
+**Why it works:** LLMs are trained on patterns where 3-5 parallel agents are natural. Asking for 17 agents triggers compression. Asking for 5 is within the natural range — no compression needed.
 
-Coverage: compare findings against manifest → retry missing rows
-```
+**Verified over 2 consecutive runs (T16 + T17):** both achieved 100% 1:1 with 4 batches of 5+5+5+2. T17 additionally found EP assessment for all 17 skills with expert-level judgment.
 
-The manifest is a **visible, assertable artifact** between the "intelligence" phase (deciding what to check) and the "discipline" phase (executing the checks). T12 achieved 100% 1:1 agents and found EP assessment + graceful skip detection for the first time — because each agent's prompt listed the EXACT checks to run.
+**This is 13 lines of EP vs the manifest's 35 lines — simpler and more reliable.**
 
-## Finding 9: Guards Are Per-Phase, Not Global (Round 13-14)
+## Finding 10: Guards Are Per-Phase, Not Global (Round 13-14)
 
-T13 removed guards from STEP 1 and STEP 2, reasoning that the manifest in STEP 3 would compensate. It crashed — the AI read all SKILL.md bodies in STEP 1 and ran git log before the manifest even existed.
+T13 removed guards from STEP 1 and STEP 2, reasoning that later mechanisms would compensate. It crashed. T14 compressed guards; quality dropped.
 
-T14 compressed guards (same constraints, fewer words). Quality dropped from 100% to 29% 1:1.
+**Each phase of an EP needs its own attention guard.** A guard in STEP 3 cannot protect STEP 1, because STEP 1 executes first. Guards are temporal — they protect the moment they appear in.
 
-**Each phase of an EP needs its own attention guard.** A guard in STEP 3 cannot protect STEP 1, because STEP 1 executes before STEP 3 exists. Guards are temporal — they protect the moment they appear in, not the moments after.
+**You cannot simplify by merging guards across phases.** Each guard is bound to a specific moment in the execution timeline.
 
-This also means: **you cannot simplify an EP by merging guards.** Each guard is bound to a specific moment in the execution timeline. Removing it opens a gap at that moment, regardless of what comes later.
+## Three Principles
 
-## Three Principles (What to推广)
+17 rounds produced many EP-specific fixes, but three principles have lasting, generalizable value:
 
-The 14 rounds produced many EP-specific fixes, but only three principles have lasting, generalizable value:
+### Principle 1: Batch to Match Natural Capacity
 
-### Principle 1: Granularity — One Agent, One Item
+When N items > 5, process in batches of up to 5 with 1:1 agent-per-item within each batch. Wait for completion before the next batch. This works WITH the LLM's trained parallel capacity (~3-5 agents) instead of fighting it.
 
-When a task has N items to process, each item must get its own attention pool (sub-agent). Batching N items into one agent divides attention by N, causing graceful skip of lower-priority checks.
+**Why not just "one agent per item"?** Because instructing the LLM to launch 17 agents is an instruction it can choose to ignore. Batching into groups of 5 makes 1:1 the natural behavior, not a forced constraint.
 
-**The trigger:** items × checks > single-agent attention budget.
-**The fix:** spawn N agents, each processing exactly one item.
+### Principle 2: Assert on Output Length, Not on Specific Items
 
-### Principle 2: Compile-Then-Execute — Manifest as Contract
+Don't cherry-pick which checks to name in the agent prompt ("check EP and graceful skip"). Instead:
+- Tell the agent: "check every row in the validation tables"
+- Assert: `len(findings) >= len(validation_table_rows)`
 
-Before executing, generate a concrete, inspectable intermediate artifact (manifest/checklist) that lists exactly what each agent must do. Then execute the manifest mechanically.
-
-**Why it works:**
-- The manifest is assertable (count items, verify check completeness)
-- The agent prompt includes EXACT checks (no interpretation needed)
-- Coverage feedback compares findings against the manifest (not against vague expectations)
-
-> LLM's intelligence generates the control flow. Deterministic mechanism executes the control flow. Knowledge and control fuse during generation, separate during execution.
+The length comparison is universal. Cherry-picking implies unlisted checks are optional.
 
 ### Principle 3: Phase Guards — Each Step Protects Itself
 
@@ -195,24 +199,22 @@ Every phase of an EP needs its own boundary constraint. A guard in a later phase
 
 **Common phase guards:**
 - Discovery: "read paths and frontmatter ONLY, no content, no git history"
-- Plan: "per-item structure, assert count"
-- Execution: manifest assert, agent-per-item, coverage feedback
+- Plan: "per-item structure"
+- Execution: batch of 5, row-count assert
 
 **You cannot simplify by merging guards across phases.** T13 and T14 proved this.
 
 ## What Persists, What Fades
 
 **Principles (permanent — as long as attention is finite):**
-- Granularity: one agent, one item
-- Compile-then-execute: manifest as contract
+- Batch to match natural capacity (5 items per round)
+- Assert on output length, not specific items
 - Phase guards: each step protects itself
-- Coverage feedback: detect and retry attention failures
 
 **Implementation (temporary — will evolve with models and platforms):**
 - Specific BOUNDARY comment wording
-- Plan template format
-- Manifest JSON structure
-- Assert placement
+- Batch size (5 might change as models evolve)
+- Assert threshold
 
 **What the attention lens clarifies:**
 - LLM autonomy vs external control = who allocates the attention budget
