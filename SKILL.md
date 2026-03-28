@@ -143,8 +143,8 @@ def forge(target):
 
     # STEP 3d: Fix — after user sees the full picture and approves
     for item in plan.items:
-        fix_items(all_findings[item], severity="Fix")  # users failing → mandatory
-        if user_approves: fix_items(all_findings[item], severity="Improve")
+        fix_items(all_findings[item], type="must_fix")     # deviates from standard → mandatory
+        if user_approves: fix_items(all_findings[item], type="suggestion")
 
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
@@ -184,7 +184,7 @@ If your platform supports sub-agents (e.g., Claude Code `Agent` tool): setup.sh 
 
 ## Security
 
-Pre-flight gate. If Fix-severity findings → block push, stop validation.
+Pre-flight gate. If must-fix findings → block push, stop validation.
 
 | Check | Criteria |
 |-------|----------|
@@ -196,14 +196,13 @@ Pre-flight gate. If Fix-severity findings → block push, stop validation.
 
 One pass, read every file, check everything. Each finding tagged by category. Before running, scan the project for its own quality standards (`CLAUDE.md`, `AGENTS.md`, `.editorconfig`, rules directories) — these add to the checks below. Break per-file review into plan sub-tasks; use sub-agents for parallelism.
 
-**Severity** — classified by user impact, not rule importance:
-- **Fix**: Users will experience failure following this skill's instructions (broken code, phantom files, wrong package names, skill silently disappears)
-- **Improve**: Users get a degraded experience that a known better design would prevent (skill not triggering for relevant queries, agent ignoring designed workflow, context wasted on filler)
-- **Note**: Observation for the author's awareness, no direct user-facing impact
+**Finding types** — only two. If it's not worth reporting, don't report it.
+- **Must fix**: Deviates from standard with concrete risk. State what the standard says, what was found, and what goes wrong for users.
+- **Suggestion**: A better mechanism exists (EP, onboarding, rule-skill pattern, etc.) that would unlock higher capability. Large change — describe the upgrade path and benefit. User decides.
 
-For each non-PASS finding, describe WHAT HAPPENS to the end user — not which rule was violated. The skill author decides what's acceptable based on impact. See `docs/skill-quality-model.md` for the community pain points behind each check.
+Do not report "nice to have" observations. If the finding doesn't fit Must fix or Suggestion, drop it.
 
-**Fix priority**: Fix first (users failing), Improve second (degraded experience), Note last (awareness only).
+For each finding, explain the user impact — not which rule was violated. Standards are defined in the reference files; the validation tables below point to them.
 
 ### Structure
 
@@ -271,8 +270,8 @@ External-facing presentation and packaging.
 
 After validation report is presented and user approves fixes:
 
-1. Fix all Fix-severity issues (mandatory — users will fail without these)
-2. Fix Improve-severity issues (with user confirmation — better design exists)
+1. Fix all must-fix issues (mandatory — deviates from standard with concrete risk)
+2. Fix suggestions (with user confirmation — better mechanism exists, larger change)
 3. **README** — REQUIRED skill invocation:
 
    Run: `Skill("readme-craft", "review <path>")`
@@ -316,7 +315,7 @@ A skill is "local ready" when ALL of the following are true:
 
 - `git init` done, initial commit made
 - Local registration (symlinks) done for all detected platform roots
-- All Fix and Improve issues resolved
+- All must-fix issues resolved, suggestions addressed or acknowledged
 - README audited by readme-craft (not just manually checked)
 
 **Local ready = publish-ready.** The only remaining action is Step 4 (publish to remote).
