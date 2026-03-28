@@ -127,13 +127,13 @@ def forge(target):
                 f"Validate ONE skill: {item.path}. "
                 f"Read the Security/Structure/Quality/Publishing validation tables "
                 f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
-                f"references. Check ALL validation table rows including EP assessment "
-                f"and graceful skip. Return findings per row, do NOT fix."
+                f"references. Check every row in the validation tables. "
+                f"Return one finding per row (PASS/WARN/N-A). Do NOT fix."
             ))
         run_parallel(agents)                           # launch this batch
         for item, agent in zip(batch, agents):         # collect before next batch
             all_findings[item] = agent.findings
-            assert len(all_findings[item]) >= len(VALIDATION_TABLE_ROWS) * 0.5  # coverage floor
+            assert len(all_findings[item]) >= len(VALIDATION_TABLE_ROWS)  # every row must have a result
             review_and_update_plan(plan_path, item, "validated")
 
     # STEP 3b: Cross-item analysis
