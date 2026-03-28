@@ -98,7 +98,7 @@ def forge(target):
     #   - [ ] 1. <action> <item-path>
     #     - [ ] Security scan
     #     - [ ] Validate (read SKILL.md, check frontmatter, references, quality)
-    #     - [ ] Fix Critical/Warning issues
+    #     - [ ] Fix / Improve issues
     #     - [ ] Skill("readme-craft", "review <path>")   # skip for in-repo items
     #     - [ ] Skill("self-review", "<path>")            # skip for in-repo items
     #     - [ ] Verify Local Ready
@@ -143,8 +143,8 @@ def forge(target):
 
     # STEP 3d: Fix — after user sees the full picture and approves
     for item in plan.items:
-        fix_critical(all_findings[item])               # mandatory
-        if user_approves: fix_warnings(all_findings[item], patterns)
+        fix_items(all_findings[item], severity="Fix")  # users failing → mandatory
+        if user_approves: fix_items(all_findings[item], severity="Improve")
 
         # REQUIRED — use Skill tool, do not substitute with manual action
         # Skip readme-craft/self-review for in-repo items with no independent README/repo
@@ -184,20 +184,26 @@ If your platform supports sub-agents (e.g., Claude Code `Agent` tool): setup.sh 
 
 ## Security
 
-Pre-flight gate. If Critical findings → block push, stop validation.
+Pre-flight gate. If Fix-severity findings → block push, stop validation.
 
 | Check | Criteria |
 |-------|----------|
-| Leaked secrets | Scan for: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords, private keys (`-----BEGIN.*PRIVATE KEY-----`). **Critical — block push** |
-| Credential files | `.env`, `credentials.json`, `*.pem`, `*.key` tracked → **Critical** |
-| .gitignore coverage | `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files → Warning |
+| Leaked secrets | Scan for: API keys (`sk-`, `ghp_`, `AKIA`, `xox[bpas]-`), tokens, passwords, private keys (`-----BEGIN.*PRIVATE KEY-----`). **Fix — block push** |
+| Credential files | `.env`, `credentials.json`, `*.pem`, `*.key` tracked → **Fix** |
+| .gitignore coverage | `.env*`, `node_modules/`, `.DS_Store`, IDE configs, OS files → Improve |
 
 ## Validation
 
 One pass, read every file, check everything. Each finding tagged by category. Before running, scan the project for its own quality standards (`CLAUDE.md`, `AGENTS.md`, `.editorconfig`, rules directories) — these add to the checks below. Break per-file review into plan sub-tasks; use sub-agents for parallelism.
 
-**Severity**: Critical = must fix. Warning = user confirms. Info = report only.
-**Fix priority**: Structure first (reorganize), Quality second (improve content), Publishing last (polish).
+**Severity** — classified by user impact, not rule importance:
+- **Fix**: Users will experience failure following this skill's instructions (broken code, phantom files, wrong package names, skill silently disappears)
+- **Improve**: Users get a degraded experience that a known better design would prevent (skill not triggering for relevant queries, agent ignoring designed workflow, context wasted on filler)
+- **Note**: Observation for the author's awareness, no direct user-facing impact
+
+For each non-PASS finding, describe WHAT HAPPENS to the end user — not which rule was violated. The skill author decides what's acceptable based on impact. See `docs/skill-quality-model.md` for the community pain points behind each check.
+
+**Fix priority**: Fix first (users failing), Improve second (degraded experience), Note last (awareness only).
 
 ### Structure
 
@@ -209,15 +215,15 @@ Organization, layout, file existence, dependencies.
 | `name` | kebab-case, max 64 chars, lowercase alphanumeric + hyphens. No start/end hyphen, no `--`, must match parent directory name |
 | `description` format | Present, < 1024 chars, **single-line** (YAML multi-line `>-`/`|` causes silent disappear in CC). If contains `: ` → must be quoted |
 | Body | Under 500 lines, meaningful content (not just TODOs) |
-| References exist | All SKILL.md references resolve. Orphan files → Warning |
+| References exist | All SKILL.md references resolve. Orphan files → Improve |
 | Dependencies | `scripts/setup.sh` exists and handles each declared dependency |
-| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md → Warning |
+| Directory names | Standard: `references/`, `assets/`, `scripts/`. Non-standard referenced by SKILL.md → Improve |
 | No junk files | Correct structure for single-skill / multi-skill repos |
 | Assets location | AI-consumed source material only. Logo, screenshots → `.github/` |
 | Runtime write | No data/, cache/ in skill directory |
 | Meta-skill contamination | No forge/creator as subdirectories |
 | Collection risks | `decide(skill_count, usage_pattern)` — `references/skill-composition.md`. 15+ skills → context flooding warning; generic names → namespacing warning |
-| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global → Warning; same name different source → Critical |
+| Registration conflicts | `audit_registrations(item, config)` — `references/registration-audit.md`. Workspace shadows global → Improve; same name different source → Fix |
 
 ### Quality
 
@@ -230,17 +236,17 @@ Shared checks (SKILL.md and every reference file):
 
 | Check | Criteria |
 |-------|----------|
-| Description coverage | Description mentions key trigger scenarios from body. Gaps → Warning. Over-promises → Warning |
+| Description coverage | Description mentions key trigger scenarios from body. Gaps → Improve. Over-promises → Improve |
 | Description clarity | Standalone comprehensible to a stranger |
 | Invocation reliability | `validate_invocations(skill_md, deps)` — `references/skill-invocation.md` |
 | Graceful skip | `audit_conditional_branches(skill_md)` — `references/anti-graceful-skip.md` |
-| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md`. Result `workflow_skill` + no EP → **Warning** minimum. Present EP cost-benefit (what skips it prevents vs restructuring cost) to user for decision |
+| Execution Procedure | `assess_procedure_need(skill_md)` — `references/execution-procedure.md`. Result `workflow_skill` + no EP → **Improve** minimum. Present EP cost-benefit (what skips it prevents vs restructuring cost) to user for decision |
 | Entry complexity | Multiple modes must produce different deliverables |
 | Script quality | `validate_script()` + `review_script()` — `references/script-quality.md` |
 | In-repo skills | Apply full validation recursively. Cross-vendor symlinks use relative paths |
-| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively → Warning: standard exists but isn't enforced |
-| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Warning |
-| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` → Warning |
+| Standard enforcement | Every reference file with an EP must have at least one invocation point in SKILL.md or in a reference module that SKILL.md calls (transitive invocation). Listed in References section but never invoked directly or transitively → Improve: standard exists but isn't enforced |
+| Assets referenced | Every asset file referenced by SKILL.md or references. Unreferenced → Improve |
+| Maintenance-rules need | `assess_and_create(repo)` — `references/maintenance-guide.md`. Published skill meeting any trigger (3+ deps, scripts/, >300 lines, external URLs) without `.claude/skills/maintenance-rules/` → Improve |
 
 ### Publishing
 
@@ -257,16 +263,16 @@ External-facing presentation and packaging.
 | Discoverability claims | No implied guarantees of immediate listing or search placement |
 | GitHub metadata | Covered by readme-craft Step 7. `delivered` contract includes metadata — do not duplicate |
 | docs/*.md | Accuracy vs SKILL.md claims, no stale content, no contradictions |
-| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) → Warning |
-| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Warning |
+| docs/ asset accuracy | Images, screenshots, and media referenced by `docs/*.md` must match the content they illustrate. Stale visuals (showing old methodology, removed features, outdated UI) → Improve |
+| Unnecessary files | Lock files without runtime, > 1MB media, build artifacts, IDE workspace files → Improve |
 | `LICENSE`, `.gitignore` | Existence + content matches expected template |
 
 ## Fix Phase
 
 After validation report is presented and user approves fixes:
 
-1. Fix all Critical issues (mandatory)
-2. Fix Warning issues (with user confirmation)
+1. Fix all Fix-severity issues (mandatory — users will fail without these)
+2. Fix Improve-severity issues (with user confirmation — better design exists)
 3. **README** — REQUIRED skill invocation:
 
    Run: `Skill("readme-craft", "review <path>")`
@@ -310,7 +316,7 @@ A skill is "local ready" when ALL of the following are true:
 
 - `git init` done, initial commit made
 - Local registration (symlinks) done for all detected platform roots
-- All Critical and Warning issues resolved
+- All Fix and Improve issues resolved
 - README audited by readme-craft (not just manually checked)
 
 **Local ready = publish-ready.** The only remaining action is Step 4 (publish to remote).
