@@ -1,64 +1,43 @@
 ---
 name: attention-feedback
-description: Validate-check-retry pattern for multi-item EP execution. Detects graceful skip via coverage checking, retries only missing validation rows. Applies when items × checks exceeds a single agent's attention budget.
+description: Batch execution pattern for multi-item EP steps. Constrains batch size to match LLM's natural parallel agent capacity (~5), ensuring 1:1 agent-per-item across multiple rounds. Includes coverage floor assertion.
 ---
 
-# Attention Feedback Pattern
+# Batch Execution Pattern
 
-Feedback loop that detects and corrects attention failures in multi-item validation. Each item gets an independent attention pool (sub-agent); coverage is checked after each returns; gaps trigger focused retry.
+When an EP step processes N items and N > 5, execute in batches of up to 5. Each batch launches 1:1 agents in parallel, waits for completion, then starts the next batch. This works WITH the LLM's natural tendency to launch 3-5 parallel agents instead of fighting it.
 
 ## Execution Procedure
 
 ```
-validate_with_feedback(items, checks) → all_findings, patterns
+batch_validate(items, checks) → all_findings
 
-# Phase A: validate each item (parallel, independent attention pools)
-for item in items:
-    findings[item] = Agent(f"Validate {item} against {checks}")
+for batch in chunk(items, 5):                    # at most 5 per round
+    agents = [Agent(f"Check {item} against {checks}") for item in batch]
+    run_parallel(agents)
+    for item, agent in zip(batch, agents):
+        assert agent.findings >= coverage_floor  # coverage check
+        all_findings[item] = agent.findings
 
-    # Phase A+: coverage feedback (per-item, immediate)
-    covered = extract_covered_checks(findings[item])
-    missing = checks - covered
-    if missing:
-        extra = Agent(f"Check ONLY {missing} for {item}")
-        findings[item].merge(extra)
-    assert len(findings[item]) > 0
-
-# Phase B: cross-item analysis (parent context, all findings visible)
-patterns = cross_item_analysis(findings)
-
-return findings, patterns
+patterns = cross_item_analysis(all_findings)
+return all_findings, patterns
 ```
 
-## Coverage Check
+## Why Batch Size 5
 
-After each agent returns, count which validation table rows appear in the findings. A row is "covered" if the findings explicitly reference it — either as a PASS or as a finding with severity.
+LLMs are trained on patterns where 3-5 parallel sub-agents are natural. When asked to launch 17 agents, they compress into 3-5 batches internally — losing the 1:1 guarantee. By constraining batch size to 5 and iterating, we get structural 1:1 within each batch.
 
-```
-covered = {row for row in checks if any finding references row}
-missing = checks - covered
-```
+## Coverage Floor
 
-If `missing` is non-empty, the agent skipped those checks (graceful skip due to attention scarcity). Retry with a focused prompt that names ONLY the missing rows.
+After each agent returns, assert that findings count meets a minimum (e.g., ≥ 50% of validation table rows). This catches agents that return shallow results without adding the complexity of row-by-row coverage tracking.
 
-## Why Focused Retry Works
+## When to Apply
 
-The retry prompt is tiny — one or two specific checks. A single check is small enough that the agent cannot fail to attend to it. Cost is one extra focused call per gap, not a full re-validation.
-
-## Feedback Levels
-
-| Level | When | What | Cost |
-|-------|------|------|------|
-| Per-item coverage check | After each agent returns | Count covered rows | Lowest — arithmetic |
-| Missing-row retry | When coverage < expected | Re-validate specific gaps | Low — focused prompt |
-| Cross-item pattern check | After all items validated | Aggregate, find collection-wide gaps | Medium — one pass |
-| Full adversarial review | When stakes are highest | Independent evaluator agent | High — separate session |
-
-For most workflows, Levels 1-3 are sufficient.
+- items > 5 and each item needs independent analysis
+- Quality requires per-item attention isolation (sub-agents as attention pools)
 
 ## When NOT to Apply
 
-- Single-item tasks (N=1): no attention scarcity
-- Simple checks (M < 5): unlikely to have coverage gaps
-- Time-critical tasks: retry adds latency
-- Tasks where partial coverage is acceptable
+- N ≤ 5: single batch, no iteration needed
+- Items are trivially uniform (same check, same structure): batch processing is fine
+- Time-critical tasks: sequential batching adds latency

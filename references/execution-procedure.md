@@ -225,11 +225,11 @@ for item in items:
 
 ### 11. Attention Budget
 
-Every EP line competes for the agent's finite attention. More lines = less attention per line. Design EPs with this budget in mind: high-priority checks as EP lines, lower-priority checks in tables (read on demand). For multi-item tasks, use `references/attention-feedback.md` to detect and retry attention failures.
+Every EP line competes for the agent's finite attention. More lines = less attention per line. Design EPs with this budget in mind: high-priority checks as EP lines, lower-priority checks in tables (read on demand).
 
-### 12. Compile-Then-Execute
+### 12. Batch Execution for Multi-Item Steps
 
-For complex, dynamic tasks: LLM generates a concrete plan/manifest (fusing knowledge + control), then the plan executes mechanically with LLM called for analysis at each step. The LLM designs the control flow; the control flow drives the LLM.
+When N items > 5, process in batches of up to 5 with 1:1 agent-per-item within each batch. Wait for completion before starting the next batch. This works with the LLM's natural capacity (~3-5 parallel agents) instead of fighting it. See `references/attention-feedback.md`.
 
 ### 13. Assert as Attention Checkpoint
 

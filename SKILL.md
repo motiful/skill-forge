@@ -40,7 +40,7 @@ def forge(target):
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
-    read("references/attention-feedback.md")              # coverage feedback pattern — read before STEP 3a
+    read("references/attention-feedback.md")              # batch execution pattern — read before STEP 3a
 
     # STEP 1: Discover — paths and classification ONLY
     items = discover(target)                           # traverse FULL project tree
@@ -127,13 +127,13 @@ def forge(target):
                 f"Validate ONE skill: {item.path}. "
                 f"Read the Security/Structure/Quality/Publishing validation tables "
                 f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
-                f"references. Check ALL validation table rows. "
-                f"Return findings only, do NOT fix."
+                f"references. Check ALL validation table rows including EP assessment "
+                f"and graceful skip. Return findings per row, do NOT fix."
             ))
         run_parallel(agents)                           # launch this batch
         for item, agent in zip(batch, agents):         # collect before next batch
             all_findings[item] = agent.findings
-            assert len(all_findings[item]) > 0
+            assert len(all_findings[item]) >= len(VALIDATION_TABLE_ROWS) * 0.5  # coverage floor
             review_and_update_plan(plan_path, item, "validated")
 
     # STEP 3b: Cross-item analysis
