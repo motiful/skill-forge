@@ -128,6 +128,7 @@ def forge(target):
                 f"Read the Security/Structure/Quality/Publishing validation tables "
                 f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
                 f"references. Check every row in the validation tables. "
+                f"For each non-PASS finding, explain the impact on end users. "
                 f"Return one finding per row (PASS/WARN/N-A). Do NOT fix."
             ))
         run_parallel(agents)                           # launch this batch
