@@ -40,18 +40,15 @@ The gap is not in authoring — AI agents can already help write skill content. 
 
 ## What Skill Forge Does
 
-Skill Forge is a **skill engineering methodology, publishing pipeline, and project skills architect**. The methodology defines what "well-engineered skill" means. The pipeline automates validation and publishing. Both are valuable independently.
-
-- **Audits entire projects** — point forge at any project directory and it discovers scattered skills, rules, and agent instructions, classifies each (in-repo, personal tool, product skill), and fixes them one by one — graduating personal tools to standalone repos and converting constraint-pattern rules to publishable skills
-- **Makes workflow skills actually get followed** — detects multi-step skills and adds pseudocode structure so agents follow your procedure step-by-step, instead of absorbing it as background knowledge
-- **Scans for security issues** — detects leaked API keys (`sk-`, `ghp_`, `AKIA`), private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
-- **Reviews every file as one unit** — reads every reference, script, and doc — checking that content is actionable for agents, references have proper format (frontmatter + procedure + content), scripts work, and docs match SKILL.md claims
-- **Validates structure and discoverability** — checks frontmatter, description coverage, body length, terminology, cross-file consistency, and context budget so agents can find and correctly trigger your skill without wasting their context window
-- **Keeps your README honest** — flags claims that exceed what your skill actually does, catches hardcoded paths, and verifies install commands and LICENSE
-- **Detects registration conflicts** — audits existing symlinks to catch workspace registrations that shadow global ones, broken links, and copies that should be symlinks
-- **Installs dependencies automatically** — `scripts/setup.sh` detects and installs required CLI tools and skill dependencies on first run, so your skill works out of the box
-- **Publishes and registers across platforms** — pushes to GitHub with optimized metadata, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill roots and symlinks to one source of truth
-- **Guides first-use setup** — when a skill needs user decisions before it can operate (config location, org name, default license), forge runs an interactive onboarding flow instead of silently using defaults
+- **Audits entire projects** — point forge at any directory and it finds every skill, rule, and agent instruction, then fixes them one by one — turning loose tools into standalone, publishable repos
+- **Detects registration conflicts** — catches symlinks that shadow each other across platforms, broken links, and copies that should be symlinks — before they cause silent failures
+- **Publishes to five platforms at once** — pushes to GitHub, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill directories and symlinks to one source of truth
+- **Scans for security issues** — finds leaked API keys, private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
+- **Makes workflow skills actually get followed** — detects multi-step skills that agents tend to skim, and adds step-by-step structure so agents execute your procedure instead of absorbing it as background knowledge
+- **Validates structure and discoverability** — checks that your skill's description, trigger phrases, and metadata are complete enough for agents to find and correctly activate it
+- **Keeps your README honest** — flags claims that exceed what your skill actually does, catches hardcoded paths, and verifies install commands
+- **Converts rules into publishable skills** — finds team rules buried in config files and packages them as portable, installable skills
+- **Guides first-use setup** — when a skill needs user decisions before it can operate (org name, default license), runs an interactive onboarding flow instead of silently using defaults
 
 **Token cost**: Review ~10-25K | Create ~15-30K | Push ~1-2K. Excludes dependent skill invocations (readme-craft, self-review). No Python, no surprise costs.
 
@@ -181,7 +178,7 @@ Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted wit
 <!-- Badge reference-style links -->
 [license-shield]: https://img.shields.io/github/license/motiful/skill-forge.svg
 [license-url]: https://github.com/motiful/skill-forge/blob/main/LICENSE
-[version-shield]: https://img.shields.io/badge/version-8.1-blue.svg
+[version-shield]: https://img.shields.io/badge/version-9.0-blue.svg
 [version-url]: SKILL.md
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io

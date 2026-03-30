@@ -1,10 +1,10 @@
 ---
 name: skill-forge
-description: 'Create, validate, scan for security issues, and review skills as publishable GitHub repos. Structures workflow skills for execution fidelity. Registers skills across platforms via symlinks and guides first-use onboarding. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", or points to a project directory with mixed skills and rules. Forge entry: discover existing → review path, nothing found → create path. Both → validate → fix → local ready. Publish to GitHub when requested (Step 4).'
+description: 'Validate, fix, and publish skills as GitHub repos. Structures workflow skills for execution fidelity. Registers skills across platforms via symlinks and guides first-use onboarding. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", or points to a project directory with mixed skills and rules. Forge: discover → classify → validate → fix → local ready. Nothing found → onboard user, scaffold, then same pipeline. Publish to GitHub when requested (Step 4).'
 license: MIT
 metadata:
   author: motiful
-  version: "8.1"
+  version: "9.0"
 ---
 
 # Skill Forge
@@ -23,7 +23,7 @@ These rules always apply. Read them before acting.
 6. **Local-ready = publish-ready** — publishing only sends to remote, never re-validates
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
 8. **Follow module interfaces** — when the procedure calls a reference file, read the file and follow its EP. The module's own EP is the authority, not any inline summary in the parent
-9. **Report discrepancies, don't pre-filter** — when a check reveals a discrepancy, report it as a finding. Do not soften severity based on expected fix effort or assumed user preference. Severity follows the check's own criteria. The user decides what to fix, not the auditor
+9. **Report what you can't resolve** — severity follows the check's own criteria, not assumed user preference. A finding explained by another explicit rule is resolved, not a discrepancy — dismiss it with the reason
 
 ## Execution Procedure
 
@@ -40,8 +40,6 @@ def forge(target):
     config = read_or_create_config()                   # ~/.config/skill-forge/config.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
-    read("references/attention-feedback.md")              # batch execution pattern — read before STEP 3a
-
     # STEP 1: Discover — paths and classification ONLY
     items = discover(target)                           # traverse FULL project tree
     # Find: SKILL.md (any depth), rules files, project instructions, setup scripts
@@ -57,32 +55,25 @@ def forge(target):
     # Content reading and validation happen in STEP 3, driven by the plan.
     # If you finish STEP 1 having already validated content → you collapsed the loop.
 
-    if items:                                          # --- Review path ---
+    if items:                                          # --- Existing items ---
         classified = classify(items)                   # references/project-audit.md
 
-    else:                                              # --- Create path ---
+    else:                                              # --- Nothing found ---
         context = detect_existing()                    # scan skills dirs + conversation
         if len(context) > 1: context = ask_user("Which existing skill?")
         elif not context: ask_user("What does this skill do? When should it trigger?")
         search_ecosystem(target)                       # npx skills find / skills.sh
-
-        caps = detect_capabilities(context)            # not optional — detect and act
-        if not any(caps.values()):
-            report_to_user("Simple skill — no deps, invocations, rules, config, or workflow detected")
-        if caps.deps:      install(caps.deps)          # references/installation.md
-        if caps.invokes:   write_call_site(dep, loc)   # references/skill-invocation.md
-        if caps.onboard:   assess_and_guide(scope)     # references/onboarding.md
-        if caps.rules:     detect_and_create(skill_md) # references/rule-skill-pattern.md
-        if caps.complex:   assess_and_create(repo)     # references/maintenance-guide.md
-        if caps.config:    assess_config_needs(scope)    # references/skill-configuration.md
-        if caps.workflow:  assess_procedure_need(md)    # references/execution-procedure.md
-
         path = f"{config.skill_workspace}/{name}/"
-        write_skill_md(path, context, caps)            # references/skill-format.md
-        readme = Skill("readme-craft", f"create {path}")  # references/templates.md for skeletons
+        write_skill_md(path, context)                  # references/skill-format.md
+        readme = Skill("readme-craft", f"create {path}")  # references/templates.md
         assert readme.delivered                        # README required for local ready
         write_artifacts(path)                          # LICENSE, .gitignore
         items = [SkillItem(path)]
+
+    # From here: all items — new or existing — go through the same pipeline.
+    # Capability detection is NOT a separate step. Each reference module defines
+    # its own applicability criteria. The validation tables cover every reference.
+    # No explicit caps.X enumeration — all references are checked uniformly.
 
     # STEP 2: Plan — GATE: file must exist AND be per-item structured before Step 3
     plan_path = f"/tmp/skill-forge-{name}.md"
@@ -97,8 +88,9 @@ def forge(target):
     #   ## Steps
     #   - [ ] 1. <action> <item-path>
     #     - [ ] Security scan
-    #     - [ ] Validate (read SKILL.md, check frontmatter, references, quality)
-    #     - [ ] Fix / Improve issues
+    #     - [ ] Validate (all table rows)
+    #     - [ ] Fix: <specific finding 1>               # added after STEP 3c
+    #     - [ ] Fix: <specific finding 2>               # one action per finding
     #     - [ ] Skill("readme-craft", "review <path>")   # skip for in-repo items
     #     - [ ] Skill("self-review", "<path>")            # skip for in-repo items
     #     - [ ] Verify Local Ready
@@ -107,8 +99,9 @@ def forge(target):
     #   ## Progress
     #   Completed: 0 / N
     #
-    # Sub-steps within each item are derived from validation tables (Security,
-    # Structure, Quality, Publishing). Read the tables line by line.
+    # Initial plan has Security + Validate + readme-craft + self-review + Local Ready.
+    # After STEP 3c, plan is updated with one "Fix:" action per must-fix finding.
+    # STEP 3d executes these actions — the plan IS the fix spec.
 
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
@@ -119,51 +112,68 @@ def forge(target):
 
     # STEP 3a: Validate — in batches of up to 5, one agent per item
     plan.items.sort(priority="security > in-repo > personal > product > rules")
-    all_findings = {}
+    findings_dir = f"/tmp/skill-forge-findings-{name}/"
+    rm_rf(findings_dir)                                # clean stale results from prior runs
+    mkdir(findings_dir)
+
     for batch in chunk(plan.items, 5):                 # at most 5 at a time
         agents = []
         for item in batch:
+            findings_path = f"{findings_dir}/{item.name}.md"
             agents.append(Agent(
                 f"Validate ONE skill: {item.path}. "
                 f"Read the Security/Structure/Quality/Publishing validation tables "
-                f"in {skill_forge_skill_md}, then read {item.skill_md} and its "
-                f"references. Check every row in the validation tables. "
-                f"For each non-PASS finding, explain the impact on end users. "
-                f"Return one finding per row (PASS/must-fix/suggestion). Do NOT fix."
+                f"in {skill_forge_skill_md}, then read {item.skill_md} and EVERY "
+                f"file under {item.path}/references/. "
+                f"Check every row in the validation tables against SKILL.md and each reference file. "
+                f"Write one row per check to {findings_path}: "
+                f"'- PASS | check | file | description' or "
+                f"'- [ ] must-fix/suggestion | check | file | description'. "
+                f"Do NOT skip rows. Do NOT fix. Write to file only."
             ))
         run_parallel(agents)                           # launch this batch
-        for item, agent in zip(batch, agents):         # collect before next batch
-            all_findings[item] = agent.findings
-            assert len(all_findings[item]) >= len(VALIDATION_TABLE_ROWS)  # every row must have a result
+        # WAIT for batch to complete. Do NOT launch next batch until all findings
+        # files in this batch exist and pass the coverage assert.
+        for item in batch:                             # collect before next batch
+            findings_path = f"{findings_dir}/{item.name}.md"
+            assert file_exists(findings_path)          # agent must have written findings
+            findings = read(findings_path)
+            assert row_count(findings) >= len(VALIDATION_TABLE_ROWS)
             review_and_update_plan(plan_path, item, "validated")
 
-    # STEP 3b: Cross-item analysis
-    patterns = cross_item_analysis(all_findings)
-    strengths = identify_what_meets_or_exceeds_standards(all_findings)
-    report_to_user(all_findings, patterns, strengths)  # problems + good patterns
+    # STEP 3b: Build REPORT.md — extract ONLY [ ] rows (must-fix + suggestion)
+    # Append findings to plan file — ONE file for the entire lifecycle.
+    # Individual finding files kept for coverage audit (contain all PASS rows).
+    run(f"bash scripts/extract-actionable.sh {findings_dir} {plan_path}")
+    findings_count = count_checkbox_rows(plan_path)    # count [ ] rows in ## Findings section
+    assert findings_count > 0                          # at least one [ ] row extracted
+    # Plan file now has: validation steps (checked) + ## Findings (unchecked).
+    # Do NOT rewrite or reorganize. Only allowed change: [ ] → [x] during fix.
+    # Cross-item patterns go to conversation only — commentary, not todo items.
+    patterns = cross_item_analysis(findings_dir)       # read all finding files for patterns
+    report_to_user(plan_path, patterns)                # show plan + patterns in conversation
 
-    # STEP 3c: Fix — after user sees the full picture and approves
-    for item in plan.items:
-        fix_items(all_findings[item], type="must_fix")     # deviates from standard → mandatory
-        if user_approves: fix_items(all_findings[item], type="suggestion")
+    # STEP 3c/3d: Fix — plan file's ## Findings section IS the todo list
+    # Each [ ] row = one fix action. Execute and check off in the plan file.
+    for finding in all_findings_rows(plan_path):       # only [ ] rows in ## Findings
+        if user_approves(finding):
+            execute(finding)
+            check_off(plan_path, finding)               # [ ] → [x] in plan file
+    assert all_must_fix_checked(plan_path)              # every must-fix [ ] is now [x]
 
-        # REQUIRED — use Skill tool, do not substitute with manual action
-        # Skip readme-craft/self-review for in-repo items with no independent README/repo
-        if not item.is_in_repo:
-            rc_result = Skill("readme-craft", f"review {item.path}")
-            assert rc_result.delivered
-            assert review_and_update_plan(plan_path, item, "readme-craft")
+    # STEP 3e: Target-level quality gates — run on TARGET root, not per-item
+    # These apply whether target is a standalone skill or a collection.
+    rc_result = Skill("readme-craft", f"review {target}")  # REQUIRED — use Skill tool
+    assert rc_result.delivered
+    sr_result = Skill("self-review", target)               # REQUIRED — use Skill tool
+    assert sr_result.no_broken_dimensions
 
-            sr_result = Skill("self-review", item.path)
-            assert sr_result.no_broken_dimensions
-            assert review_and_update_plan(plan_path, item, "self-review")
-
-        conflicts = audit_registrations(item, config)    # references/registration-audit.md
-        if conflicts.critical: resolve_or_block()        # HITL
-        detect_and_register(item)                        # references/platform-registry.md
-        if not item.has_git: git_init(item)
-        assert local_ready(item)                       # see Local Ready Definition
-        review_and_update_plan(plan_path, item, "done")
+    # Registration + git
+    conflicts = audit_registrations(target, config)    # references/registration-audit.md
+    if conflicts.critical: resolve_or_block()          # HITL
+    detect_and_register(target)                        # references/platform-registry.md
+    if not target.has_git: git_init(target)
+    assert local_ready(target)                         # see Local Ready Definition
 
     # STEP 4: Publish (optional — only when trigger includes publish intent)
     # Triggers: "publish this skill", "push this to GitHub", "put this on GitHub"
@@ -197,11 +207,12 @@ Pre-flight gate. If must-fix findings → block push, stop validation.
 
 One pass, read every file, check everything. Each finding tagged by category. Before running, scan the project for its own quality standards (`CLAUDE.md`, `AGENTS.md`, `.editorconfig`, rules directories) — these add to the checks below. Break per-file review into plan sub-tasks; use sub-agents for parallelism.
 
-**Finding types** — only two. If it's not worth reporting, don't report it.
+**Result types** — every validation table row produces exactly one result:
+- **PASS**: Meets the standard. Brief note on what was checked. Required for coverage proof.
 - **Must fix**: Deviates from standard with concrete risk. State what the standard says, what was found, and what goes wrong for users.
-- **Suggestion**: A better mechanism exists (EP, onboarding, rule-skill pattern, etc.) that would unlock higher capability. Large change — describe the upgrade path and benefit. User decides.
+- **Suggestion**: A better mechanism exists that would unlock higher capability. Describe the upgrade path and benefit. User decides.
 
-Do not report "nice to have" observations. If the finding doesn't fit Must fix or Suggestion, drop it.
+No other result types. If it's not PASS, must-fix, or suggestion — it's PASS.
 
 For each finding, explain the user impact — not which rule was violated. Standards are defined in the reference files; the validation tables below point to them.
 
@@ -216,6 +227,8 @@ Organization, layout, file existence, dependencies.
 | `description` format | `references/skill-format.md` §Standard Frontmatter — single-line, < 1024 chars |
 | Body size | `references/skill-format.md` §Body — under 500 lines |
 | References exist | All SKILL.md references resolve, no orphans |
+| Reference file frontmatter | Each .md in references/ must have `--- name + description ---` per `references/skill-format.md` §Reference Frontmatter |
+| Reference file size | Each reference file under 300 lines per `references/reference-extraction.md`; over 300 = must split |
 | Dependencies | `references/installation.md` — setup.sh handles each declared dependency |
 | Directory names | `references/skill-format.md` §Directory Taxonomy |
 | No junk files | Correct structure for single-skill / multi-skill repos |
@@ -241,9 +254,15 @@ Shared checks (SKILL.md and every reference file):
 | Entry complexity | Multiple modes must produce different deliverables |
 | Script quality | `references/script-quality.md` |
 | In-repo skills | Full validation recursively; cross-vendor symlinks use relative paths |
-| Standard enforcement | Every reference with EP must have an invocation point from SKILL.md |
+| Standard enforcement | Every reference must have an EP function call from SKILL.md — no call = 100% skip (`references/execution-procedure.md` §4) |
 | Assets referenced | Every asset file referenced by SKILL.md or references |
 | Maintenance-rules need | `references/maintenance-guide.md` |
+| Onboarding need | `references/onboarding.md` — zero-config → PASS; first-use decisions or credentials needed → must fix |
+| Configuration need | `references/skill-configuration.md` — user-adjustable preferences? litmus test applies |
+| Rule-skill classification | `references/rule-skill-pattern.md` Mode A — is the skill itself a rule-skill? If yes, validate against rules-as-skills three-layer model |
+| Rule-skill conversion | `references/rule-skill-pattern.md` Mode B/C — project has rules that should be skills? detection + packaging |
+| Publishing model | `references/publishing-strategy.md` — single-skill vs collection, appropriate for project structure? |
+| Reference extraction | `references/reference-extraction.md` — sections that should be references? line count thresholds, index quality |
 
 ### Publishing
 
@@ -263,10 +282,10 @@ External-facing presentation and packaging.
 
 ## Fix Phase
 
-After validation report is presented and user approves fixes:
+**Plan-driven.** STEP 3c converts each finding into a concrete fix action in the plan file. STEP 3d executes these actions one by one, checking each off. The plan IS the fix spec — fix agents read the plan, not the original findings.
 
-1. Fix all must-fix issues (mandatory — deviates from standard with concrete risk)
-2. Fix suggestions (with user confirmation — better mechanism exists, larger change)
+1. **Crystallize** (STEP 3c) — each must-fix finding → one plan action with file path + fix description. Approved suggestions → same. Assert: action count ≥ must-fix count.
+2. **Execute** (STEP 3d) — for each item, execute fix actions line by line. Assert: all actions checked off.
 3. **README** — REQUIRED skill invocation:
 
    Run: `Skill("readme-craft", "review <path>")`
@@ -351,7 +370,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 - `references/templates.md` — README, LICENSE, and .gitignore skeletons
 - `references/readme-quality.md` — README writing, claim discipline, example rules
 - `references/script-quality.md` — Script size limits, module split triggers, dependency policy
-- `references/maintenance-guide.md` — In-repo maintenance-rules skill: when to create, required content, template
+- `references/maintenance-guide.md` — In-repo maintenance-rules skill: when to create, required content, template, reference dimension classification (D1/D2/D3)
 - `references/anti-graceful-skip.md` — Default-execute principle, skip conditions, no-downside enhancements, Step 3 audit criteria
 - `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern + batch principle + non-overlapping ownership for workflow skills
 - `references/project-audit.md` — Discovery, Classification, Plan File, Rules Conversion, Execution Order for project-level forge

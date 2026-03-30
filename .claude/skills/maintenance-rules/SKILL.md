@@ -21,7 +21,8 @@ if "community tools" in trigger:
     follow Community Tools Updates steps 1-4
 if change proposed:
     run Decision Test (7 criteria) → accept | reject
-    verify all Constraints (MUST/NEVER)
+    for each constraint in Constraints:
+        run constraint's verification method (parenthesized after each MUST)
     run Consistency Checks
     update Changelog (max 5, trim oldest)
 after significant changes:
@@ -38,8 +39,8 @@ after significant changes:
 - MUST NOT include content that fails the Positional Test (see references/skill-format.md)
 - MUST verify reference files follow three-layer format (frontmatter + EP + aligned Content)
 - MUST keep examples in standard-defining references generic — no skill-forge-specific labels in universal patterns
-- MUST verify SKILL.md pseudocode function names align with sub-module EP entry signatures
-- MUST verify lossless delegation when moving inline criteria to a sub-module: map every deleted parent line to a sub-module EP line. Unmapped criteria → add to sub-module first, then remove from parent
+- MUST verify SKILL.md pseudocode function names align with sub-module EP entry signatures (run: grep function names from references/ EPs, diff against SKILL.md pseudocode calls)
+- MUST verify lossless delegation when moving inline criteria to a sub-module: map every deleted parent line to a sub-module EP line. Unmapped criteria → add to sub-module first, then remove from parent (run: diff parent before/after, match each removed line to a sub-module line)
 - MUST verify every defined standard has a corresponding enforcement check in Validation (Structure, Quality, or Publishing). A standard without a check is dead weight — either add the check or remove the standard
 
 ## Platform Registry Updates
@@ -97,7 +98,7 @@ Protocol (run after significant changes):
 - SKILL.md description matches README positioning
 - README "Dependencies" table matches SKILL.md Step 0 + setup.sh
 - No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()", "checkpoint()", "content block" (replaced by "paragraph"), "register_locally()" (replaced by "detect_and_register()" per platform-registry.md EP), "read_repo_meta()" (replaced by Skill("readme-craft", "apply metadata") — github-metadata migrated to readme-craft), "lookup()" (replaced by "detect_and_register()"), "validate(repo_meta)" (replaced by Skill("readme-craft", "apply metadata")), "validate_and_apply()" (for github metadata context — replaced by readme-craft delegation), "detect(skill_md) → bool" (replaced by "assess_procedure_need() → workflow_skill | reference_only"), "design()" (replaced by "assess_config_needs()" / "assess_and_guide()"), "audit()" (replaced by "audit_conditional_branches()"), "create(skill_repo)" (replaced by "assess_and_create()"), "Execute reference" / "Read reference" (replaced by unified "reference" — file structure tells AI what to do), "Execute sub-module EPs" (replaced by "Follow module interfaces" — Engagement Principle #8), "EP-writability test" (replaced by module-based judgment: independent module with own interface → reference), "Parameterizing" (never adopted — sections are implementation, not parameters), "Core Validation" / "Content Review" / "Repo Hygiene" (replaced by unified "Security" gate + "Validation" section with Structure/Quality/Publishing sub-groups — categorize findings not execution)
-- Current terminology: "Engagement Principles", "Execution Procedure", "Security" (pre-flight gate), "Validation" (one section: Structure + Quality + Publishing), "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Module Model" (EP=interface, Section=implementation, Reference=imported module), "Forge", "Publish" (as Step 4 of forge), "review_and_update_plan" (assert review_and_update_plan() at major step boundaries), "Follow module interfaces" (Engagement Principle #8), "Batch Principle", "Non-Overlapping Ownership", "EP Comment Discipline", "Step Granularity", "Categorize findings not execution", "Lossless delegation" (maintenance practice), "Registration Audit" (pre-registration conflict detection), "audit_registrations()" (owned skills only, scoped by config.skill_root)
+- Current terminology (across SKILL.md + references): "Engagement Principles", "Execution Procedure", "Security" (pre-flight gate), "Validation" (one section: Structure + Quality + Publishing), "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Module Model" (EP=interface, Section=implementation, Reference=imported module), "Forge", "Publish" (as Step 4 of forge), "review_and_update_plan" (assert review_and_update_plan() at major step boundaries), "Follow module interfaces" (Engagement Principle #8), "Batch Principle", "Non-Overlapping Ownership", "EP Comment Discipline", "Step Granularity", "categorize findings, not execution" (corollary in execution-procedure.md §6), "Registration Audit" (pre-registration conflict detection), "audit_registrations()" (owned skills only, scoped by config.skill_root)
 
 ## Update Triggers
 
@@ -113,9 +114,9 @@ Protocol (run after significant changes):
 
 ## Changelog (max 5 entries)
 
+- 2026-03-31: **v9.0 — Self-review fixes.** Version badge synced to 9.0. EP enforcement made specific (each MUST constraint now has parenthesized verification method). Removed stale "Lossless delegation" from current terminology. Fixed "Categorize findings not execution" casing to match source.
 - 2026-03-25: **v8.1 — Self-audit fixes.** GitHub metadata migrated to readme-craft. Skill() calls now use output capture + gate. setup.sh checks git. skill-format.md split: Content Splitting → references/reference-extraction.md, Batch/Non-Overlapping → execution-procedure.md (356→282 lines). platform-registry.md gets `assess_cc_market` EP entry. Create path reports when all caps are false. Description covers registration + onboarding.
 - 2026-03-25: **v8.0 — Module Model architecture + Registration Audit.** EP=interface, Section=implementation, Reference=imported module. Added EP Comment Discipline, Step Granularity, Batch Principle, Non-Overlapping Ownership. Dropped Execute/Read reference distinction. Pseudocode cleaned: decision logic converted from comments to code. Merged Core Validation + Content Review + Repo Hygiene into Security gate + unified Validation (Structure/Quality/Publishing). Lossless delegation moved to maintenance-rules. New references/registration-audit.md.
 - 2026-03-23: **v7.2 — Unified forge entry.** Merged Review + Create + Push into single `forge()` EP. Publish is Step 4 (optional, trigger-gated).
 - 2026-03-22: **v7.1 — Three-layer reference format.** References get frontmatter + EP. Content Audience Check → Positional Test. reference-format.md merged into skill-format.md.
-- 2026-03-20: **v7.0 — Procedure-first architecture.** SKILL.md restructured: pseudocode EP as primary directing layer. Plan = checklist. One-hop info flow. 499→317 lines.
 

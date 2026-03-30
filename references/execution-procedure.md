@@ -1,6 +1,6 @@
 ---
 name: execution-procedure
-description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the nine components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, batch principle, non-overlapping ownership, EP vs content separation), and common anti-patterns.
+description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the nine components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, batch principle, non-overlapping ownership, EP vs content separation), attention principles (budget, batch execution, assert as checkpoint, phase output as rigid artifact), and common anti-patterns.
 ---
 
 # Execution Procedure Pattern
@@ -144,6 +144,8 @@ template = read("references/templates.md")
 
 Both are one hop from the EP line. No intermediate layer. No inline summary of a module's standards — the module's own EP is the authority.
 
+**Decision-layer reference or 100% skip.** A reference that is not called from the EP (via function call or explicit `read()`) will never be read during execution — regardless of how valuable its content is. Listing a reference in a `## References` index or mentioning it in prose is NOT a decision-layer reference. Only EP pseudocode function calls and `read()` instructions cause the agent to actually enter the module. Consequence: when adding a reference, always add a corresponding EP call. When auditing, any reference without an EP call is dead code.
+
 **Sub-module EP = complete business flow.** Skills share one context window — the AI retains parent context when entering a sub-module. Sub-module EPs should own their entire domain: validate → gate → execute. Parent orchestrates sequence (when to call); sub-module owns domain logic (what to check, what to do).
 
 ### 5. EP Comment Discipline
@@ -229,7 +231,7 @@ Every EP line competes for the agent's finite attention. More lines = less atten
 
 ### 12. Batch Execution for Multi-Item Steps
 
-When N items > 5, process in batches of up to 5 with 1:1 agent-per-item within each batch. Wait for completion before starting the next batch. This works with the LLM's natural capacity (~3-5 parallel agents) instead of fighting it. See `references/attention-feedback.md`.
+When N items > 5, process in batches of up to 5 with 1:1 agent-per-item within each batch. Wait for completion before starting the next batch. This works with the LLM's natural capacity (~3-5 parallel agents) instead of fighting it.
 
 ### 13. Assert as Attention Checkpoint
 
@@ -246,6 +248,40 @@ When N items > 5, process in batches of up to 5 with 1:1 agent-per-item within e
 **Placement:** Assert at phase boundaries only (between major steps). Too many asserts compete for the same attention budget they're trying to protect.
 
 **M × N delegation:** Coarse asserts (M items exist) belong in the parent EP where attention is scarce. Fine asserts (N checks per item covered) belong in sub-modules where attention is fresh. Each assert level matches the attention budget of its execution context.
+
+### 14. Phase Output as Rigid Artifact
+
+When a workflow transitions between phases with different cognitive demands (assess → modify, validate → fix, plan → execute), Phase N's output must be a **concrete, enumerable artifact** that Phase N+1 consumes mechanically.
+
+```
+Phase N (intelligence)  →  Rigid Artifact  →  Phase N+1 (mechanics)
+validate(items)         →  plan.fix_actions →  execute(actions)
+discover(target)        →  items[]          →  validate(items)
+assess(findings)        →  plan.checklist   →  fix(checklist)
+```
+
+**Why:** Phase N+1 typically has MORE context pressure (it carries N's context plus its own work). Re-interpreting intent under higher pressure → graceful skip. A concrete artifact removes interpretation.
+
+**Requirements for the rigid artifact:**
+1. **Enumerable** — each item in the artifact maps to exactly one action in the next phase
+2. **Assertable** — `assert artifact.count >= expected` verifies completeness at the boundary
+3. **Self-contained** — the next phase reads the artifact, not the original context that produced it
+
+**When to apply:** Any EP with phases that have different cognitive demands. If Phase N reads and Phase N+1 writes, a rigid artifact MUST bridge them. If both phases are read-only or both write, a rigid bridge is optional.
+
+**HITL boundaries are stricter.** When the phase transition passes through a human (report → user decision → next phase), the artifact doubles as the user's decision surface. Summary-level output ("N issues found") forces bulk approve/reject — the user cannot judge individual items. Per-item output (one row per finding) lets the user accept, reject, or modify each one. If the user cannot enumerate what they approved, the approval is meaningless.
+
+**Failure modes without rigid artifact:**
+| Phase boundary | Weak artifact | What happens |
+|---------------|--------------|--------------|
+| AI → AI (validate → fix) | Prose summary of findings | Fix phase re-interprets, drops items it finds hard to address |
+| AI → Human (report → approval) | Per-group counts | User approves blind — cannot distinguish systemic issues from typos |
+| Human → AI (approval → execute) | Vague "fix what was found" | Execute phase picks easy items, skips complex ones |
+
+**Relationship to other principles:**
+- Generalizes #12 (Batch Execution) — batch execution is one form of rigid artifact (the manifest)
+- Complements #10 (Observe-Then-Act) — observation produces the artifact, action consumes it
+- Enables #13 (Assert as Attention Checkpoint) — the artifact is what gets asserted against
 
 ## Anti-Patterns
 

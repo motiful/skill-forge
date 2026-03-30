@@ -1,6 +1,6 @@
 ---
 name: maintenance-guide
-description: When and how to create an in-repo maintenance-rules skill for complex skill repos. Covers trigger conditions (3+ deps, platform paths, scripts, large files), required content (constraints, update triggers, verification protocol, changelog), cross-vendor symlink creation, and the relationship between maintenance-rules and the parent skill.
+description: When and how to create an in-repo maintenance-rules skill for complex skill repos. Covers trigger conditions (3+ deps, platform paths, scripts, large files), required content (constraints, update triggers, verification protocol, changelog), cross-vendor symlink creation, reference dimension classification (D1 self-maintenance, D2 operational, D3 capability standard), and the relationship between maintenance-rules and the parent skill.
 ---
 
 # Maintenance Guide
@@ -87,6 +87,35 @@ Recent changes. Max 5 entries, trim oldest.
 | Contribution criteria | Skill has collaborators |
 | Self-governance | Skill has self-referential capabilities |
 | Consistency checks | Multiple files must stay aligned |
+
+## Reference Dimension Classification
+
+When a skill repo has multiple references, each reference serves one of three dimensions:
+
+| Dimension | Serves | Validation Coverage | If Wrongly Placed |
+|-----------|--------|--------------------|--------------------|
+| D1: Self-maintenance | The skill repo's own codebase | Not a reference — belongs in maintenance-rules | Occupies reference slot but never serves produced artifacts |
+| D2: Operational | The skill's runtime process | Reference, no validation row needed | Correctly excluded from per-item validation |
+| D3: Capability standard | Artifacts the skill produces or validates | Reference, MUST have validation table row (direct or chain) | Standard exists but never gets checked → silent gap |
+
+### When to Apply
+
+Any skill that **produces or validates other artifacts** (forge, linter, code generator). Skills that only serve end users directly (code-review, deployment) have no D2/D3 distinction — all their references serve users.
+
+### Classification Test
+
+For each reference, ask: *"If I deleted this reference, would the PRODUCED ARTIFACT be worse, or would just the PROCESS of producing it break?"*
+
+- Process breaks, artifact unchanged → **D2** (operational)
+- Produced artifact worse → **D3** (capability standard, needs validation row)
+- Neither — only repo maintenance affected → **D1** (move to maintenance-rules)
+
+### D3 via Chain
+
+A reference's D3 content can be "graduated" into a parent reference that already has a validation row. When this happens:
+- The graduated content IS checked (through the parent's row)
+- The original reference becomes pure D2 or fully redundant
+- Remove redundant references — they waste attention budget without adding information
 
 ## Anti-Patterns
 
