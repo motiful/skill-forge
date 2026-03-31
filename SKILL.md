@@ -95,22 +95,21 @@ def forge(target):
     # Plan structure (every plan follows this, no exceptions):
     #
     #   ## Steps
-    #   - [ ] 1. <action> <item-path>
+    #   - [ ] 1. Validate <item-path>
     #     - [ ] Security scan
     #     - [ ] Validate (all table rows)
-    #     - [ ] Fix: <specific finding 1>               # added after STEP 3c
-    #     - [ ] Fix: <specific finding 2>               # one action per finding
-    #     - [ ] Skill("readme-craft", "review <path>")   # skip for in-repo items
-    #     - [ ] Skill("self-review", "<path>")            # skip for in-repo items
-    #     - [ ] Verify Local Ready
-    #   - [ ] 2. <action> <item-path>
+    #   - [ ] 2. Validate <item-path>
     #     - [ ] ...
+    #   ## Findings                                     # appended by STEP 3b
+    #   ### <skill-name>
+    #   - [ ] must-fix | check | file | description
+    #   - [ ] suggestion | check | file | description
     #   ## Progress
     #   Completed: 0 / N
     #
-    # Initial plan has Security + Validate + readme-craft + self-review + Local Ready.
-    # After STEP 3c, plan is updated with one "Fix:" action per must-fix finding.
-    # STEP 3d executes these actions — the plan IS the fix spec.
+    # STEP 3a checks off validation steps. STEP 3b appends ## Findings.
+    # STEP 3c reads ## Findings, fixes [ ] rows, marks [x].
+    # STEP 3d runs readme-craft + self-review on TARGET root (not per-item).
 
     write_plan(plan_path, items)                       # use Bash if Write tool requires Read
     assert file_exists(plan_path)
@@ -150,23 +149,20 @@ def forge(target):
             assert row_count(findings) >= len(VALIDATION_TABLE_ROWS)
             review_and_update_plan(plan_path, item, "validated")
 
-    # STEP 3b: Append findings to plan, then analyze patterns.
-    run(f"bash scripts/extract-actionable.sh {findings_dir} {plan_path}")
-    review_and_update_plan(plan_path, "3b: findings appended")
-    # Cross-item analysis: read finding files, identify systemic patterns.
-    # Report patterns IN CONVERSATION. Do NOT touch the plan file.
-    patterns = cross_item_analysis(findings_dir)
-    report_to_user(f"{plan_path} updated with ## Findings. Patterns: {patterns}")
+    # STEP 3b: Aggregate + report (Observe-Then-Act Phase B — references/execution-procedure.md §10)
+    # 1. Extract [ ] rows from {findings_dir}/*.md, append as ## Findings to {plan_path}
+    # 2. Cross-item analysis: identify systemic patterns across finding files
+    # 3. Report plan path + patterns to user
+    aggregate_and_append(findings_dir, plan_path)      # [ ] rows → ## Findings in plan
+    patterns = cross_item_analysis(findings_dir)       # §10 Phase B: full-picture patterns
+    report_to_user(plan_path, patterns)
 
-    # STEP 3c/3d: Fix — plan file's ## Findings section IS the todo list
-    # Each [ ] row = one fix action. Execute and check off in the plan file.
-    for finding in all_findings_rows(plan_path):       # only [ ] rows in ## Findings
-        if user_approves(finding):
-            execute(finding)
-            check_off(plan_path, finding)               # [ ] → [x] in plan file
-    assert all_must_fix_checked(plan_path)              # every must-fix [ ] is now [x]
+    # STEP 3c: Fix — ## Findings in plan file is the todo list.
+    # Each [ ] row = one fix. Mark [x] when done.
+    fix_findings(plan_path)
+    assert no_unchecked_must_fix(plan_path)
 
-    # STEP 3e: Target-level quality gates — run on TARGET root, not per-item
+    # STEP 3d: Target-level quality gates — run on TARGET root, not per-item
     # These apply whether target is a standalone skill or a collection.
     rc_result = Skill("readme-craft", f"review {target}")  # REQUIRED — use Skill tool
     assert rc_result.delivered
@@ -288,10 +284,10 @@ External-facing presentation and packaging.
 
 ## Fix Phase
 
-**Plan-driven.** The plan file is ONE file for the entire lifecycle. STEP 3b appends `## Findings` (via script). STEP 3c/3d reads the `[ ]` rows and fixes them one by one, checking off each `[ ]` → `[x]`. No separate report file. No rewriting the plan.
+**Plan-driven.** STEP 3b appends `## Findings` to the plan file (extracted from per-skill finding files). STEP 3c reads `[ ]` rows and fixes them, marking `[x]`. One file, entire lifecycle.
 
-1. **Fix** (STEP 3c/3d) — read `## Findings` in the plan file. Each `[ ]` row = one fix action. Execute, then `[ ]` → `[x]`. Assert: all must-fix rows checked.
-2. **User decides** — must-fix rows are mandatory. Suggestion rows are optional (user approves/skips).
+1. **Fix** (STEP 3c) — read `## Findings` in plan file. Each `[ ]` row = one fix action. Execute, then `[ ]` → `[x]`. Assert: zero unchecked must-fix rows.
+2. **User decides** — must-fix is mandatory. Suggestion is optional (user approves/skips).
 3. **README** — REQUIRED skill invocation:
 
    Run: `Skill("readme-craft", "review <path>")`
