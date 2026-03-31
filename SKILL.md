@@ -37,13 +37,12 @@ Follow the pseudocode step by step. At STEP 2, write a plan file with per-item c
 def forge(target):
     # STEP 0: Environment
     run("scripts/setup.sh")                            # exit non-zero → STOP
-    config = read_or_create_config()                   # ~/.config/skill-forge/config.md
+    config = assess_config_needs()                     # references/skill-configuration.md
     if not config: assess_and_guide(target)            # references/onboarding.md
 
     # STEP 1: Discover — paths and classification ONLY
-    items = discover(target)                           # traverse FULL project tree
+    classified = discover_and_classify(target)         # references/project-audit.md
     # Find: SKILL.md (any depth), rules files, project instructions, setup scripts
-    # references/project-audit.md — discovery signals + classification framework
     #
     # BOUNDARY: Discovery reads file PATHS and FRONTMATTER (for classification).
     # Discovery also reads project standards (CLAUDE.md, AGENTS.md) — shared context.
@@ -55,8 +54,7 @@ def forge(target):
     # Content reading and validation happen in STEP 3, driven by the plan.
     # If you finish STEP 1 having already validated content → you collapsed the loop.
 
-    if items:                                          # --- Existing items ---
-        classified = classify(items)                   # references/project-audit.md
+    if classified:                                     # --- Existing items ---
 
     else:                                              # --- Nothing found ---
         context = detect_existing()                    # scan skills dirs + conversation
@@ -64,7 +62,18 @@ def forge(target):
         elif not context: ask_user("What does this skill do? When should it trigger?")
         search_ecosystem(target)                       # npx skills find / skills.sh
         path = f"{config.skill_workspace}/{name}/"
-        write_skill_md(path, context)                  # references/skill-format.md
+
+        source_docs = detect_source_documents(context) # backstage, research, outputs
+        scaffold_skill_md(path, context)                # follows references/skill-format.md standards
+        ep_contract = extract_ep_signatures(path)      # function calls in SKILL.md EP
+
+        if source_docs:
+            transform_references(source_docs, ep_contract)
+        else:
+            write_references(path, ep_contract)
+
+        assert all_ep_calls_have_matching_defs(path)   # GATE
+
         readme = Skill("readme-craft", f"create {path}")  # references/templates.md
         assert readme.delivered                        # README required for local ready
         write_artifacts(path)                          # LICENSE, .gitignore
@@ -141,17 +150,13 @@ def forge(target):
             assert row_count(findings) >= len(VALIDATION_TABLE_ROWS)
             review_and_update_plan(plan_path, item, "validated")
 
-    # STEP 3b: Build REPORT.md — extract ONLY [ ] rows (must-fix + suggestion)
-    # Append findings to plan file — ONE file for the entire lifecycle.
-    # Individual finding files kept for coverage audit (contain all PASS rows).
+    # STEP 3b: Append findings to plan, then analyze patterns.
     run(f"bash scripts/extract-actionable.sh {findings_dir} {plan_path}")
-    findings_count = count_checkbox_rows(plan_path)    # count [ ] rows in ## Findings section
-    assert findings_count > 0                          # at least one [ ] row extracted
-    # Plan file now has: validation steps (checked) + ## Findings (unchecked).
-    # Do NOT rewrite or reorganize. Only allowed change: [ ] → [x] during fix.
-    # Cross-item patterns go to conversation only — commentary, not todo items.
-    patterns = cross_item_analysis(findings_dir)       # read all finding files for patterns
-    report_to_user(plan_path, patterns)                # show plan + patterns in conversation
+    review_and_update_plan(plan_path, "3b: findings appended")
+    # Cross-item analysis: read finding files, identify systemic patterns.
+    # Report patterns IN CONVERSATION. Do NOT touch the plan file.
+    patterns = cross_item_analysis(findings_dir)
+    report_to_user(f"{plan_path} updated with ## Findings. Patterns: {patterns}")
 
     # STEP 3c/3d: Fix — plan file's ## Findings section IS the todo list
     # Each [ ] row = one fix action. Execute and check off in the plan file.
@@ -255,6 +260,7 @@ Shared checks (SKILL.md and every reference file):
 | Script quality | `references/script-quality.md` |
 | In-repo skills | Full validation recursively; cross-vendor symlinks use relative paths |
 | Standard enforcement | Every reference must have an EP function call from SKILL.md — no call = 100% skip (`references/execution-procedure.md` §4) |
+| EP contract integrity | Bidirectional: (1) every `ref.function()` call in SKILL.md EP has a matching `def function()` in the reference; (2) every reference `def` is called from SKILL.md. Parameter names must match. Reference with data but no `def` = must fix |
 | Assets referenced | Every asset file referenced by SKILL.md or references |
 | Maintenance-rules need | `references/maintenance-guide.md` |
 | Onboarding need | `references/onboarding.md` — zero-config → PASS; first-use decisions or credentials needed → must fix |
@@ -282,10 +288,10 @@ External-facing presentation and packaging.
 
 ## Fix Phase
 
-**Plan-driven.** STEP 3c converts each finding into a concrete fix action in the plan file. STEP 3d executes these actions one by one, checking each off. The plan IS the fix spec — fix agents read the plan, not the original findings.
+**Plan-driven.** The plan file is ONE file for the entire lifecycle. STEP 3b appends `## Findings` (via script). STEP 3c/3d reads the `[ ]` rows and fixes them one by one, checking off each `[ ]` → `[x]`. No separate report file. No rewriting the plan.
 
-1. **Crystallize** (STEP 3c) — each must-fix finding → one plan action with file path + fix description. Approved suggestions → same. Assert: action count ≥ must-fix count.
-2. **Execute** (STEP 3d) — for each item, execute fix actions line by line. Assert: all actions checked off.
+1. **Fix** (STEP 3c/3d) — read `## Findings` in the plan file. Each `[ ]` row = one fix action. Execute, then `[ ]` → `[x]`. Assert: all must-fix rows checked.
+2. **User decides** — must-fix rows are mandatory. Suggestion rows are optional (user approves/skips).
 3. **README** — REQUIRED skill invocation:
 
    Run: `Skill("readme-craft", "review <path>")`

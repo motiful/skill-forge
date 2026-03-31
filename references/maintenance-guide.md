@@ -19,6 +19,16 @@ generate .claude/skills/maintenance-rules/SKILL.md with:
 create cross-vendor symlink (.agents/skills/ → relative path)
 ```
 
+## TOC
+
+- [What maintenance-rules Is](#what-maintenance-rules-is)
+- [When to Create](#when-to-create)
+- [Generated Skill Structure](#generated-skill-structure)
+- [Required Content](#required-content)
+- [Optional Content](#optional-content)
+- [Reference Dimension Classification](#reference-dimension-classification)
+- [Anti-Patterns](#anti-patterns)
+
 ## What maintenance-rules Is
 
 An in-repo rule-skill containing maintenance constraints and procedures. Lives in `.claude/skills/maintenance-rules/` within the skill repo.

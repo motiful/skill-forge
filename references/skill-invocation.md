@@ -24,6 +24,13 @@ generate: Skill("name", "args") + output capture + assert gate
 position: at the exact EP line where the dependency is needed
 ```
 
+## TOC
+
+- [The Pattern](#the-pattern)
+- [Validation (Step 3)](#validation-step-3)
+- [Delivered Contract](#delivered-contract)
+- [Anti-Patterns](#anti-patterns)
+
 ## The Pattern
 
 Three lines. Use at every point a skill calls another skill.

@@ -21,6 +21,14 @@ if found → auto-create paired <name>-rules skill
 if not found → no action
 ```
 
+## TOC
+
+- [Detection](#detection)
+- [When forge creates a rule-skill](#when-forge-creates-a-rule-skill)
+- [Packaging](#packaging)
+- [Converting Existing Rules Files to Rule-Skills](#converting-existing-rules-files-to-rule-skills)
+- [Attribution](#attribution)
+
 ## Detection
 
 Three detection modes. All are detection-driven, not user-chosen.

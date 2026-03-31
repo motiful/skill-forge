@@ -36,7 +36,7 @@ The Agent Skills ecosystem has grown to 88K+ published skills ([SkillsMP](https:
 
 **If you already published** — your repo might have issues you haven't noticed: leaked API keys in config files, missing .gitignore entries, structure that doesn't match the [Agent Skills](https://agentskills.io) standard, or claims in the README that don't match what the skill actually does.
 
-The gap is not in authoring — AI agents can already help write skill content. The gap is in engineering: validating structure, scanning for security issues, checking description coverage, enforcing claim discipline, and publishing correctly.
+The gap is not in authoring — AI agents can already help write skill content. The gap is in engineering: validating structure, scanning for security issues, checking description coverage, catching README claims that don't match actual capabilities, and publishing correctly.
 
 ## What Skill Forge Does
 

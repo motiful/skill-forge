@@ -15,18 +15,17 @@ Constraints and procedures for maintaining the skill-forge repository.
 maintain(trigger) → updated | no_change
 
 if "platform registry" in trigger:
-    follow Platform Registry Updates steps 1-11
-    update downstream: SKILL.md Fix Phase, README install, Detection logic
+    update_platform_registry()
+    update_downstream()                               # SKILL.md Fix Phase, README install, Detection logic
 if "community tools" in trigger:
-    follow Community Tools Updates steps 1-4
+    update_community_tools()
 if change proposed:
-    run Decision Test (7 criteria) → accept | reject
-    for each constraint in Constraints:
-        run constraint's verification method (parenthesized after each MUST)
-    run Consistency Checks
-    update Changelog (max 5, trim oldest)
+    run_decision_test()                               # 7 criteria → accept | reject
+    verify_constraints()                              # each MUST's parenthesized method
+    run_consistency_checks()
+    update_changelog()                                # max 5, trim oldest
 after significant changes:
-    run Self-Governance protocol (4 steps)
+    run_self_governance()                             # 4 steps
 ```
 
 ## Constraints
@@ -97,7 +96,7 @@ Protocol (run after significant changes):
 
 - SKILL.md description matches README positioning
 - README "Dependencies" table matches SKILL.md Step 0 + setup.sh
-- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()", "checkpoint()", "content block" (replaced by "paragraph"), "register_locally()" (replaced by "detect_and_register()" per platform-registry.md EP), "read_repo_meta()" (replaced by Skill("readme-craft", "apply metadata") — github-metadata migrated to readme-craft), "lookup()" (replaced by "detect_and_register()"), "validate(repo_meta)" (replaced by Skill("readme-craft", "apply metadata")), "validate_and_apply()" (for github metadata context — replaced by readme-craft delegation), "detect(skill_md) → bool" (replaced by "assess_procedure_need() → workflow_skill | reference_only"), "design()" (replaced by "assess_config_needs()" / "assess_and_guide()"), "audit()" (replaced by "audit_conditional_branches()"), "create(skill_repo)" (replaced by "assess_and_create()"), "Execute reference" / "Read reference" (replaced by unified "reference" — file structure tells AI what to do), "Execute sub-module EPs" (replaced by "Follow module interfaces" — Engagement Principle #8), "EP-writability test" (replaced by module-based judgment: independent module with own interface → reference), "Parameterizing" (never adopted — sections are implementation, not parameters), "Core Validation" / "Content Review" / "Repo Hygiene" (replaced by unified "Security" gate + "Validation" section with Structure/Quality/Publishing sub-groups — categorize findings not execution)
+- No residual terminology from previous versions: "five-layer", "Kit", "JIT", "Enhancement Report", "Quick Review", "Full Pipeline", "Multi-Skill Triage", "Scenario 1/2/3/4/5", "Operation Modules", "Step Reference", "Output Checklist", "Content Audience Check", "Interface" (as reference layer name), "Header" (as reference layer name), "Teaching" (as layer name), "Directing" (as layer name), "Review" (as independent EP entry name), "Create" (as independent EP entry name), "Push" (as independent EP entry name), "review_plan()", "update_plan()", "close_plan()", "checkpoint()", "content block" (replaced by "paragraph"), "register_locally()" (replaced by "detect_and_register()" per platform-registry.md EP), "read_repo_meta()" (replaced by Skill("readme-craft", "apply metadata") — github-metadata migrated to readme-craft), "lookup()" (replaced by "detect_and_register()"), "validate(repo_meta)" (replaced by Skill("readme-craft", "apply metadata")), "validate_and_apply()" (for github metadata context — replaced by readme-craft delegation), "detect(skill_md) → bool" (replaced by "assess_procedure_need() → workflow_skill | reference_only"), "design()" (replaced by "assess_config_needs()" / "assess_and_guide()"), "audit()" (replaced by "audit_conditional_branches()"), "create(skill_repo)" (replaced by "assess_and_create()"), "Execute reference" / "Read reference" (replaced by unified "reference" — file structure tells AI what to do), "Execute sub-module EPs" (replaced by "Follow module interfaces" — Engagement Principle #8), "EP-writability test" (replaced by module-based judgment: independent module with own interface → reference), "Parameterizing" (never adopted — sections are implementation, not parameters), "Core Validation" / "Content Review" / "Repo Hygiene" (replaced by unified "Security" gate + "Validation" section with Structure/Quality/Publishing sub-groups — categorize findings not execution), "read_or_create_config()" (replaced by "assess_config_needs()" per skill-configuration.md EP), "write_skill_md()" (replaced by "scaffold_skill_md()" — local operation following skill-format.md standards), "discover()" + "classify()" as separate calls (replaced by single "discover_and_classify()" per project-audit.md EP)
 - Current terminology (across SKILL.md + references): "Engagement Principles", "Execution Procedure", "Security" (pre-flight gate), "Validation" (one section: Structure + Quality + Publishing), "Fix Phase", "Local Ready Definition", "Push to Remote", "Positional Test", "Alignment Validation", "Three-Layer Format", "Module Model" (EP=interface, Section=implementation, Reference=imported module), "Forge", "Publish" (as Step 4 of forge), "review_and_update_plan" (assert review_and_update_plan() at major step boundaries), "Follow module interfaces" (Engagement Principle #8), "Batch Principle", "Non-Overlapping Ownership", "EP Comment Discipline", "Step Granularity", "categorize findings, not execution" (corollary in execution-procedure.md §6), "Registration Audit" (pre-registration conflict detection), "audit_registrations()" (owned skills only, scoped by config.skill_root)
 
 ## Update Triggers
