@@ -1,4 +1,4 @@
-# Attention, Control, and Feedback: Lessons from 9 Rounds of Skill Validation at Scale
+# Attention, Control, and Feedback: Lessons from 30 Rounds of Skill Validation at Scale
 
 What happens when you ask an AI agent to validate 17 skills instead of 1? It skips things. Not because it can't — because it won't. This article explains why, and what to do about it.
 
@@ -14,7 +14,7 @@ When a skill loads into an AI agent's context, it's doing one thing: **directing
 
 ## The Experiment
 
-We used [skill-forge](https://github.com/motiful/skill-forge) to review [featbit-skills](https://github.com/featbit/featbit-skills), a collection of 17 agent skills for the FeatBit feature flags platform. Over 9 iterative test rounds (2026-03-26/27), we discovered a series of failure modes and designed fixes for each.
+We used [skill-forge](https://github.com/motiful/skill-forge) to review [featbit-skills](https://github.com/featbit/featbit-skills), a collection of 17 agent skills for the FeatBit feature flags platform. Over 30 iterative test rounds (2026-03-26 to 2026-03-31), we discovered a series of failure modes and designed fixes for each.
 
 Each round revealed something the previous round didn't. The findings are not specific to skill-forge — they apply to any AI agent executing structured procedures on multiple items.
 
@@ -122,7 +122,7 @@ This reveals a paradox: fewer EP lines = more attention per line, but also less 
 
 Practical rule: **critical mechanisms must be visible at the call site, not hidden in references.** References are for detail; the call site must carry enough information for correct behavior even if the reference is not read.
 
-## The 9 Rounds
+## The 30 Rounds
 
 | Round | Fix Applied | Result | Key Learning |
 |-------|-----------|--------|-------------|
@@ -143,6 +143,16 @@ Practical rule: **critical mechanisms must be visible at the call site, not hidd
 | T15 | Same EP as T12 | 30 findings, 0% 1:1 | EP execution is stochastic — same EP, different results |
 | T16 | **Batch of 5 + row-count assert** | **36 findings, 100% 1:1** | **Work WITH LLM's natural batch size, not against it** |
 | T17 | Same batch approach | **3 patterns (covering 46 skills) + 7 per-skill, 100% 1:1** | **EP assessment found ALL 17 skills with expert judgment** |
+| T18 | Impact-driven findings + Must-fix/Suggestion | **64 must-fix, 100% 1:1** | Quality model aligned with user impact |
+| T19-T20 | v9.0 structural changes (unified pipeline, 3c/3d) | Regression: 22-28 must-fix | Structural improvements hurt validation depth |
+| T21 | File-based findings (agents write to /tmp/) | 37 must-fix, refs partially found | Rigid artifacts recover reference coverage |
+| T22 | Batch wait enforced + explicit ref checks | **54 must-fix, 15/15 frontmatter** | Table rows = coverage; shared checks = skipped |
+| T23-T24 | Mechanical merge (REPORT.md) | Report complete but parent rewrites | AI rewrites any file it can touch |
+| T25-T26 | REPORT.md frozen + biased example fix | 4-16 must-fix (stochastic) | Prompt examples override validation table severity |
+| T27 | Extract script called + check hints restored | 7 must-fix, 14/15 frontmatter | Prompt length: format instructions crowd out check instructions |
+| T28 | Structure table adds ref file rows | **90 findings, 15/15 frontmatter, 5/5 oversized** | If not in the table, it won't be checked |
+| T29-T30 | Script compliance stochastic | Validation stable, script ~40% called | AI does "intelligent work" reliably, "discipline work" unreliably |
+| T31 | Delete rigid script, use intent description | **Plan file correctly updated — first time** | Design with AI's natural behavior, not against it |
 
 ## Finding 8: Manifest Works But Isn't Reproducible (Round 12, 15)
 
@@ -175,9 +185,88 @@ T13 removed guards from STEP 1 and STEP 2, reasoning that later mechanisms would
 
 **You cannot simplify by merging guards across phases.** Each guard is bound to a specific moment in the execution timeline.
 
-## Three Principles
+## Phase 2: From Validation to Fix Pipeline (Rounds 18-31)
 
-17 rounds produced many EP-specific fixes, but three principles have lasting, generalizable value:
+With validation depth solved (batch of 5 + row-count assert), we shifted focus to the fix pipeline: how findings flow from validation to report to fix execution. This phase revealed that the principles from Phase 1 apply beyond validation — they govern every phase transition in a multi-step AI workflow.
+
+## Finding 11: Phase Output as Rigid Artifact (Round 18)
+
+When validation found "missing frontmatter AND EP" for reference files, the fix phase only applied frontmatter. It dropped EP. Why? The fix phase re-interpreted the findings under higher context pressure (it carried validation context plus its own work) and made a "rational" tradeoff: fix the easy thing, skip the hard thing.
+
+This is graceful skip applied to the fix phase, not the validation phase. The fix is the same: **make the output of each phase a concrete, enumerable artifact that the next phase consumes mechanically.** When Phase N reads and Phase N+1 writes, a rigid artifact MUST bridge them.
+
+Three requirements for the rigid artifact:
+1. **Enumerable** — each item maps to exactly one action in the next phase
+2. **Assertable** — `assert artifact.count >= expected` verifies completeness
+3. **Self-contained** — the next phase reads the artifact, not the original context
+
+HITL (human-in-the-loop) boundaries are stricter: when a phase transition passes through a human, the artifact doubles as the decision surface. Summary-level output ("N issues found") forces bulk approve/reject. Per-item output lets the user judge each finding individually.
+
+## Finding 12: Validation Tables Define Coverage (Round 22, 28)
+
+For 10 consecutive rounds, reference file checks (frontmatter, line count) were never found. The validation tables had rows for SKILL.md frontmatter and SKILL.md body size — but no rows explicitly targeting reference files. The "shared checks" section mentioned "SKILL.md and every reference file" but agents treated shared checks as descriptive text, not actionable rows.
+
+When we added two explicit table rows — "Reference file frontmatter" and "Reference file size" — reference coverage jumped from 0% to 100% in one round and stayed stable for 4 consecutive rounds.
+
+**If a check is not a row in the validation table, it will not be performed.** Shared checks, prose descriptions, and implicit coverage are all forms of "I assumed they'd check it" — and they won't. Table rows are the only reliable unit of validation coverage.
+
+## Finding 13: Prompt Examples Are Calibrating Context (Round 25-27)
+
+We added format examples to the agent prompt to show how findings should be written:
+
+```
+- [ ] suggestion | EP | SKILL.md | Could benefit from minimal EP
+```
+
+This example directly seeded "EP → suggestion" in the agent's judgment. Despite the validation table saying "workflow skill + no EP = must fix", agents classified EP as suggestion because the example was more salient than the table.
+
+Changing the example from `suggestion | EP` to `suggestion | Description clarity` immediately restored EP as must-fix.
+
+**Prompt examples are calibrating context.** They bias the agent's judgment toward whatever severity/pattern the example demonstrates. If the example contradicts the standard, the example wins — because it's closer to the output format the agent is generating.
+
+## Finding 14: Design with AI's Natural Behavior (Round 29-31)
+
+We wrote a bash script (`extract-actionable.sh`) and told the EP to call it. Over 5 rounds, the script was called only twice. The parent agent consistently did its own inline bash grep instead — achieving the same result through a different mechanism.
+
+| Behavior | AI compliance | Why |
+|----------|--------------|-----|
+| Bash grep (self-initiated) | ~100% | AI naturally processes data it has |
+| Cross-item analysis | ~100% | AI naturally synthesizes patterns |
+| Call rigid script | ~40% | Feels like unnecessary indirection |
+| Update plan file | ~20% | File management with no immediate payoff |
+
+When we deleted the script and replaced `run("scripts/extract-actionable.sh")` with `aggregate_and_append(findings_dir, plan_path)` — an intent description instead of a rigid command — the AI complied in the next run. It did its own grep, built the findings section, and updated the plan file.
+
+**AI reliably does intelligent work (grep, analyze, judge). AI unreliably does discipline work (call scripts, update files, wait for batches).** When the desired outcome can be achieved through intelligent work, describe the intent and let the AI choose the implementation.
+
+This is not "let the AI do whatever it wants." The intent must be specific (`aggregate_and_append` with clear parameters), the standard must be referenced (`cross_item_analysis` per execution-procedure.md §10), and the outcome must be verifiable (plan file has `## Findings` section with `[ ]` rows). What's flexible is the HOW, not the WHAT.
+
+## Finding 15: One File Lifecycle (Round 31)
+
+We had two files: a plan file (drives validation) and a report file (drives fixing). The parent consistently chose the wrong file at the wrong time — updating the plan during fix phase, rewriting the report during validation.
+
+Merging them into one file with sections that grow over time solved it:
+
+```
+## Steps                    ← written in STEP 2, checked off during 3a
+- [x] 1. Validate skill-A
+- [x] 2. Validate skill-B
+
+## Findings                 ← appended by STEP 3b
+### skill-A
+- [ ] must-fix | EP | SKILL.md | No execution procedure
+- [x] must-fix | frontmatter | refs/auth.md | Missing   ← checked off during 3c
+
+## Progress                 ← updated throughout
+Validated: 17/17
+Must-fix: 22 → 0
+```
+
+One file, append-only growth, never rewritten. Each phase adds to it; no phase replaces what came before.
+
+## Five Principles
+
+30 rounds produced many EP-specific fixes, but five principles have lasting, generalizable value:
 
 ### Principle 1: Batch to Match Natural Capacity
 
@@ -204,17 +293,35 @@ Every phase of an EP needs its own boundary constraint. A guard in a later phase
 
 **You cannot simplify by merging guards across phases.** T13 and T14 proved this.
 
+### Principle 4: Table Rows Are the Only Reliable Coverage Unit
+
+If a quality check exists only in prose ("shared checks", section descriptions, or reference file content), it will eventually be skipped. Only explicit table rows with `| Check | Standard |` format are consistently executed by validation agents.
+
+When adding a new quality standard: add a table row. When auditing coverage: count table rows against findings. If rows > findings, something was skipped.
+
+### Principle 5: Intent Over Implementation for AI Execution
+
+Describe WHAT outcome you need and WHICH standard governs it. Do NOT prescribe HOW the AI should implement it (which script to call, which grep pattern to use, which file to update first).
+
+AI agents reliably achieve described outcomes. They unreliably follow prescribed procedures. The difference: outcomes engage intelligence (the AI's strength); procedures demand discipline (the AI's weakness).
+
+**Boundary:** the intent must be specific enough to verify. "Make it better" is not an intent. "Append [ ] rows from finding files to plan file, grouped by skill name" is.
+
 ## What Persists, What Fades
 
 **Principles (permanent — as long as attention is finite):**
 - Batch to match natural capacity (5 items per round)
 - Assert on output length, not specific items
 - Phase guards: each step protects itself
+- Table rows = coverage (if not in the table, won't be checked)
+- Intent over implementation (outcome-driven EP > procedure-driven EP)
 
 **Implementation (temporary — will evolve with models and platforms):**
 - Specific BOUNDARY comment wording
 - Batch size (5 might change as models evolve)
 - Assert threshold
+- Specific file management strategies (plan file vs report file)
+- Script vs inline execution choice
 
 **What the attention lens clarifies:**
 - LLM autonomy vs external control = who allocates the attention budget
@@ -235,4 +342,4 @@ Every phase of an EP needs its own boundary constraint. A guard in a later phase
 
 ---
 
-*Discovered through iterative testing of [skill-forge](https://github.com/motiful/skill-forge) on [featbit-skills](https://github.com/featbit/featbit-skills), March 2026.*
+*Discovered through iterative testing of [skill-forge](https://github.com/motiful/skill-forge) on [featbit-skills](https://github.com/featbit/featbit-skills), 30 rounds, March-April 2026.*
