@@ -140,7 +140,7 @@ Skill loading consumes context tokens. The total loaded content (SKILL.md + all 
 
 **Guidelines:**
 - SKILL.md body: under 500 lines (the always-loaded ceiling)
-- Individual reference file: under 100 lines needs no TOC; 100-300 lines is acceptable with a TOC; above 300 lines should split by default
+- Individual reference file: under 100 lines needs no TOC; 100-300 lines is acceptable with a TOC; 300-450 lines evaluate concerns (single concern + TOC = keep, mixed = split); above 450 lines split by default
 - **Instruction density**: at least 60% of lines should be executable instructions (check tables, rules, process steps, templates). Below 60% suggests excessive explanation
 - References are **loaded on-demand** — the agent reads them only when the process flow requires it. Budget is per-file, not sum-of-all-files. A skill with 250-line SKILL.md + five 100-line references is fine — peak load is ~350 lines, not 750
 

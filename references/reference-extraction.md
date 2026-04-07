@@ -29,7 +29,7 @@ Extract when the content is an **independent module**: it has its own meaningful
 
 Keep inline when the content is **tightly coupled** to the parent EP: consumed at exactly one point, no meaningful interface of its own, or extracting would require constant back-and-forth with the parent.
 
-**Split early** when a file mixes multiple responsibilities, even if under 300 lines. Mixed examples:
+**Split early** when a file mixes multiple responsibilities, even if under 450 lines. Mixed examples:
 - literal templates + writing rules
 - validation logic + publishing strategy
 - setup policy + troubleshooting appendix
@@ -48,7 +48,8 @@ How SKILL.md points to its references:
 - SKILL.md body: under 500 lines
 - Reference file under 100 lines: TOC not needed
 - Reference file 100-300 lines: add a TOC, no split needed purely for length
-- Reference file above 300 lines: split by default
+- Reference file 300-450 lines: evaluate — single cohesive concern with TOC = keep; mixed concerns = split
+- Reference file above 450 lines: split by default
 - Multi-responsibility reference files: split regardless of length
 - Budget is per-file (peak load), not sum-of-all-files — references load on-demand
 - Don't split a 250-line single-purpose reference into 6 tiny files — splitting has overhead too

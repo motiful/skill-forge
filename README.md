@@ -162,6 +162,8 @@ Skill Forge validates and publishes — it does not write skill content or test 
 Skills are the next unit of reusable intelligence — loadable capability extensions that give AI agents structured expertise a base model doesn't have. skill-forge defines six quality dimensions (discoverable, reliable, efficient, trustworthy, bounded, valuable) and validates against them using prompts instead of scripts — keeping skills platform-agnostic and installable without runtimes.
 
 → [Vision, quality dimensions, and technical route](docs/skill-philosophy.md)
+→ [Why each check exists — pain points and rationale](docs/skill-quality-model.md)
+→ [Attention, control, and feedback — lessons from validation at scale](docs/attention-and-feedback.md)
 
 ## Contributing
 

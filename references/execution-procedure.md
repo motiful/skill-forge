@@ -1,6 +1,6 @@
 ---
 name: execution-procedure
-description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, the nine components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, batch principle, non-overlapping ownership, EP vs content separation), attention principles (budget, batch execution, assert as checkpoint, phase output as rigid artifact), and common anti-patterns.
+description: Pseudocode + plan-as-checklist + GATE assertion pattern for structuring workflow skills. Defines when a skill needs an Execution Procedure, covers nine core components (pseudocode, plan-as-checklist, GATE, module references, EP comment discipline, step granularity, batch principle, non-overlapping ownership, EP vs content separation), five attention principles (observe-then-act, attention budget, batch execution, assert as checkpoint, phase output as rigid artifact), and common anti-patterns.
 ---
 
 # Execution Procedure Pattern
@@ -34,7 +34,7 @@ if purely reference material (no ordering constraint) → reference_only
 
 ## TOC
 
-- [When to Detect](#when-to-detect)
+- [Default: Every Skill Gets EP](#default-every-skill-gets-ep)
 - [The Pattern](#the-pattern)
 - [Anti-Patterns](#anti-patterns)
 
@@ -54,7 +54,7 @@ These signals are **confirmations**, not prerequisites. A skill does not need to
 
 ## The Pattern
 
-Nine components, all required for workflow skills:
+Nine core components (§1-9) plus five attention principles (§10-14) for workflow skills:
 
 ### 1. Pseudocode Procedure
 

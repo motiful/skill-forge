@@ -215,7 +215,7 @@ One pass, read every file, check everything. Each finding tagged by category. Be
 
 No other result types. If it's not PASS, must-fix, or suggestion — it's PASS.
 
-For each finding, explain the user impact — not which rule was violated. Standards are defined in the reference files; the validation tables below point to them.
+For each finding, explain the user impact — not which rule was violated. Standards are defined in the reference files; the validation tables below point to them. Each table row referencing a file constitutes the EP dispatch — the agent reads the reference's EP when evaluating that check (per batch principle, `references/execution-procedure.md` §7).
 
 ### Structure
 
@@ -374,7 +374,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 - `references/script-quality.md` — Script size limits, module split triggers, dependency policy
 - `references/maintenance-guide.md` — In-repo maintenance-rules skill: when to create, required content, template, reference dimension classification (D1/D2/D3)
 - `references/anti-graceful-skip.md` — Default-execute principle, skip conditions, no-downside enhancements, Step 3 audit criteria
-- `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern + batch principle + non-overlapping ownership for workflow skills
+- `references/execution-procedure.md` — Pseudocode + plan-as-checklist + GATE pattern + attention model + non-overlapping ownership for workflow skills
 - `references/project-audit.md` — Discovery, Classification, Plan File, Rules Conversion, Execution Order for project-level forge
 - `references/reference-extraction.md` — When to extract sections into references, index quality, line count thresholds
 - `references/registration-audit.md` — Pre-registration conflict detection: workspace shadows global, broken links, copy vs symlink
