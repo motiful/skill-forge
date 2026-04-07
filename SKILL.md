@@ -61,7 +61,15 @@ def forge(target):
         if len(context) > 1: context = ask_user("Which existing skill?")
         elif not context: ask_user("What does this skill do? When should it trigger?")
         search_ecosystem(target)                       # npx skills find / skills.sh
-        path = f"{config.skill_workspace}/{name}/"
+
+        # Workspace: standalone + design-heavy → full workspace with backstage
+        # Signals: public/publishable, 3+ expected references, multi-session,
+        #   user mentioned design docs. Rule-skill/in-repo/prototype → skip.
+        if assess_workspace_need(name, context):       # HITL — user confirms
+            Skill("repo-scaffold", f"scaffold {name}, git init but skip push")
+            path = f"{config.skill_workspace}/{name}-project/{name}/"
+        else:
+            path = f"{config.skill_workspace}/{name}/"
 
         source_docs = detect_source_documents(context) # backstage, research, outputs
         scaffold_skill_md(path, context)                # follows references/skill-format.md standards
@@ -76,7 +84,7 @@ def forge(target):
 
         readme = Skill("readme-craft", f"create {path}")  # references/templates.md
         assert readme.delivered                        # README required for local ready
-        write_artifacts(path)                          # LICENSE, .gitignore
+        write_artifacts(path)                          # LICENSE, .gitignore — skip if exist
         items = [SkillItem(path)]
 
     # From here: all items — new or existing — go through the same pipeline.
