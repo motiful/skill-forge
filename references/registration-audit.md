@@ -10,11 +10,11 @@ Pre-registration conflict detection scoped to skills the developer maintains.
 ## Execution Procedure
 
 ```
-audit_registrations(item, config) → findings[]
+audit_registrations(target, config) → findings[]
 
 owned = skills whose resolved target is under config.skill_root
 for each platform root (global + project-level):
-    project_skills = scan(item.project_root / platform_root)
+    project_skills = scan(target.project_root / platform_root)
     global_skills = scan(~ / platform_root)
     overlap = project_skills ∩ global_skills (by name, owned only)
     for skill in overlap:

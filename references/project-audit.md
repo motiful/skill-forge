@@ -12,7 +12,7 @@ Every forge run — single skill or full project — starts with Discovery. The 
 ## Execution Procedure
 
 ```
-discover_and_classify(project_path) → classified_items[]
+discover_and_classify(target) → classified_items[]
 
 traverse full project tree → find all SKILL.md, rules files, agent instructions
 for each item:

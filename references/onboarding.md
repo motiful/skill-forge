@@ -10,7 +10,7 @@ Interactive first-use guidance that helps users set up their environment for a s
 ## Execution Procedure
 
 ```
-assess_and_guide(skill_scope) → onboarded | skipped
+assess_and_guide(target) → onboarded | skipped
 
 if zero-config needed → skipped
 if config missing → trigger first-use flow:

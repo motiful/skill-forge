@@ -10,7 +10,7 @@ Engineering pattern: giving a skill user-adjustable preferences that persist acr
 ## Execution Procedure
 
 ```
-assess_config_needs(skill_scope) → config_spec | none
+assess_config_needs() → config_spec | none
 
 if no user-adjustable behavior → none
 location: ~/.config/<skill-name>/config.md

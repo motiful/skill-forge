@@ -8,7 +8,7 @@ description: Mapping of agent platforms (Claude Code, Codex, Copilot, Cursor, Wi
 ## Execution Procedure
 
 ```
-detect_and_register(platforms) → registered | skipped
+detect_and_register(target) → registered | skipped
 
 scan global + project skill roots (strong signals only)
 for each detected root → add to registration plan
