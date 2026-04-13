@@ -11,6 +11,24 @@ metadata:
 
 Skill engineering methodology and publishing pipeline. Defines what "well-engineered skill" means, validates skills against that standard, and produces publishable GitHub repos.
 
+## Three-Dimension Mental Model
+
+Skill engineering decisions split along three orthogonal dimensions. Keep them separate — mixing causes self-contradictory choices.
+
+| Dimension | Question | Decides |
+|-----------|----------|---------|
+| **A. Entry** | Should this be its own skill? | New capability skill / new rule-skill / just a reference file |
+| **B. Dependency** | How do skills relate to each other? | Runtime (setup.sh, cross-repo OK) vs Maintenance (must ship together) |
+| **C. Publishing** | How to package for distribution? | Single Skill repo / Collection repo / In-repo |
+
+Each reference below covers ONE dimension (mostly):
+- `references/publishing-strategy.md` — Dimension C
+- `references/rule-skill-pattern.md` — Dimension A (for rule-skills specifically)
+- `references/skill-composition.md` — Dimension B
+- `references/anti-graceful-skip.md` — orthogonal quality check (applies to all dimensions)
+
+When a decision seems to conflict, check which dimension you're reasoning about. A/B/C answers do not constrain each other.
+
 ## Engagement Principles
 
 These rules always apply. Read them before acting.
@@ -265,6 +283,7 @@ Shared checks (SKILL.md and every reference file):
 | In-repo skills | Full validation recursively; cross-vendor symlinks use relative paths |
 | Standard enforcement | Every reference must have an EP function call from SKILL.md — no call = 100% skip (`references/execution-procedure.md` §4) |
 | EP contract integrity | Bidirectional: (1) every `ref.function()` call in SKILL.md EP has a matching `def function()` in the reference; (2) every reference `def` is called from SKILL.md. Parameter names must match. Reference with data but no `def` = must fix |
+| EP field resolvability | Every data field referenced in EP pseudocode (`answers.X`, `context.Y`, `brief.Z`) must have a documented inference source. See `references/anti-graceful-skip.md` §Principle 5 + `references/execution-procedure.md` §4 Field-level resolvability |
 | Assets referenced | Every asset file referenced by SKILL.md or references |
 | Maintenance-rules need | `references/maintenance-guide.md` |
 | Onboarding need | `references/onboarding.md` — zero-config → PASS; first-use decisions or credentials needed → must fix |

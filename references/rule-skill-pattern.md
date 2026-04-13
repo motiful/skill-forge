@@ -97,14 +97,27 @@ Do not create a rule-skill without consulting rules-as-skills methodology.
 
 ## Packaging
 
-In the generated capability skill:
-- **SKILL.md Step 0**: declare `<name>-rules` as dependency, installed by `scripts/setup.sh`
-- **README "Dependencies"**: list `<name>-rules` with `npx skills add <org>/<name>-rules`
+Rule-skills and their paired capability skills have **maintenance dependency** (Dimension B, see `references/skill-composition.md`) — the rule-skill exists to constrain the capability's iteration. Fork one without the other and the constraints are lost.
 
-In the generated rule-skill:
-- Standalone README with own install instructions
-- Self-contained SKILL.md with all constraint rules
-- No dependency on forge or rules-as-skills to function
+**Default packaging**: Augmented Skill collection (see `references/publishing-strategy.md` §Augmented Skill).
+
+```
+<org>/<primary-name>-skills/
+├── skills/
+│   ├── <primary-name>/             ← capability skill
+│   └── <primary-name>-rules/       ← rule-skill (or -ep-rules, -xxx-rules)
+├── README.md                       ← centers on primary skill
+├── LICENSE
+└── .gitignore
+```
+
+Fork or `npx skills add <org>/<primary-name>-skills --all` pulls both. The rule-skill is never independently installed because it has no meaning without the capability.
+
+**Exception — rule-skill spans multiple capabilities**: When one rule-skill constrains N independent capability skills (rare), publish the rule-skill as a separate repo and have each capability declare runtime dependency via `scripts/setup.sh`. This is maintenance dependency fanning out — pick this only when there are genuinely multiple unrelated consumers.
+
+**In-repo rule-skills** (not independently published): If the rule-skill only applies to its host repo's maintainers (not to users of the published capability), keep it in-repo in `.claude/skills/<name>-rules/`. See `references/publishing-strategy.md` §In-Repo.
+
+**Rationale for default Collection**: Separate repos require users to remember two `npx skills add` commands. Fork-based distribution (clone the capability from GitHub) won't auto-install a separate rule-skill repo. Maintenance dependencies that require two-step install are fragile.
 
 ## Converting Existing Rules Files to Rule-Skills
 

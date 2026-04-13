@@ -8,13 +8,17 @@ description: Three publishing models (Skill, Collection, In-Repo) with decision 
 ## Execution Procedure
 
 ```
-decide(skill_structure) → publishing_model
+decide(skills_to_publish) → publishing_model
+
+# Dimension C (Publishing) only. Does NOT assess entry (A) or dependency (B).
+# Upstream decisions (which skills to create, how they depend) must be settled
+# before calling this function.
 
 if only for this repo's maintainers → in-repo (.claude/skills/)
-if one skill → skill repo (default)
-if multiple skills:
-    if always consumed together → collection repo
-    if independent → separate skill repos
+if len(skills) == 1 → skill repo (default)
+if len(skills) >= 2:
+    if skills must ship together (any graft / fork must get all) → collection repo
+    if skills can ship independently → separate skill repos + declared dependencies
 ```
 
 ## TOC
@@ -71,6 +75,41 @@ See `references/installation.md` for the full setup.sh standard.
 ## Collection (Multi-Skill Repo)
 
 Multiple skills in one GitHub repo. Used when skills are always consumed together.
+
+Collections come in two flavors:
+
+### Augmented Skill (主 + 加强器)
+
+One **primary capability** skill plus N **augmenting** skills (typically rule-skills, sometimes micro-capabilities). The outward identity is the primary capability — users say "I'm using design-playbook", not "I'm using the design-playbook collection". The augmenters enhance the primary without being independently useful.
+
+**Characteristics**:
+- One primary skill, N ≥ 1 augmenters
+- Augmenters have **maintenance dependency** on the primary (they exist to constrain or assist the primary's iteration)
+- Outward branding = primary skill name
+- Directory: `<primary-name>-skills/` or similar (GitHub repo); installation UX shows primary in README
+
+**When to use**:
+- Primary capability ships with paired rule-skill(s) enforcing maintenance constraints
+- Primary has companion micro-capabilities that have no use outside it
+- You want a single install command to pull primary + all enhancements
+
+**Example**: `design-playbook-skills/` contains `design-playbook/` (capability) + `design-playbook-ep-rules/` (rule-skill). README centers on `design-playbook`. `design-playbook-ep-rules` exists to constrain future EP edits, never used standalone.
+
+### Peer Collection (平级多 skill)
+
+N independent skills that happen to share a common domain or team, bundled for convenience. No primary — all peers.
+
+**Characteristics**:
+- N peer skills, no primary
+- Each skill could theoretically be independently useful
+- Bundled because same team / same release cycle / user wants one install
+
+**When to use**:
+- Single team publishes a family of related but independent capabilities
+- Users commonly want all of them (WordPress dev workflow, Vercel + React stack)
+- Release cycle is synchronized
+
+**Example**: `WordPress/agent-skills` with 13 peer skills for WordPress development. No primary — each skill stands alone.
 
 **Structure:**
 ```
@@ -134,21 +173,22 @@ project-repo/
 This framework is also used by the Classification step in `references/project-audit.md`. When classifying skills found during a project audit, apply this decision tree to determine whether each skill should stay in-repo, be extracted as a standalone repo, or grouped into a collection.
 
 ```
-How many skills are you publishing?
+Dimension C decision (after A and B are settled):
 
-0. Is this skill only for THIS repo's maintainers/developers?
-   → In-repo (in .claude/skills/)
-   → Done
+Step 1 — How many skills to publish?
+   0 (in-repo only) → In-repo (.claude/skills/)
+   1 → Skill (one repo, default)
+   ≥2 → continue to Step 2
 
-1. Just one skill?
-   → Skill (one repo, default)
-   → If dependencies exist, declare in Step 0 + setup.sh + README
-   → Done
+Step 2 — Must they ship together?
+   YES, forking one without others breaks maintenance/function → Collection
+       → continue to Step 3
+   NO, they can ship independently → Separate Skill repos
+       → declare inter-skill dependencies in each skill's setup.sh
 
-2. Multiple skills?
-   → Are they always consumed together?
-     YES → Collection (one repo)
-     NO  → Keep as separate Skill repos
+Step 3 — Collection subtype?
+   One primary + N augmenters (rule-skills, micro-capabilities) → Augmented Skill
+   N peers, no primary → Peer Collection
 ```
 
 ## Directory Standards

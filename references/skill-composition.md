@@ -1,6 +1,6 @@
 ---
 name: skill-composition
-description: How skills declare dependencies and manage context budget. Covers the context budget constraint (~15K-25K tokens safe), collection risks (context flooding, name collision, unenforced internal deps), publishing model decision (skill vs collection), two dependency tiers (must-install vs informational), and current tooling landscape.
+description: How skills declare dependencies and manage context budget (Dimension B). Covers the context budget constraint (~15K-25K tokens safe), collection risks (context flooding, name collision, unenforced internal deps), two-axis dependency classification (runtime vs informational, maintenance-coupled vs independent), and current tooling landscape. Publishing format (Dimension C) is decided in references/publishing-strategy.md.
 ---
 
 # Skill Composition
@@ -90,23 +90,34 @@ Collections often have a shared foundation skill (e.g., `startup-context`) that 
 
 ## Publishing Models
 
-Two models, simple decision:
-
-| Model | When | Trade-off |
-|-------|------|-----------|
-| **Skill** (one repo) | Default. Independent, discoverable, star-able | Each skill installs separately |
-| **Collection** (one repo) | Skills always consumed together, same team, same release cycle | Locked together, can't mix-and-match |
-
-**Our recommendation:** Default to a single Skill repo. Dependencies are declared in SKILL.md Step 0 and installed by `scripts/setup.sh`. Mirror in README's "Dependencies" section. Use Collection only when skills are genuinely locked together (WordPress 13 skills, Vercel 5 skills, Anthropic 17 skills).
+Publishing format (Dimension C) is decided in `references/publishing-strategy.md` — the decision depends on dependency type from §Dependency Tiers below. This file describes dependencies (Dimension B); that file decides packaging (Dimension C). See `SKILL.md §Three-Dimension Mental Model` for why these are kept separate.
 
 ## Dependency Tiers
 
-| Tier | Declared in | Behavior |
-|------|-------------|----------|
-| **Dependencies** | SKILL.md Step 0 + `scripts/setup.sh` | Must install. Missing → install. Can't install → block |
-| **Informational** | README.md only | Human reading. AI does not act on it |
+Two orthogonal axes for classifying skill-to-skill relationships:
 
-No middle ground. "Works better with" is not a tier — if the skill needs it, declare it as a dependency.
+### Axis 1: When does the dependency activate?
+
+| Tier | Declared in | Activation | Example |
+|------|-------------|-----------|---------|
+| **Runtime** | SKILL.md Step 0 + `scripts/setup.sh` | When capability runs, dependency must be installed | `design-playbook` runtime-depends-on `impeccable` (needed during code generation) |
+| **Informational** | README.md only | Human reads it; AI does not act | "Works well with X" in README |
+
+### Axis 2: Must the dependency ship with you?
+
+| Tier | Distribution | Packaging consequence |
+|------|-------------|----------------------|
+| **Runtime (independent)** | Dependency installs at runtime via setup.sh, published separately | Separate repos + dependency declaration |
+| **Maintenance (coupled)** | Dependency must be present alongside, even during fork/maintenance | Collection (Augmented Skill) — both ship in same repo |
+
+**Typical combinations**:
+- **Runtime + independent**: `design-playbook` → `impeccable` (Impeccable is reused by many skills, ships standalone)
+- **Maintenance + coupled**: `design-playbook` → `design-playbook-ep-rules` (rule-skill has no meaning without design-playbook, never used elsewhere)
+- **Runtime + coupled**: rare — if A always needs B at runtime and B is only used by A, consider whether B should even be a separate skill
+
+**Why this matters**: Runtime dependencies can cross repo boundaries (`setup.sh` handles install). Maintenance dependencies cannot — a fork won't automatically install a dependency from another repo, so maintenance-coupled skills must share a repo (Collection).
+
+No middle ground. "Works better with" is not a tier — if the skill functionally needs it, declare it as runtime dependency; if it's just a hint, it's informational.
 
 **Self-containment**: A forged skill must function without skill-forge installed. "Self-contained from forge" does NOT mean "independent from everything" — skills can and should declare their own runtime dependencies.
 
