@@ -93,7 +93,9 @@ One **primary capability** skill plus N **augmenting** skills (typically rule-sk
 - Primary has companion micro-capabilities that have no use outside it
 - You want a single install command to pull primary + all enhancements
 
-**Example**: `design-playbook-skills/` contains `design-playbook/` (capability) + `design-playbook-ep-rules/` (rule-skill). README centers on `design-playbook`. `design-playbook-ep-rules` exists to constrain future EP edits, never used standalone.
+**Example**: a database migration capability skill + a paired rule-skill enforcing "NEVER write destructive migrations without backup verification". The rule-skill has no meaning outside that capability — publishing separately would force users to install both while giving them no way to understand the coupling, and forking the capability without the rule-skill would silently lose the enforcement.
+
+**When NOT to use this pattern**: 2026-04 dogfooding of this pattern on `design-playbook` surfaced a counter-lesson. Most of that rule-skill's constraints (file size limits, reference index sync) were **general skill-engineering rules already enforced by skill-forge audits**, not design-playbook-specific. Only one constraint (EP field resolvability) was genuinely capability-specific — and that rule fit better as a 5-line comment block at the top of the reference file it constrained. Augmented Skill packaging is justified only when (a) the rule-skill has substantive content that would clutter the primary capability's SKILL.md, AND (b) the constraints are unique to the primary capability and cannot be handled by generic audits. If either fails, prefer a single skill with inline documentation over collection packaging.
 
 ### Peer Collection (平级多 skill)
 
