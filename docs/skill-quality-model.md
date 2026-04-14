@@ -121,6 +121,20 @@ The skill author decides what to act on based on whether the impact is acceptabl
 | Rules conversion | Trigger-based rules that should be skills but aren't |
 | Graduation path | Personal tools stuck in one project |
 
+## Pain Point #9: Silent Graceful Skip on Condition Side
+
+**Community evidence**: Internal self-review dogfooding (April 2026) on `design-playbook`'s EP discovered 8 `answers.X` field references in conditional branches with no inference rules documented. The Authority and Empowerment hero-strategy branches were effectively dead code — the AI reading the EP had no anchor for *when* each branch should fire, so both conditions defaulted to false and execution always fell through to the emotional branch. No existing validation check caught it; the drift surfaced only when Dimension 2 field-resolvability audit was run by hand.
+
+**User impact**: Skill appears to work but specific decision paths never fire. Authors believe their EP covers all cases; in practice, the agent silently skips unreachable branches with no error signal. The more sophisticated the EP's branching logic, the more invisible dead code accumulates.
+
+| Check | What it prevents |
+|-------|-----------------|
+| anti-graceful-skip Principle #5 | Conditional conditions must be resolvable — every `if answers.X` or `if context.X` in EP must be traceable to either a documented inference rule (for input-derived fields) or a prior EP step that writes the field |
+| EP field-resolvability audit | Unreferenced data fields → silent graceful skip on the *condition side* (the mirror of action-side graceful skip in Principles 1-4) |
+| Reference Index completeness | Every reference file has an EP call site — orphaned references never load, making their content invisible dead code |
+
+**Framing**: Principles 1-4 of `anti-graceful-skip.md` prevent *action-side* graceful skip ("AI chooses not to execute X"). Principle #5 prevents *condition-side* graceful skip ("AI can't determine whether to execute X, defaults to no"). Both produce identical symptoms (work not done) but from opposite failure modes — one is a motivation gap, the other is an information gap. The validation check for #5 is mechanical: grep every `answers.` / `brief.` / `context.` reference in EP conditionals, verify each has a documented rule, flag the orphans.
+
 ---
 
 *Each pain point sourced from public GitHub issues, community forums, security audits, and official platform documentation. Full raw data in `docs/research/ecosystem-pain-points-2026.md`.*

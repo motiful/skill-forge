@@ -42,6 +42,22 @@ Parallels from established disciplines:
 
 **One-sentence definition**: A skill is an AI agent's professional competency package — like a board certification for a doctor, it gives the agent structured expertise in a specific domain.
 
+## Three-Dimension Mental Model
+
+When structuring, packaging, and delivering a skill, three orthogonal dimensions must be resolved separately. Confusing them is the most common source of packaging mistakes.
+
+| Dimension | Question | Options |
+|-----------|----------|---------|
+| **A. Entry** | How does the agent encounter this skill? | Capability (explicit invocation like "review my skill") vs Constraint (auto-activated when the body's trigger scenario matches) |
+| **B. Dependency** | What other skills does this one require? | Runtime (must load to execute) vs Informational (reference material only), crossed with Independent vs Coupled |
+| **C. Publishing** | How does this skill ship? | Single-skill repo / Peer Collection (unrelated skills co-located for install convenience) / Augmented Skill Collection (primary capability + paired rule-skills that must ship together) |
+
+The dimensions are orthogonal. Decisions in one do not constrain decisions in another: a capability skill (A) can have a coupled runtime dependency (B) and still publish as a Peer Collection (C). Questions like "should my rule-skill be its own repo?" conflate A (it's a constraint) with C (a publishing decision) and produce confusion.
+
+**How this mental model emerged**: April 2026 dogfooding against `design-playbook` and `rules-as-skills`. Earlier packaging decisions had silently conflated the three dimensions — "we need rule-skill packaging" was being used to answer three different questions at once. Separating them fixed the design and revealed that not every rule-skill candidate needs a separate Augmented Skill Collection; some are better inlined as documentation within the capability they constrain.
+
+See [`references/publishing-strategy.md`](../references/publishing-strategy.md) for the full Dimension C decision framework and [`references/skill-composition.md`](../references/skill-composition.md) for Dimension B dependency tiers.
+
 ## Technical Route
 
 **Prompt-driven. Platform-agnostic. No runtime dependencies for core logic.**
