@@ -26,6 +26,7 @@ if len(skills) >= 2:
 - [Terminology](#terminology)
 - [Skill (Single Repo)](#skill-single-repo)
 - [Collection (Multi-Skill Repo)](#collection-multi-skill-repo)
+- [Protocol Skill — Orthogonal Dimension](#protocol-skill--orthogonal-dimension-installation-side-effects)
 - [In-Repo (Not Independently Published)](#in-repo-not-independently-published)
 - [Decision Framework](#decision-framework)
 - [Directory Standards](#directory-standards)
@@ -36,6 +37,7 @@ if len(skills) >= 2:
 |------|-----------|------------|
 | **Skill** | One capability, one repo. The atomic unit. | `<org>/<skill-name>` |
 | **Collection** | Multiple skills in one repo. Simpler but skills are locked together. | `<org>/<domain>-skills` |
+| **Protocol Skill** | A skill whose real value is delivered by a setup script that modifies the host environment. Publishing-model orthogonal (can be Single or Collection). | same as underlying publishing model |
 
 Use these terms in conversation with the user. Avoid jargon like "monorepo" or "hybrid."
 
@@ -95,7 +97,18 @@ One **primary capability** skill plus N **augmenting** skills (typically rule-sk
 
 **Example**: a database migration capability skill + a paired rule-skill enforcing "NEVER write destructive migrations without backup verification". The rule-skill has no meaning outside that capability — publishing separately would force users to install both while giving them no way to understand the coupling, and forking the capability without the rule-skill would silently lose the enforcement.
 
-**When NOT to use this pattern**: 2026-04 dogfooding of this pattern on `design-playbook` surfaced a counter-lesson. Most of that rule-skill's constraints (file size limits, reference index sync) were **general skill-engineering rules already enforced by skill-forge audits**, not design-playbook-specific. Only one constraint (EP field resolvability) was genuinely capability-specific — and that rule fit better as a 5-line comment block at the top of the reference file it constrained. Augmented Skill packaging is justified only when (a) the rule-skill has substantive content that would clutter the primary capability's SKILL.md, AND (b) the constraints are unique to the primary capability and cannot be handled by generic audits. If either fails, prefer a single skill with inline documentation over collection packaging.
+**Description design for augmenters** — a pattern to improve auto-invocation reliability:
+
+- **Primary skill description**: writes on **intent triggers** — "Use when user asks to build X", "Use when starting a Y workflow". Intent phrases match user's verbal task framing.
+- **Augmenter (rule-skill) description**: writes on **environment triggers** — "MUST read SKILL.md BEFORE editing any `*.sql` migration file", "Activate when touching `schema/` directory". Environment phrases match the model's task context, not the user's phrasing.
+
+Why split: if both use identical trigger patterns, they compete for the same matches and one drowns out the other. If they target different trigger dimensions (intent vs environment), the primary loads when the user states intent and the augmenter loads when the model is about to touch the constrained artifact — double coverage with no contention.
+
+**Upper bound on N**: experience shows `N ≤ 3-5` augmenters. Beyond that, descriptions start competing for attention even with intent/environment split, and users lose the mental model of "one primary skill with a few guardrails". If you find yourself at N ≥ 6, reconsider whether the augmenters actually belong together or whether the primary itself should be split.
+
+**When NOT to use this pattern**: 2026-04 dogfooding on `design-playbook` surfaced a counter-lesson. Most of that rule-skill's constraints (file size limits, reference index sync) were **general skill-engineering rules already enforced by skill-forge audits**, not design-playbook-specific. Only one constraint (EP field resolvability) was genuinely capability-specific — and that rule fit better as a 5-line comment block at the top of the reference file it constrained. Augmented Skill packaging is justified only when (a) the rule-skill has substantive content that would clutter the primary capability's SKILL.md, AND (b) the constraints are unique to the primary capability and cannot be handled by generic audits. If either fails, prefer a single skill with inline documentation over collection packaging.
+
+See also: `rules-as-skills/references/decision-tree.md` Step 0 — if a candidate augmenter is universal engineering hygiene or single-file scope, it should not be a rule-skill at all.
 
 ### Peer Collection (平级多 skill)
 
@@ -146,6 +159,54 @@ npx skills add <org>/<collection>                   # interactive picker
 - `vercel-labs/agent-skills` — 5 skills for Vercel + React
 - `anthropics/skills` — 17 skills for Claude API
 
+### Augmented vs Peer — Choosing Between the Two
+
+```
+Are the skills independently useful?
+  YES (each skill stands alone, unrelated to the others)         → Peer Collection
+  NO  (one skill is the reason for the bundle, others support it) → continue
+
+Is there a clear "main thing" users identify with?
+  YES (users say "I use X" where X is one specific skill)         → Augmented Skill
+  NO  (users say "I use the X collection")                        → Peer Collection
+
+Would forking the primary without the augmenters silently break behavior?
+  YES (augmenters enforce invariants the primary relies on)       → Augmented Skill
+  NO  (augmenters are nice-to-have)                               → Peer Collection or separate repos
+```
+
+Augmented Skill reads like "one product with bundled guardrails". Peer Collection reads like "a suite, each piece usable alone".
+
+## Protocol Skill — Orthogonal Dimension: Installation Side Effects
+
+Beyond Single / Collection / In-Repo (publishing models), a skill can also be classified by **what its installation does**:
+
+| Skill behavior type | Value delivery | Install effect |
+|---------------------|----------------|----------------|
+| **Capability** | skill body (workflows, commands, code) | Install places files; value realized on load |
+| **Rule-skill (constraint)** | description MUST/NEVER + body details | Install places files; value realized when description matches context |
+| **Protocol Skill** | **setup script side effects** (modifies host environment) | Install places files **and** requires running setup to activate the protocol |
+
+A Protocol Skill is any skill whose **real value is delivered by a setup script**, not by the skill files themselves. The files document the protocol; the setup activates it.
+
+**Canonical example**: [rules-as-skills](https://github.com/motiful/rules-as-skills). Installing the repo alone gives you methodology docs. Running `scripts/install-meta-rule.sh` injects a meta-rule into each agent's global rule file — that meta-rule is the actual enforcement mechanism, and it applies to every `*-rules` skill on the machine (current and future). Without the setup step, the skill is a PDF; with it, it's a protocol.
+
+**When a skill should be Protocol-type**:
+- The skill's central claim is about **how other skills or tools should be treated** (meta-level methodology)
+- Without an environment change, the methodology can be read but not enforced
+- The change is **global** (affects the whole agent environment), not per-skill
+
+**Interaction with publishing models**:
+- Most Protocol Skills are **Single** (the protocol itself is one coherent thing)
+- Some could be **Augmented** if they ship with helper rule-skills (but the meta-rule already covers all rule-skills by design, so augmenters are often redundant)
+- Rarely **Peer** — Peer Collection has no primary, but a Protocol Skill needs a primary to anchor the setup script ownership
+
+**Setup script expectations** (from `references/installation.md`):
+- Idempotent (re-running has no adverse effect)
+- Reversible (supports an `uninstall` subcommand)
+- Uses distinctive markers in injected content so the uninstaller can target its changes precisely
+- Non-destructive (never overwrites unrelated content in the host file)
+
 ## In-Repo (Not Independently Published)
 
 Skills that ship with a project repo. Distributed via clone/fork, not `npx skills add`.
@@ -191,6 +252,13 @@ Step 2 — Must they ship together?
 Step 3 — Collection subtype?
    One primary + N augmenters (rule-skills, micro-capabilities) → Augmented Skill
    N peers, no primary → Peer Collection
+
+Step 4 — Orthogonal: is this also a Protocol Skill?
+   Does activation require a setup script that modifies the host environment?
+   YES → See §Protocol Skill for setup.sh requirements (idempotent, reversible,
+         marker-based injection). Publishing model unchanged; add a setup step
+         to README.
+   NO  → Standard publishing; no additional requirements.
 ```
 
 ## Directory Standards
