@@ -123,7 +123,7 @@ The skill author decides what to act on based on whether the impact is acceptabl
 
 ## Pain Point #9: Silent Graceful Skip on Condition Side
 
-**Community evidence**: Internal self-review dogfooding (April 2026) on `design-playbook`'s EP discovered 8 `answers.X` field references in conditional branches with no inference rules documented. The Authority and Empowerment hero-strategy branches were effectively dead code — the AI reading the EP had no anchor for *when* each branch should fire, so both conditions defaulted to false and execution always fell through to the emotional branch. No existing validation check caught it; the drift surfaced only when Dimension 2 field-resolvability audit was run by hand.
+**Community evidence**: self-review dogfooding on capability skills with multi-branch EPs has repeatedly surfaced `answers.X` / `context.Y` field references in conditional branches that have no inference rules documented. Branches like these are effectively dead code — the AI reading the EP has no anchor for *when* each branch should fire, so conditions default to false and execution falls through to whichever branch sits at the end of the `if/elif` chain. No traditional validation check catches this; the drift surfaces only when a field-resolvability audit is run deliberately.
 
 **User impact**: Skill appears to work but specific decision paths never fire. Authors believe their EP covers all cases; in practice, the agent silently skips unreachable branches with no error signal. The more sophisticated the EP's branching logic, the more invisible dead code accumulates.
 

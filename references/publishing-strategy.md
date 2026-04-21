@@ -82,7 +82,7 @@ Collections come in two flavors:
 
 ### Augmented Skill (主 + 加强器)
 
-One **primary capability** skill plus N **augmenting** skills (typically rule-skills, sometimes micro-capabilities). The outward identity is the primary capability — users say "I'm using design-playbook", not "I'm using the design-playbook collection". The augmenters enhance the primary without being independently useful.
+One **primary capability** skill plus N **augmenting** skills (typically rule-skills, sometimes micro-capabilities). The outward identity is the primary capability — users say "I'm using `<primary-skill>`", not "I'm using the `<primary-skill>` collection". The augmenters enhance the primary without being independently useful.
 
 **Characteristics**:
 - One primary skill, N ≥ 1 augmenters
@@ -106,7 +106,7 @@ Why split: if both use identical trigger patterns, they compete for the same mat
 
 **Upper bound on N**: experience shows `N ≤ 3-5` augmenters. Beyond that, descriptions start competing for attention even with intent/environment split, and users lose the mental model of "one primary skill with a few guardrails". If you find yourself at N ≥ 6, reconsider whether the augmenters actually belong together or whether the primary itself should be split.
 
-**When NOT to use this pattern**: 2026-04 dogfooding on `design-playbook` surfaced a counter-lesson. Most of that rule-skill's constraints (file size limits, reference index sync) were **general skill-engineering rules already enforced by skill-forge audits**, not design-playbook-specific. Only one constraint (EP field resolvability) was genuinely capability-specific — and that rule fit better as a 5-line comment block at the top of the reference file it constrained. Augmented Skill packaging is justified only when (a) the rule-skill has substantive content that would clutter the primary capability's SKILL.md, AND (b) the constraints are unique to the primary capability and cannot be handled by generic audits. If either fails, prefer a single skill with inline documentation over collection packaging.
+**When NOT to use this pattern**: before packaging a rule-skill as an Augmenter, check whether its constraints are (a) **generic skill-engineering rules** already enforced by skill-forge audits (file size limits, reference index sync, frontmatter hygiene, etc.) or (b) **capability-specific** to the primary skill. Augmented Skill packaging is justified only when both conditions hold: the rule-skill has substantive content that would clutter the primary capability's SKILL.md if inlined, AND the constraints are unique to the primary capability and cannot be handled by generic audits. If the candidate constraints reduce to generic hygiene, prefer a single skill with inline documentation (short comment block at the top of the reference file being constrained) over collection packaging.
 
 See also: `rules-as-skills/references/decision-tree.md` Step 0 — if a candidate augmenter is universal engineering hygiene or single-file scope, it should not be a rule-skill at all.
 

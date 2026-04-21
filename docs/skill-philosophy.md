@@ -54,7 +54,7 @@ When structuring, packaging, and delivering a skill, three orthogonal dimensions
 
 The dimensions are orthogonal. Decisions in one do not constrain decisions in another: a capability skill (A) can have a coupled runtime dependency (B) and still publish as a Peer Collection (C). Questions like "should my rule-skill be its own repo?" conflate A (it's a constraint) with C (a publishing decision) and produce confusion.
 
-**How this mental model emerged**: April 2026 dogfooding against `design-playbook` and `rules-as-skills`. Earlier packaging decisions had silently conflated the three dimensions — "we need rule-skill packaging" was being used to answer three different questions at once. Separating them fixed the design and revealed that not every rule-skill candidate needs a separate Augmented Skill Collection; some are better inlined as documentation within the capability they constrain.
+**How this mental model emerged**: dogfooding on real skill-publishing decisions. Earlier packaging heuristics had silently conflated the three dimensions — "we need rule-skill packaging" was often being used to answer three different questions at once. Separating them revealed that not every rule-skill candidate needs a separate Augmented Skill Collection; some are better inlined as documentation within the capability they constrain.
 
 See [`references/publishing-strategy.md`](../references/publishing-strategy.md) for the full Dimension C decision framework and [`references/skill-composition.md`](../references/skill-composition.md) for Dimension B dependency tiers.
 

@@ -100,7 +100,7 @@ Two orthogonal axes for classifying skill-to-skill relationships:
 
 | Tier | Declared in | Activation | Example |
 |------|-------------|-----------|---------|
-| **Runtime** | SKILL.md Step 0 + `scripts/setup.sh` | When capability runs, dependency must be installed | `design-playbook` runtime-depends-on `impeccable` (needed during code generation) |
+| **Runtime** | SKILL.md Step 0 + `scripts/setup.sh` | When capability runs, dependency must be installed | a frontend-design workflow skill runtime-depends-on a design-system skill (needed during code generation) |
 | **Informational** | README.md only | Human reads it; AI does not act | "Works well with X" in README |
 
 ### Axis 2: Must the dependency ship with you?
@@ -111,8 +111,8 @@ Two orthogonal axes for classifying skill-to-skill relationships:
 | **Maintenance (coupled)** | Dependency must be present alongside, even during fork/maintenance | Collection (Augmented Skill) — both ship in same repo |
 
 **Typical combinations**:
-- **Runtime + independent**: `design-playbook` → `impeccable` (Impeccable is reused by many skills, ships standalone)
-- **Maintenance + coupled**: `design-playbook` → `design-playbook-ep-rules` (rule-skill has no meaning without design-playbook, never used elsewhere)
+- **Runtime + independent**: `<capability-skill>` → `<shared-utility-skill>` (the utility is reused by many skills, ships standalone)
+- **Maintenance + coupled**: `<capability-skill>` → `<capability-skill>-rules` (rule-skill has no meaning without the parent capability, never used elsewhere)
 - **Runtime + coupled**: rare — if A always needs B at runtime and B is only used by A, consider whether B should even be a separate skill
 
 **Why this matters**: Runtime dependencies can cross repo boundaries (`setup.sh` handles install). Maintenance dependencies cannot — a fork won't automatically install a dependency from another repo, so maintenance-coupled skills must share a repo (Collection).
