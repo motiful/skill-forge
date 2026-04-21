@@ -308,6 +308,7 @@ External-facing presentation and packaging.
 | GitHub metadata | Covered by readme-craft — do not duplicate |
 | docs/ accuracy | No stale content vs SKILL.md claims |
 | Unnecessary files | No lock files, > 1MB media, build artifacts |
+| Platform-specific instruction files | Skill repo MUST NOT contain `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/` / `.github/copilot-instructions.md` or other single-platform agent instruction files — must-fix. See `references/project-audit.md` §Skill Repo: Platform Instruction Files Are Must-Fix and `rules-as-skills/SKILL.md` §In-Repo Rule-Skills §Cross-Platform Constraint |
 
 ## Fix Phase
 

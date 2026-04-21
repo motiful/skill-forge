@@ -15,8 +15,11 @@ Every forge run — single skill or full project — starts with Discovery. The 
 discover_and_classify(target) → classified_items[]
 
 traverse full project tree → find all SKILL.md, rules files, agent instructions
+scan for scattered MUST/NEVER constraints                    # §In-Repo Maintenance Discovery
 for each item:
     classify: in-repo | product | personal | external | rules
+    if skill_repo(target) and is_platform_instruction_file(item):
+        → must-fix override                                  # §Skill Repo: Platform Instruction Files Are Must-Fix
     ambiguous → ask user with reasoning (HITL)
 create plan file: /tmp/skill-forge-<name>.md with per-item checklists
 execution priority: security > in-repo > personal > product > rules
@@ -25,7 +28,9 @@ execution priority: security > in-repo > personal > product > rules
 ## TOC
 
 - [Discovery](#discovery)
+  - [In-Repo Maintenance Discovery — Scan for Scattered Constraints](#in-repo-maintenance-discovery--scan-for-scattered-constraints)
 - [Classification](#classification)
+  - [Skill Repo: Platform Instruction Files Are Must-Fix](#skill-repo-platform-instruction-files-are-must-fix)
 - [Plan File](#plan-file)
 - [Rules Quality](#rules-quality)
 - [Rules Conversion](#rules-conversion)
@@ -52,6 +57,17 @@ Traverse the **full project tree** from the target path. Do not limit to known d
 - Rules scattered across multiple subdirectories
 
 Inventory everything found before classifying. Do not skip files because they are in unexpected locations.
+
+### In-Repo Maintenance Discovery — Scan for Scattered Constraints
+
+Beyond locating existing files, discovery MUST also scan for **scattered maintenance constraints** that are candidates for extraction into an in-repo maintenance rule-skill. Run this scan on every audit:
+
+1. **Repeated MUST/NEVER phrases** — scan `README.md`, project instruction files (`CLAUDE.md`, `AGENTS.md`), `.claude/rules/`, inline code comments, and prose documentation for MUST/NEVER statements (or equivalent imperatives: "always", "never", "must", "do not") that surface in ≥ 2 distinct files. Repetition is the primary scatter signal.
+2. **Platform-specific instruction files in skill repos** — if the target is a skill repo (root `SKILL.md` or `skills/<name>/SKILL.md` present) AND it carries `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`, `.github/copilot-instructions.md`, or any single-platform agent instruction file, flag for must-fix (see Classification §Skill Repo: Platform Instruction Files).
+
+If scan finds ≥ 2 candidates for signal 1, add a suggestion to the plan file: *"Consider extracting to in-repo maintenance rule-skill."* Cite `rules-as-skills/SKILL.md §In-Repo Rule-Skills §Recognition Signals` for the authoritative signal list and candidate-vs-non-candidate criteria — do NOT duplicate the signal list here.
+
+This is a discovery-time scan, not a validation check. The extraction decision itself follows the Recognition Signals framework in rules-as-skills.
 
 ## Classification
 
@@ -83,6 +99,18 @@ Apply to every item in the discovery inventory. Use the Decision Framework from 
 | Skills have distinct trigger scenarios with no overlap | Separate standalone repos |
 
 When ambiguous, default to **separate standalone repos** — easier to install selectively, easier to version independently. Collection is the exception, not the default.
+
+### Skill Repo: Platform Instruction Files Are Must-Fix
+
+A **skill repo** is identified by `SKILL.md` at the repo root (single-skill) or `skills/<name>/SKILL.md` (collection). When a skill repo contains **platform-specific agent instruction files** (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`, `.github/copilot-instructions.md`, or equivalent), the finding is **must-fix** — not a Rules Conversion candidate.
+
+Rationale: skill repos are cross-platform products; single-platform instruction files bind a portable artifact to one runtime. See `rules-as-skills/SKILL.md §In-Repo Rule-Skills §Cross-Platform Constraint` for the authoritative rule and the 4-tier migration mapping (maintenance-rules / `references/` / separate skill / delete).
+
+**Audit action**:
+1. Flag the finding as must-fix in the plan file. It is a publishing-integrity defect (not a security defect) and blocks Local Ready.
+2. Do NOT route the file through Rules Conversion. Rules Conversion assumes the target environment keeps rule files; skill repos do not.
+3. Cite the migration mapping from `rules-as-skills/SKILL.md §Cross-Platform Constraint`. Do NOT duplicate the mapping here.
+4. For non-skill repos (application codebases, internal tools), platform instruction files remain normal — this rule does not fire.
 
 ## Plan File
 
