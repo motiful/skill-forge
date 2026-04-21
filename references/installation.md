@@ -110,35 +110,47 @@ Skill installation logic is **centralized in a shared bash library** — each sk
 source "$(dirname "$0")/install-skill-lib.sh"
 ```
 
-The lib exposes three functions with optional scope control:
+The lib exposes three functions:
 
 | Function | Purpose |
 |----------|---------|
 | `skill_installed "<name>" [scope]` | Returns 0 if skill exists in the requested scope |
 | `skill_install_path "<name>" [scope]` | Prints the installed skill's directory path (or returns 1) |
-| `install_skill "<name>" "<org/repo>" [scope]` | Installs via `npx skills add` **and** cascades into its setup.sh |
+| `install_skill "<name>" "<org/repo>" [scope-flag] [alt-name...]` | Installs via `npx skills add` **and** cascades into its setup.sh |
 
-**Scope values** (third parameter, optional):
+**Scope flag** (third parameter of `install_skill`, optional):
 
-| Scope | Meaning | Location |
-|-------|---------|----------|
-| `global` (default) | User-level install | `~/.claude/skills/` + `~/.agents/skills/` (hardlinked by `npx skills add -g`) |
-| `project` | Install under current working directory | `$PWD/.claude/skills/` + `$PWD/.agents/skills/` (what `npx skills add` defaults to without `-g`) |
-| custom absolute path | **Not supported in v1** — planned for v0.2 | N/A |
+| Value | Meaning | Location | Matches |
+|-------|---------|----------|---------|
+| `<omitted>` (default) | project-level | `$PWD/.claude/skills/` + `$PWD/.agents/skills/` | `npx skills add` native default |
+| `-g` or `--global` | user-level | `~/.claude/skills/` + `~/.agents/skills/` | `npx skills add -g` |
+| anything else | **ERROR — unsupported** | — | custom absolute paths planned for v0.2 |
+
+Default is **project** (matches `npx skills add` native behavior) — safer, doesn't pollute the user's global namespace. Tooling-type skills that belong globally (e.g. skill-forge's own deps) must pass `-g` explicitly.
+
+**Alt names** (fourth parameter onward of `install_skill`, optional):
+
+Additional names under which the skill may be found installed. Used when the repository name differs from the installed directory name — typically collection repos, or when the caller prefers a short alias over the real SKILL.md `name` field.
 
 **Examples**:
 
 ```bash
-install_skill "readme-craft" "motiful/readme-craft"                  # default: global
-install_skill "readme-craft" "motiful/readme-craft" "global"          # explicit global
-install_skill "project-only-helper" "org/skill" "project"             # scoped to this project
+# Default project-level; matches `npx skills add`
+install_skill "project-helper" "org/skill"
+
+# Global scope; matches `npx skills add -g`
+install_skill "readme-craft" "motiful/readme-craft" "-g"
+install_skill "readme-craft" "motiful/readme-craft" "--global"
+
+# Alt names for mismatched naming
+install_skill "feel-better" "jakubkrehel/make-interfaces-feel-better" "" "make-interfaces-feel-better"
+#              ^primary     ^repo                                    ^scope-flag ^alt-name (4th arg)
+
+# Alt names with explicit global scope
+install_skill "taste" "Leonxlnx/taste-skill" "-g" "taste-skill" "stitch-design-taste"
 ```
 
-**When to use which**:
-- **global** — tooling skills that serve the user across projects (e.g., skill-forge, readme-craft, self-review). Default for dependency skills
-- **project** — skills that only apply to this repo's workflow (e.g., project-specific linting, deployment scripts) and should NOT pollute the user's global skill namespace. Committed to `.gitignore` like `node_modules/`
-
-For `skill_installed` / `skill_install_path`, scope defaults to `"any"` (checks both global and project roots). For `install_skill`, scope defaults to `"global"`.
+`skill_installed` and `skill_install_path` take scope as their 2nd arg with values `"any"` (default — checks both project and global), `"global"`, or `"project"`. Internal helpers; most callers invoke `install_skill` and don't call these directly.
 
 Do not redefine these in your setup.sh — source the lib. When skill-forge releases a new lib version, update each skill's copy (skill-forge validate will detect drift via content hash in the future).
 
@@ -271,9 +283,11 @@ echo ""
 # --- Skill dependencies via shared lib ---
 source "$(dirname "$0")/install-skill-lib.sh"
 
-install_skill "readme-craft"    "motiful/readme-craft"    || errors=$((errors + 1))
-install_skill "rules-as-skills" "motiful/rules-as-skills" || errors=$((errors + 1))
-install_skill "self-review"     "motiful/self-review"     || errors=$((errors + 1))
+# skill-forge is a tooling skill — deps live globally so they work across all
+# user projects, not just whichever one invoked setup.sh. Pass -g explicitly.
+install_skill "readme-craft"    "motiful/readme-craft"    "-g" || errors=$((errors + 1))
+install_skill "rules-as-skills" "motiful/rules-as-skills" "-g" || errors=$((errors + 1))
+install_skill "self-review"     "motiful/self-review"     "-g" || errors=$((errors + 1))
 
 echo ""
 

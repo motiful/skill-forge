@@ -31,9 +31,11 @@ echo ""
 # --- Skill dependencies via shared lib ---
 source "$(dirname "$0")/install-skill-lib.sh"
 
-install_skill "readme-craft"    "motiful/readme-craft"    || errors=$((errors + 1))
-install_skill "rules-as-skills" "motiful/rules-as-skills" || errors=$((errors + 1))
-install_skill "self-review"     "motiful/self-review"     || errors=$((errors + 1))
+# skill-forge is a tooling skill — its deps should live globally so they work
+# across all user projects (not just whichever one invoked setup.sh).
+install_skill "readme-craft"    "motiful/readme-craft"    "-g" || errors=$((errors + 1))
+install_skill "rules-as-skills" "motiful/rules-as-skills" "-g" || errors=$((errors + 1))
+install_skill "self-review"     "motiful/self-review"     "-g" || errors=$((errors + 1))
 
 echo ""
 

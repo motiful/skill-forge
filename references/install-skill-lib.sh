@@ -5,12 +5,28 @@
 #
 #   source "$(dirname "$0")/install-skill-lib.sh"
 #
-#   install_skill "readme-craft" "motiful/readme-craft"              # default: global
-#   install_skill "project-only" "org/skill" "project"               # project-level
+#   install_skill "readme-craft" "motiful/readme-craft"                        # project (default)
+#   install_skill "readme-craft" "motiful/readme-craft" "-g"                   # global
+#   install_skill "feel-better"  "jakubkrehel/make-interfaces-feel-better" "" "make-interfaces-feel-better"
+#     └─ primary name + repo + empty scope flag + alt names (4th arg onward)
 #
-# Scope values:
-#   global  (default) — install to user-level (~/.claude/skills/ + ~/.agents/skills/)
-#   project           — install to current working directory (.claude/skills/ + .agents/skills/)
+# Scope flag (third parameter, optional):
+#   <none> (default)  — project-level: install under CWD (.claude/skills/ + .agents/skills/)
+#                       mirrors `npx skills add` native default.
+#   -g | --global     — user-level: install globally (~/.claude/skills/ + ~/.agents/skills/)
+#                       mirrors `npx skills add -g`.
+#
+# Alt names (fourth parameter onward, optional):
+#   Additional names under which the skill may be found installed. Used when the
+#   repository name differs from the SKILL.md `name` field — e.g. repo
+#   `jakubkrehel/make-interfaces-feel-better` installs as `make-interfaces-feel-better`,
+#   but the caller may prefer the short alias `feel-better` as primary.
+#   detect + resolve_path both try primary first, then each alt in order.
+#
+# Rationale for project default: matches npx skills add's native default, which reflects
+# the safer behavior — don't pollute the user's global skill namespace unless explicitly
+# asked. Tooling-style skills that should live globally (skill-forge, readme-craft, etc.)
+# must pass "-g" explicitly.
 #
 # Custom absolute paths are NOT supported in v1 (npx skills add does not accept
 # arbitrary paths). Planned for v0.2 via git clone fallback (see install-cascade-design.md §5.2).
@@ -87,27 +103,44 @@ skill_install_path() {
 }
 
 # --- install_skill: install + cascade-run its setup.sh ---
-# Usage: install_skill <name> <org/repo> [scope]
-#   scope: "global" (default) | "project"
+# Usage: install_skill <name> <org/repo> [scope-flag] [alt-name...]
+#   scope-flag (optional):
+#     <none>            → project (default, matches `npx skills add`)
+#     -g | --global     → global (matches `npx skills add -g`)
+#   alt-name (optional, fourth arg onward):
+#     additional names to probe when detecting / resolving path. See header comment.
 install_skill() {
   local name=$1 repo=$2
-  local scope=${3:-global}
+  local scope="project"
 
-  # Validate scope
-  case "$scope" in
-    global|project) ;;
+  # Parse scope flag (third arg)
+  case "${3:-}" in
+    "")        scope="project" ;;
+    -g|--global) scope="global" ;;
     *)
-      echo "  ERROR: install_skill: unsupported scope '$scope'"
-      echo "  Accepted: global (default) | project"
+      echo "  ERROR: install_skill: unsupported scope flag '$3'"
+      echo "  Accepted: <none> for project | -g | --global for global"
       echo "  Custom absolute paths planned for v0.2."
       return 1
       ;;
   esac
 
+  # Collect alt names (args from 4th onward).
+  local alt_names=()
+  [ "$#" -ge 4 ] && alt_names=("${@:4}")
+
+  # Detect: probe primary name, then each alt.
   if skill_installed "$name" "$scope"; then
     echo "  $name: installed ($scope)"
     return 0
   fi
+  local alt
+  for alt in ${alt_names[@]+"${alt_names[@]}"}; do
+    if skill_installed "$alt" "$scope"; then
+      echo "  $name: installed as $alt ($scope)"
+      return 0
+    fi
+  done
 
   echo "  $name: installing ($scope)..."
   # Build npx flags: always -y; add -g only for global
@@ -121,11 +154,17 @@ install_skill() {
   fi
   echo "  $name: installed"
 
-  local path
-  path=$(skill_install_path "$name" "$scope") || {
-    echo "  WARN: $name installed but install path not detectable — skipping cascade"
+  # Resolve path: try primary name, then each alt.
+  local path=""
+  path=$(skill_install_path "$name" "$scope") || path=""
+  for alt in ${alt_names[@]+"${alt_names[@]}"}; do
+    [ -n "$path" ] && break
+    path=$(skill_install_path "$alt" "$scope") || path=""
+  done
+  if [ -z "$path" ]; then
+    echo "  WARN: $name installed but install path not detectable (tried: $name ${alt_names[*]-}) — skipping cascade"
     return 0
-  }
+  fi
 
   # Cascade: run the newly installed skill's setup.sh if present.
   # SKILL_DEPS_DEPTH caps recursion to prevent cycles.
