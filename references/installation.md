@@ -1,6 +1,6 @@
 ---
 name: installation
-description: Standard mechanism for declaring and installing skill dependencies via scripts/setup.sh. Covers the two-outcome principle (installed or blocked), dependency types (CLI tools, skills, npm packages), skill detection across platform directories, install scope (global vs project), two-tier declaration model, and setup.sh guidelines (idempotent, fast, non-interactive).
+description: Standard mechanism for declaring and installing skill dependencies via scripts/setup.sh. Covers the two-outcome principle (installed or blocked), dependency types (CLI tools, skills, npm packages), the shared install-skill-lib.sh helper, mechanical cascade semantics that mirror npm's postinstall behavior, protocol activation hints, install scope (global vs project), two-tier declaration model, and setup.sh authoring guidelines (idempotent, fast, non-interactive).
 ---
 
 # Installation
@@ -16,6 +16,7 @@ run scripts/setup.sh
 for each dependency:
     if present → skip
     if missing and installable → install
+        after install → cascade: run its setup.sh (pulls deeper deps)
     if cannot install → error with resolution, exit non-zero
 all present → exit 0
 ```
@@ -25,6 +26,9 @@ all present → exit 0
 - [Core Principle](#core-principle)
 - [scripts/setup.sh](#scriptssetupsh)
 - [Dependency Types](#dependency-types)
+- [Shared Library: install-skill-lib.sh](#shared-library-install-skill-libsh)
+- [Cascade Behavior](#cascade-behavior)
+- [Protocol Activation Hints](#protocol-activation-hints)
 - [Skill Installation Detection](#skill-installation-detection)
 - [Install Scope: Global vs Project](#install-scope-global-vs-project)
 - [Declaration: Two Tiers](#declaration-two-tiers)
@@ -52,10 +56,12 @@ Every skill with dependencies **must** include `scripts/setup.sh`. This is the s
 
 ```
 scripts/setup.sh
-  1. Check all declared dependencies (tools, skills, npm packages)
-  2. Missing → install
-  3. Can't install → print error with resolution steps, exit non-zero
-  4. All present → exit 0
+  1. Check all declared CLI tools
+  2. Source install-skill-lib.sh (see next section)
+  3. For each skill dependency: call install_skill "name" "repo"
+  4. (Optional) Print activation hint if this skill itself is a Protocol skill
+  5. Can't install any dep → print error with resolution, exit non-zero
+  6. All present → exit 0
 ```
 
 ### Relationship with SKILL.md Step 0
@@ -88,8 +94,104 @@ setup.sh handles three categories of dependencies:
 | Type | Detection | Installation |
 |------|-----------|-------------|
 | **CLI tools** | `command -v <tool>` | `brew install`, `apt-get install`, or manual instructions |
-| **Skills** | Check known skill directories (see below) | `npx skills add <org>/<name> -g -y` |
+| **Skills** | `skill_installed` helper (from lib) | `install_skill "name" "repo"` (from lib) |
 | **npm packages** | `node_modules/` or `npm ls` | `npm install` |
+
+## Shared Library: install-skill-lib.sh
+
+Skill installation logic is **centralized in a shared bash library** — each skill ships its own copy of `scripts/install-skill-lib.sh` and sources it from `scripts/setup.sh`. This keeps setup.sh lean (20-30 lines) and avoids every skill re-defining the installer from scratch.
+
+**Canonical source**: `/Users/yuhaolu/motifpool/skill-forge/references/install-skill-lib.sh` — maintained as the single source of truth.
+
+**Distribution**: each skill copies the lib into its own `scripts/` directory. The lib travels with the skill (self-contained distribution; no chicken-and-egg with skill-forge).
+
+```bash
+# From your scripts/setup.sh:
+source "$(dirname "$0")/install-skill-lib.sh"
+```
+
+The lib exposes three functions with optional scope control:
+
+| Function | Purpose |
+|----------|---------|
+| `skill_installed "<name>" [scope]` | Returns 0 if skill exists in the requested scope |
+| `skill_install_path "<name>" [scope]` | Prints the installed skill's directory path (or returns 1) |
+| `install_skill "<name>" "<org/repo>" [scope]` | Installs via `npx skills add` **and** cascades into its setup.sh |
+
+**Scope values** (third parameter, optional):
+
+| Scope | Meaning | Location |
+|-------|---------|----------|
+| `global` (default) | User-level install | `~/.claude/skills/` + `~/.agents/skills/` (hardlinked by `npx skills add -g`) |
+| `project` | Install under current working directory | `$PWD/.claude/skills/` + `$PWD/.agents/skills/` (what `npx skills add` defaults to without `-g`) |
+| custom absolute path | **Not supported in v1** — planned for v0.2 | N/A |
+
+**Examples**:
+
+```bash
+install_skill "readme-craft" "motiful/readme-craft"                  # default: global
+install_skill "readme-craft" "motiful/readme-craft" "global"          # explicit global
+install_skill "project-only-helper" "org/skill" "project"             # scoped to this project
+```
+
+**When to use which**:
+- **global** — tooling skills that serve the user across projects (e.g., skill-forge, readme-craft, self-review). Default for dependency skills
+- **project** — skills that only apply to this repo's workflow (e.g., project-specific linting, deployment scripts) and should NOT pollute the user's global skill namespace. Committed to `.gitignore` like `node_modules/`
+
+For `skill_installed` / `skill_install_path`, scope defaults to `"any"` (checks both global and project roots). For `install_skill`, scope defaults to `"global"`.
+
+Do not redefine these in your setup.sh — source the lib. When skill-forge releases a new lib version, update each skill's copy (skill-forge validate will detect drift via content hash in the future).
+
+## Cascade Behavior
+
+`install_skill` goes beyond `npx skills add`. After a successful install, it **automatically runs the newly installed skill's own `scripts/setup.sh`** — this mirrors npm's `postinstall` semantics, which `npx skills add` itself does not provide.
+
+**Why this matters**: without cascade, installing skill A does not pull A's own dependencies. Depth-2 dependencies silently break unless the AI happens to read A's SKILL.md and manually triggers its Step 0. The cascade makes the dependency chain mechanical, not reliant on agent behavior.
+
+```
+A.setup.sh → install_skill "B" → npx skills add → runs B.setup.sh
+                                                        → install_skill "C" → npx skills add → runs C.setup.sh
+                                                                                                     → ...
+```
+
+**Recursion guard**: the `SKILL_DEPS_DEPTH` env var caps the cascade at 5 levels. A cyclic dependency (A → B → A) hits the cap and stops with a warning instead of looping forever. In practice no real dependency tree needs more than 2-3 levels.
+
+**Failure propagation**: if any level's setup.sh exits non-zero, the cascade propagates the failure up. The upstream install_skill returns non-zero, which in turn causes the upstream setup.sh to BLOCK.
+
+## Protocol Activation Hints
+
+Some skills (notably Protocol skills like `rules-as-skills`) require an additional **activation** step after installation — running a script that modifies global environment state (e.g., injecting a meta-rule into every agent's global rule file). **Activation has side effects and must not be automated** — the user must see the prompt and consent before execution.
+
+**Convention**: the activation hint is printed at the **tail of the skill's own setup.sh**. The lib does NOT detect any special "activate.sh" file — no new naming convention is introduced. Because `install_skill` cascades by running the installed skill's setup.sh, the activation hint naturally surfaces in the parent's install output without any extra machinery.
+
+**Template** (put at the end of a Protocol skill's setup.sh, after all dep declarations):
+
+```bash
+cat <<EOF
+
+NOTE: <skill-name> is a Protocol Skill.
+To activate, run:
+  $(dirname "$0")/<activation-script>
+
+This modifies <what it modifies>. Run with 'uninstall' to revert.
+EOF
+```
+
+Example (from rules-as-skills):
+
+```bash
+cat <<EOF
+
+NOTE: rules-as-skills is a Protocol Skill.
+To activate the meta-rule protocol across agent platforms, run:
+  $(dirname "$0")/install-meta-rule.sh install
+
+This modifies global rule files (~/.claude/rules/, ~/.codex/rules/, etc.).
+Run with 'uninstall' to revert.
+EOF
+```
+
+Non-Protocol skills omit this section entirely.
 
 ## Skill Installation Detection
 
@@ -101,21 +203,9 @@ Skills can exist in multiple directories depending on the installation method:
 | Manual symlink | `~/.claude/skills/<name>/`, `~/.copilot/skills/<name>/`, `~/.cursor/skills/<name>/`, `~/.codeium/windsurf/skills/<name>/` |
 | Project-level | `<project>/.claude/skills/<name>/`, `<project>/.agents/skills/<name>/`, etc. |
 
-`npx skills add -g` automatically hardlinks to both `~/.agents/skills/` and `~/.claude/skills/`, so no manual symlink is needed. The detection function also checks Copilot, Cursor, and Windsurf native paths for manual installations.
+`npx skills add -g` automatically hardlinks to both `~/.agents/skills/` and `~/.claude/skills/`, so no manual symlink is needed. The `skill_installed` helper in install-skill-lib.sh checks all five canonical roots: Claude Code, Agents, Copilot, Cursor, Windsurf.
 
-Detection function:
-
-```bash
-skill_installed() {
-  local name=$1
-  [ -d "$HOME/.claude/skills/$name" ] && return 0
-  [ -d "$HOME/.agents/skills/$name" ] && return 0
-  [ -d "$HOME/.copilot/skills/$name" ] && return 0
-  [ -d "$HOME/.cursor/skills/$name" ] && return 0
-  [ -d "$HOME/.codeium/windsurf/skills/$name" ] && return 0
-  return 1
-}
-```
+The helper function is **provided by the lib** — do not redefine it in setup.sh.
 
 ## Install Scope: Global vs Project
 
@@ -135,7 +225,7 @@ skill_installed() {
 
 Same principle as `node_modules/`: declare dependencies (SKILL.md Step 0), install via setup.sh, don't commit the installation.
 
-**setup.sh always installs with `-g`** — this is the default and correct behavior for dependency skills.
+**`install_skill` always installs with `-g`** — this is the default and correct behavior for dependency skills.
 
 ## Declaration: Two Tiers
 
@@ -148,8 +238,11 @@ Same principle as `node_modules/`: declare dependencies (SKILL.md Step 0), insta
 
 ## Example: skill-forge's own setup.sh
 
+Standard pattern: CLI checks → source lib → declare skill dependencies → optional activation hint → exit gate.
+
 ```bash
 #!/usr/bin/env bash
+# skill-forge dependency checker.
 set -euo pipefail
 
 echo "skill-forge: checking dependencies..."
@@ -175,40 +268,12 @@ done
 
 echo ""
 
-# --- Skill dependencies ---
-skill_installed() {
-  local name=$1
-  [ -d "$HOME/.claude/skills/$name" ] && return 0
-  [ -d "$HOME/.agents/skills/$name" ] && return 0
-  [ -d "$HOME/.copilot/skills/$name" ] && return 0
-  [ -d "$HOME/.cursor/skills/$name" ] && return 0
-  [ -d "$HOME/.codeium/windsurf/skills/$name" ] && return 0
-  return 1
-}
+# --- Skill dependencies via shared lib ---
+source "$(dirname "$0")/install-skill-lib.sh"
 
-install_skill() {
-  local name=$1 repo=$2
-
-  if skill_installed "$name"; then
-    echo "  $name: installed"
-    return 0
-  fi
-
-  echo "  $name: installing..."
-  if npx skills add "$repo" -g -y 2>/dev/null; then
-    # npx skills add -g hardlinks to both ~/.agents/skills/ and ~/.claude/skills/
-    echo "  $name: installed"
-    return 0
-  fi
-
-  echo "  ERROR: failed to install $name"
-  echo "  Manual fix: npx skills add $repo -g"
-  return 1
-}
-
-install_skill "readme-craft" "motiful/readme-craft" || errors=$((errors + 1))
+install_skill "readme-craft"    "motiful/readme-craft"    || errors=$((errors + 1))
 install_skill "rules-as-skills" "motiful/rules-as-skills" || errors=$((errors + 1))
-install_skill "self-review" "motiful/self-review" || errors=$((errors + 1))
+install_skill "self-review"     "motiful/self-review"     || errors=$((errors + 1))
 
 echo ""
 
@@ -222,10 +287,14 @@ echo "All dependencies ready."
 exit 0
 ```
 
+**What is NOT in this setup.sh anymore**: `skill_installed` and `install_skill` function definitions. They live in `install-skill-lib.sh` — the skill's copy sits at `scripts/install-skill-lib.sh`, sourced on the line above.
+
 ## Guidelines
 
 - **Idempotent**: setup.sh runs every invocation, not just first use. Already-installed deps are detected and skipped instantly
-- **Fast**: existence checks, not full test suites. A passing run should complete in under 2 seconds
+- **Fast**: existence checks, not full test suites. A passing run should complete in under 2 seconds (skipping only). Cascade installs take longer on first run — expected
 - **Informative**: print status for each dependency so the user sees what's happening
 - **Non-interactive**: no prompts. Use `-y` flags where available. setup.sh is automated, not an onboarding flow
 - **Fail loud**: exit non-zero with specific error messages. Never silently continue with missing deps
+- **Lean shell**: setup.sh body ≤ 40 lines. Heavy lifting lives in install-skill-lib.sh, not in the shell
+- **Keep lib copies up to date**: when the canonical lib in skill-forge/references/ changes, update each skill's `scripts/install-skill-lib.sh` copy. Skill-forge validate will flag drift

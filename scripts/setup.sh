@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# skill-forge dependency checker
+# skill-forge dependency checker.
 # Verifies CLI tools (git, gh, node, npx) and installs skill dependencies
-# (readme-craft, rules-as-skills, self-review) via npx skills add.
-# No special permissions required. Safe to re-run (idempotent).
+# (readme-craft, rules-as-skills, self-review) via the shared install-skill-lib.sh.
+# Safe to re-run (idempotent). No sudo required.
 set -euo pipefail
 
 echo "skill-forge: checking dependencies..."
@@ -28,40 +28,12 @@ done
 
 echo ""
 
-# --- Skill dependencies ---
-skill_installed() {
-  local name=$1
-  [ -d "$HOME/.claude/skills/$name" ] && return 0
-  [ -d "$HOME/.agents/skills/$name" ] && return 0
-  [ -d "$HOME/.copilot/skills/$name" ] && return 0
-  [ -d "$HOME/.cursor/skills/$name" ] && return 0
-  [ -d "$HOME/.codeium/windsurf/skills/$name" ] && return 0
-  return 1
-}
+# --- Skill dependencies via shared lib ---
+source "$(dirname "$0")/install-skill-lib.sh"
 
-install_skill() {
-  local name=$1 repo=$2
-
-  if skill_installed "$name"; then
-    echo "  $name: installed"
-    return 0
-  fi
-
-  echo "  $name: installing..."
-  if npx skills add "$repo" -g -y 2>/dev/null; then
-    # npx skills add -g hardlinks to both ~/.agents/skills/ and ~/.claude/skills/
-    echo "  $name: installed"
-    return 0
-  fi
-
-  echo "  ERROR: failed to install $name"
-  echo "  Manual fix: npx skills add $repo -g"
-  return 1
-}
-
-install_skill "readme-craft" "motiful/readme-craft" || errors=$((errors + 1))
+install_skill "readme-craft"    "motiful/readme-craft"    || errors=$((errors + 1))
 install_skill "rules-as-skills" "motiful/rules-as-skills" || errors=$((errors + 1))
-install_skill "self-review" "motiful/self-review" || errors=$((errors + 1))
+install_skill "self-review"     "motiful/self-review"     || errors=$((errors + 1))
 
 echo ""
 
