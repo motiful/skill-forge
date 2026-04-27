@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: 'Validate, fix, and publish skills as GitHub repos. Structures workflow skills for execution fidelity. Registers skills across platforms via symlinks and guides first-use onboarding. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", or points to a project directory with mixed skills and rules. Forge: discover → classify → validate → fix → local ready. Nothing found → onboard user, scaffold, then same pipeline. Publish to GitHub when requested (Step 4).'
+description: 'Validate, fix, and publish skills as GitHub repos. Structures workflow skills for execution fidelity. Registers skills across platforms via symlinks and guides first-use onboarding. Use when the user says "create a skill", "forge a skill", "review this skill repo", "audit this skill", "audit all my skills", "audit this project", "clean up my skills", "check my skill", "publish this skill", "push this to GitHub", "structure my workflow skill", "extract a skill from this folder", "turn my prototype into a skill", or points to a project directory with mixed skills and rules, or to an engineering folder where a skill was being prototyped. Forge: triage → discover → classify → validate → fix → local ready. Workshop input → triage extracts skill before audit. Nothing found → onboard user, scaffold, then same pipeline. Publish to GitHub when requested (Step 4).'
 license: MIT
 metadata:
   author: motiful
@@ -42,6 +42,7 @@ These rules always apply. Read them before acting.
 7. **Understand context** — a skill may belong to a tool, or relate to other skills. Don't treat each in isolation
 8. **Follow module interfaces** — when the procedure calls a reference file, read the file and follow its EP. The module's own EP is the authority, not any inline summary in the parent
 9. **Report what you can't resolve** — severity follows the check's own criteria, not assumed user preference. A finding explained by another explicit rule is resolved, not a discrepancy — dismiss it with the reason
+10. **Triage before validate** — read the project's directory semantics first. Never grade a workshop against gold-standard skill criteria. If the target is mixed engineering content, run Triage to extract the skill before any audit work. See `references/triage.md`
 
 ## Execution Procedure
 
@@ -49,7 +50,7 @@ Follow the pseudocode step by step. At STEP 2, write a plan file with per-item c
 
 ### Forge
 
-**Trigger**: "review", "check", "audit", "audit this project", "audit all my skills", "clean up my skills", "create a skill", "forge a skill", "build a skill for X", "publish this skill", "push this to GitHub", "put this on GitHub"
+**Trigger**: "review", "check", "audit", "audit this project", "audit all my skills", "clean up my skills", "create a skill", "forge a skill", "build a skill for X", "extract a skill from this folder", "turn my prototype into a skill", "publish this skill", "push this to GitHub", "put this on GitHub"
 
 ```python
 def forge(target):
@@ -57,6 +58,16 @@ def forge(target):
     run("scripts/setup.sh")                            # exit non-zero → STOP
     config = assess_config_needs()                     # references/skill-configuration.md
     if not config: assess_and_guide(target)            # references/onboarding.md
+
+    # STEP 0.5: Triage — what is the target, before validating it?
+    state, skill_path = triage(target)                 # references/triage.md
+    # state ∈ {skill_shaped, workshop, empty}
+    # workshop  → triage ran HITL dialogue, extracted skill into a clean dir, returned new path
+    # empty     → no skill artifacts; falls into Nothing Found branch in STEP 1
+    # skill_shaped → target unchanged
+    if state == "workshop": target = skill_path        # re-target to extracted skill
+    # AI judgment, not hardcoded thresholds. Read folder names + file types first;
+    # do not open file bodies until intent is locked. See references/triage.md §Signals.
 
     # STEP 1: Discover — paths and classification ONLY
     classified = discover_and_classify(target)         # references/project-audit.md
@@ -160,6 +171,9 @@ def forge(target):
                 f"in {skill_forge_skill_md}, then read {item.skill_md} and EVERY "
                 f"file under {item.path}/references/. "
                 f"Check every row in the validation tables against SKILL.md and each reference file. "
+                f"For each reference file, the EP function declared in its frontmatter "
+                f"pseudocode block (e.g. validate_format(), review_reference()) IS the "
+                f"dispatch entry — invoke it when evaluating rows that point to that reference. "
                 f"Write one row per check to {findings_path}: "
                 f"'- PASS | check | file | description' or "
                 f"'- [ ] must-fix/suggestion | check | file | description'. "
@@ -388,6 +402,7 @@ Step 4 of forge. Only runs when the trigger includes publish intent. Requires lo
 
 ## References
 
+- `references/triage.md` — Pre-validation triage: workshop vs skill-shaped detection, semantic map, author intent dialogue, skill extraction (STEP 0.5)
 - `references/installation.md` — setup.sh standard: dependency detection, installation, two outcomes
 - `references/skill-invocation.md` — Runtime invocation reliability: explicit `Skill(...)` call + output gate pattern
 - `references/onboarding.md` — Interactive first-use guidance pattern

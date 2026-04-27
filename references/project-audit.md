@@ -9,6 +9,8 @@ Discovery, Classification, and Plan File logic for forge's review path.
 
 Every forge run — single skill or full project — starts with Discovery. The plan file is always created. Discovery determines what the plan contains.
 
+**Upstream contract:** Discovery assumes Triage (`references/triage.md`, STEP 0.5) has already decided the target is skill-shaped — either originally, or after extracting a skill from a workshop. Discovery does not detect or handle workshop / mixed-engineering inputs; that is Triage's responsibility.
+
 ## Execution Procedure
 
 ```

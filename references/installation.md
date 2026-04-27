@@ -32,7 +32,7 @@ all present → exit 0
 - [Skill Installation Detection](#skill-installation-detection)
 - [Install Scope: Global vs Project](#install-scope-global-vs-project)
 - [Declaration: Two Tiers](#declaration-two-tiers)
-- [Example: skill-forge's own setup.sh](#example-skill-forges-own-setupsh)
+- [Example](#example)
 - [Guidelines](#guidelines)
 
 ## Core Principle
@@ -101,7 +101,7 @@ setup.sh handles three categories of dependencies:
 
 Skill installation logic is **centralized in a shared bash library** — each skill ships its own copy of `scripts/install-skill-lib.sh` and sources it from `scripts/setup.sh`. This keeps setup.sh lean (20-30 lines) and avoids every skill re-defining the installer from scratch.
 
-**Canonical source**: `/Users/yuhaolu/motifpool/skill-forge/references/install-skill-lib.sh` — maintained as the single source of truth.
+**Canonical source**: `references/install-skill-lib.sh` in this repo — maintained as the single source of truth.
 
 **Distribution**: each skill copies the lib into its own `scripts/` directory. The lib travels with the skill (self-contained distribution; no chicken-and-egg with skill-forge).
 
@@ -248,60 +248,9 @@ Same principle as `node_modules/`: declare dependencies (SKILL.md Step 0), insta
 
 "Works Better With" does not exist in SKILL.md runtime logic.
 
-## Example: skill-forge's own setup.sh
+## Example
 
-Standard pattern: CLI checks → source lib → declare skill dependencies → optional activation hint → exit gate.
-
-```bash
-#!/usr/bin/env bash
-# skill-forge dependency checker.
-set -euo pipefail
-
-echo "skill-forge: checking dependencies..."
-echo ""
-
-errors=0
-
-# --- CLI tools ---
-for tool in git gh node npx; do
-  if command -v "$tool" &>/dev/null; then
-    echo "  $tool: $(command -v "$tool")"
-  else
-    echo "  ERROR: $tool not found"
-    case "$tool" in
-      git)  echo "  Install: https://git-scm.com" ;;
-      gh)   echo "  Install: https://cli.github.com" ;;
-      node) echo "  Install: https://nodejs.org" ;;
-      npx)  echo "  Install: comes with Node.js — https://nodejs.org" ;;
-    esac
-    errors=$((errors + 1))
-  fi
-done
-
-echo ""
-
-# --- Skill dependencies via shared lib ---
-source "$(dirname "$0")/install-skill-lib.sh"
-
-# skill-forge is a tooling skill — deps live globally so they work across all
-# user projects, not just whichever one invoked setup.sh. Pass -g explicitly.
-install_skill "readme-craft"    "motiful/readme-craft"    "-g" || errors=$((errors + 1))
-install_skill "rules-as-skills" "motiful/rules-as-skills" "-g" || errors=$((errors + 1))
-install_skill "self-review"     "motiful/self-review"     "-g" || errors=$((errors + 1))
-
-echo ""
-
-# --- Result ---
-if [ $errors -gt 0 ]; then
-  echo "BLOCKED: $errors dependency issue(s). Fix above errors and re-run."
-  exit 1
-fi
-
-echo "All dependencies ready."
-exit 0
-```
-
-**What is NOT in this setup.sh anymore**: `skill_installed` and `install_skill` function definitions. They live in `install-skill-lib.sh` — the skill's copy sits at `scripts/install-skill-lib.sh`, sourced on the line above.
+A complete worked example lives at `scripts/setup.sh` in this repo. The pattern: CLI checks → source `install-skill-lib.sh` → declare skill dependencies via `install_skill` → optional activation hint → exit gate. Do not redefine `skill_installed` or `install_skill` in your setup.sh — source the lib instead.
 
 ## Guidelines
 

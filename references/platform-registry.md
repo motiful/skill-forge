@@ -18,7 +18,7 @@ no roots found → skip registration
 
 assess_cc_market(config) → include | skip
 
-check config.cc_market setting
+check config.cc_market setting             # source: ~/.config/skill-forge/config.md §Publishing — see §CC Market for the ask flow
 true → include CC Market in publish flow
 false → skip silently
 not set → ask once with recommendation (default: skip), save to config

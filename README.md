@@ -36,11 +36,14 @@ The Agent Skills ecosystem has grown to 88K+ published skills ([SkillsMP](https:
 
 **If you already published** — your repo might have issues you haven't noticed: leaked API keys in config files, missing .gitignore entries, structure that doesn't match the [Agent Skills](https://agentskills.io) standard, or claims in the README that don't match what the skill actually does.
 
+**If you've been prototyping in a folder** — your skill is mixed with test scripts, fixtures, and downloaded materials. You're not sure what's "the skill" vs scratch work, and you don't want to lose your lab while extracting.
+
 The gap is not in authoring — AI agents can already help write skill content. The gap is in engineering: validating structure, scanning for security issues, checking description coverage, catching README claims that don't match actual capabilities, and publishing correctly.
 
 ## What Skill Forge Does
 
 - **Audits entire projects** — point forge at any directory and it finds every skill, rule, and agent instruction, then fixes them one by one — turning loose tools into standalone, publishable repos
+- **Extracts skills from prototype folders** — point forge at a chaotic engineering area where you were testing a skill (mixed scripts, fixtures, deps), and it isolates the skill into a clean repo without touching your lab content
 - **Detects registration conflicts** — catches symlinks that shadow each other across platforms, broken links, and copies that should be symlinks — before they cause silent failures
 - **Publishes to five platforms at once** — pushes to GitHub, then detects Claude Code, Codex, Cursor, Windsurf, and GitHub Copilot skill directories and symlinks to one source of truth
 - **Scans for security issues** — finds leaked API keys, private keys, credential files, and missing .gitignore entries before they reach GitHub. Critical issues block push
@@ -61,10 +64,11 @@ npx skills add motiful/skill-forge -g
 Then tell your AI coding assistant:
 
 ```text
-"Review this skill"          — validate, scan, fix → local ready
-"Create a skill for X"       — build from scratch → local ready
-"Audit this project"         — discover all skills + rules in a directory, classify, fix each
-"Publish this skill"         — any of the above + push to GitHub
+"Review this skill"              — validate, scan, fix → local ready
+"Create a skill for X"           — build from scratch → local ready
+"Extract a skill from this folder" — triage messy prototype, extract skill cleanly
+"Audit this project"             — discover all skills + rules in a directory, classify, fix each
+"Publish this skill"             — any of the above + push to GitHub
 ```
 
 ## Usage
@@ -74,6 +78,8 @@ Say any of:
 - "Audit my skill" — same as review
 - "Create a skill for X" — build from scratch → local ready
 - "Forge a skill from my notes" — same as create
+- "Extract a skill from this folder" — triage messy prototype → extract skill cleanly
+- "Turn my prototype into a skill" — same as extract
 - "Publish this skill" — forge + publish to GitHub
 - "Push this skill to GitHub" — same as publish
 
