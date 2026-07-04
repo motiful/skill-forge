@@ -148,7 +148,7 @@ Never act on weak signals without explicit user confirmation. Never create direc
 
 | Tool | Official model | Relevant paths | Notes | Docs |
 |------|----------------|----------------|-------|------|
-| Gemini CLI | Extensions + commands | `~/.gemini/extensions/`, `~/.gemini/commands/`, `<project>/.gemini/commands/` | Not an Agent Skills directory consumer. Do not register SKILL.md repos here as if they were standard skills. | [extensions](https://github.com/google-gemini/gemini-cli/blob/main/docs/extension.md) |
+| Gemini CLI | Extensions + commands | `~/.gemini/extensions/`, `~/.gemini/commands/`, `<project>/.gemini/commands/` | Not an Agent Skills directory consumer. Do not register SKILL.md repos here as if they were standard skills. | [extensions](https://github.com/google-gemini/gemini-cli/blob/main/docs/extensions/index.md) |
 
 ## Community Tools
 
@@ -163,7 +163,7 @@ Never act on weak signals without explicit user confirmation. Never create direc
 |----------|-----|-------|
 | skills.sh | [skills.sh](https://skills.sh) | Leaderboard visibility follows `npx skills add` telemetry; do not promise immediate ranking from GitHub publication alone |
 | SkillsMP | [skillsmp.com](https://skillsmp.com) | 66k+ skills |
-| LobeHub | [lobehub.com/skills](https://lobehub.com/skills) | Marketplace |
+| LobeHub | lobehub.com/skills | Marketplace |
 
 ## CC Market (Claude Code Marketplace)
 

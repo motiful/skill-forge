@@ -20,8 +20,8 @@ if gitignore → standard exclusions
 ## TOC
 
 - [README.md Template](#readmemd-template)
-- [LICENSE Template (MIT)](#license-template-mit)
-- [.gitignore Template](#gitignore-template)
+- MIT License Template
+- Gitignore Template
 
 ## README.md Template
 
@@ -35,7 +35,7 @@ If you mention directories, marketplaces, or leaderboards around the template, f
 Default the template prose to English for reusable skills. Only localize when the skill itself is language-specific or culture-specific.
 If the skill has dependencies (other skills, CLI tools), add a "Dependencies" section listing what gets installed by `scripts/setup.sh`. Informational recommendations (not required) go in README body text only, not in a dedicated section.
 
-```markdown
+````markdown
 # <skill-name>
 
 > <one-line value proposition — what problem this solves, not what it is>
@@ -111,14 +111,14 @@ references/            — <if applicable>
 
 ---
 
-Forged with [Skill Forge](https://github.com/<org>/skill-forge) · Crafted with [Readme Craft](https://github.com/<org>/readme-craft)
-```
+Forged with [Skill Forge](https://github.com/motiful/skill-forge) · Crafted with [Readme Craft](https://github.com/motiful/readme-craft)
+````
 
 ## Collection README.md Template
 
 > For multi-skill repos (Collection publishing model). See `references/publishing-strategy.md`.
 
-```markdown
+````markdown
 # <collection-name>
 
 > <one-line value proposition — what problem space this collection covers>
@@ -178,10 +178,10 @@ npx skills add <org>/<collection> --list
 
 ---
 
-Forged with [Skill Forge](https://github.com/<org>/skill-forge)
-```
+Forged with [Skill Forge](https://github.com/motiful/skill-forge)
+````
 
-## LICENSE Template (MIT)
+## MIT License Template
 
 ```
 MIT License
@@ -207,7 +207,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## .gitignore Template
+## Gitignore Template
 
 ```
 .DS_Store
