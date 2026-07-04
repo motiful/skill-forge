@@ -20,8 +20,8 @@ if gitignore → standard exclusions
 ## TOC
 
 - [README.md Template](#readmemd-template)
-- MIT License Template
-- Gitignore Template
+- [MIT License Template](#mit-license-template)
+- [Gitignore Template](#gitignore-template)
 
 ## README.md Template
 

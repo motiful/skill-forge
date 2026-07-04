@@ -163,7 +163,7 @@ Never act on weak signals without explicit user confirmation. Never create direc
 |----------|-----|-------|
 | skills.sh | [skills.sh](https://skills.sh) | Leaderboard visibility follows `npx skills add` telemetry; do not promise immediate ranking from GitHub publication alone |
 | SkillsMP | [skillsmp.com](https://skillsmp.com) | 66k+ skills |
-| LobeHub | lobehub.com/skills | Marketplace |
+| LobeHub | [lobehub.com/skills](https://lobehub.com/skills) | Marketplace |
 
 ## CC Market (Claude Code Marketplace)
 
