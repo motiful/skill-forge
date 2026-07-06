@@ -95,8 +95,8 @@ def forge(target):
         # Signals: public/publishable, 3+ expected references, multi-session,
         #   user mentioned design docs. Rule-skill/in-repo/prototype → skip.
         if assess_workspace_need(name, context):       # HITL — user confirms
-            Skill("repo-scaffold", f"scaffold {name}, git init but skip push")
             path = f"{config.skill_workspace}/{name}-project/{name}/"
+            mkdir_p(path); git_init(path)               # scaffold workspace dir, git init but skip push
         else:
             path = f"{config.skill_workspace}/{name}/"
 
@@ -265,8 +265,10 @@ Organization, layout, file existence, dependencies.
 |-------|---------|
 | Frontmatter fields | `references/skill-format.md` §Standard Frontmatter |
 | `name` | `references/skill-format.md` §Standard Frontmatter — kebab-case, matches directory |
-| `description` format | `references/skill-format.md` §Standard Frontmatter — single-line, < 1024 chars |
+| `description` format | `references/skill-format.md` §Standard Frontmatter — single-line, < 1024 chars, non-empty, no angle brackets |
+| `description` quality | **MUST** — `references/skill-format.md` §Description Quality (`validate_description_quality()`). Both halves (what + when), explicit "Use when…" triggers + concrete keywords, third person only, no vague filler, **no body leak (no restating own MUST/NEVER rules, no concept-teaching)**. Any missing gate = must-fix |
 | Body size | `references/skill-format.md` §Body — under 500 lines |
+| Body opening | **MUST** — `references/skill-format.md` §Body Opening (`validate_body_opening()`). Opener (first lines / blockquote after H1) must be actionable (model / Execution Procedure / procedure), NOT meta-commentary — epistemic self-description, authority declaration, cross-skill navigation as opener, or maintenance citation = must-fix |
 | References exist | All SKILL.md references resolve, no orphans |
 | Reference file frontmatter | Each .md in references/ must have `--- name + description ---` per `references/skill-format.md` §Reference Frontmatter |
 | Reference file size | Each reference file under 300 lines per `references/reference-extraction.md`; over 300 = must split |
@@ -287,8 +289,8 @@ Shared checks (SKILL.md and every reference file):
 
 | Check | Standard |
 |-------|---------|
-| Description coverage | Description covers key trigger scenarios from body |
-| Description clarity | Comprehensible to a stranger without project context |
+| Description coverage | Description covers key trigger scenarios from body — see `references/skill-format.md` §Description Quality gate 2 (explicit "Use when…" triggers + concrete keywords) |
+| Description clarity | Comprehensible to a stranger without project context — see `references/skill-format.md` §Description Quality gates 4–5 (specific not vague, no body leak / rule-restatement) |
 | Invocation reliability | `references/skill-invocation.md` |
 | Graceful skip | `references/anti-graceful-skip.md` |
 | Execution Procedure | `references/execution-procedure.md` — workflow skill + no EP = must fix |

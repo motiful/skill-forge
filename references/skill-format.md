@@ -12,7 +12,10 @@ validate_format(file) → format_findings[]
 
 if SKILL.md:
     check: standard frontmatter (name, description, license, metadata)
+    check: description FORMAT — single-line, < 1024 chars, non-empty, no angle brackets
+    check: description QUALITY — validate_description_quality() → FAIL any missing gate
     check: body under 500 lines
+    check: body opening — validate_body_opening() → FAIL if opener is meta not actionable
     check: ## Execution Procedure heading with pseudocode block for workflow skills
     check: file ordering (title → description → [preamble] → EP → content)
 if reference file:
@@ -33,13 +36,37 @@ check: cross-references resolve
 check: no hardcoded paths
 check: line count reasonable (< 300 or has TOC)
 # Reference extraction: references/reference-extraction.md
+
+validate_description_quality(description) → FAIL | PASS   # MUST-level, see §Description Quality
+
+fail if: states only WHAT (no trigger) OR only WHEN (no capability)  # both halves required
+fail if: no explicit "Use when..." trigger + concrete keywords/phrases/file-types
+fail if: first/second person — "I" / "you" / "we" / "help you"       # third person only
+fail if: vague filler — "helps with" / "processes data" / "does stuff" / "utilities for"
+fail if: LEAKS BODY — implementation steps, concept-teaching, cross-refs used as content,
+         internal conventions, OR restates the skill's own MUST/NEVER rules  # KEY new check
+warn if: sibling skill overlaps but no negative trigger ("Do NOT use for X, use Y instead")
+# "pushy"/assertive phrasing is ALLOWED (combats under-triggering) — never a fail
+
+validate_body_opening(body) → FAIL | PASS                # MUST-level, see §Body Opening
+
+opener := first lines / blockquote directly after the H1 title
+fail if: opener self-describes epistemic category ("this skill is descriptive/prescriptive")
+fail if: opener is an authority declaration ("hard constraints per X meta-protocol",
+         "same authority as a platform-native rule file")
+fail if: opener's FIRST thing is cross-skill navigation ("Read ../other/SKILL.md first")
+fail if: opener is an internal maintenance citation ("Boundary: ADR 00xx")
+pass if: opener is actionable — the model / Execution Procedure / the procedure itself
+# one plain one-line pointer to a needed definition is OK; a STACK of meta blockquotes = FAIL
 ```
 
 ## TOC
 
 - [Standard Frontmatter](#standard-frontmatter)
+  - [Description Quality](#description-quality)
 - [CC-Specific Extensions](#cc-specific-extensions)
 - [Body](#body)
+  - [Body Opening](#body-opening)
   - [Positional Test](#positional-test)
   - [Context Budget](#context-budget)
 - [Reference File Format](#reference-file-format)
@@ -76,6 +103,40 @@ metadata:                   # optional, custom key-value pairs
 - `description` — max 1024 chars, no angle brackets. Must be quoted if value contains `: ` (colon-space) to avoid strict YAML parser failures. This is the trigger mechanism — the agent reads descriptions to decide relevance. All trigger conditions go here.
 - `metadata` — free-form key-value pairs for author, version, tags, etc.
 
+The bullets above are the FORMAT gate. Format alone is insufficient: a well-formed line can still be a poor trigger. Every `description` also passes the Description Quality gate below.
+
+### Description Quality
+
+MUST-level content gate — `validate_description_quality()`. A description that only passes format but fails any row below is a **must-fix**, not a suggestion. The description is injected into the system prompt as the sole trigger signal for skill selection among potentially 100+ skills; a description that teaches or restates rules instead of naming triggers under-triggers the skill and wastes the reader's selection budget.
+
+| # | Criterion | FAIL when |
+|---|-----------|-----------|
+| 1 | **Both halves** | States only WHAT it does, or only WHEN to use it. Missing either half → FAIL |
+| 2 | **Explicit triggers** | No "Use when…" clause with concrete keywords / phrases / file-types a user would actually say |
+| 3 | **Third person** | Contains "I" / "you" / "we" / "help you" — first or second person → FAIL |
+| 4 | **Specific, not vague** | Uses filler: "helps with", "processes data", "does stuff", "utilities for" → FAIL |
+| 5 | **No body leak** (KEY) | Leaks body content: implementation steps, concept-teaching / explanation, cross-references to other skills or docs used AS content, internal conventions, OR restates the skill's own MUST / NEVER rules. A description that teaches or restates rules instead of naming triggers → FAIL |
+| 6 | **Format** | > 1024 chars, empty, angle brackets, or multi-line (see FORMAT bullets above) → FAIL |
+
+**Allowed / recommended (never a FAIL):**
+- **Pushy is fine** — assertive, "always reach for this" phrasing is encouraged; it combats under-triggering.
+- **Negative triggers recommended** — when a sibling skill overlaps, add "Do NOT use for X — use `<other-skill>` instead" to route correctly.
+
+**GOOD** (verbatim, official example — states what + when, concrete triggers, third person, no body leak):
+
+```yaml
+description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+```
+
+**BAD:**
+
+```yaml
+description: Helps with documents                         # vague filler, no trigger, no capability
+description: I can help you process Excel files           # first person + second person
+```
+
+Standard: Anthropic *Skill authoring best practices* (`platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`) §Writing effective descriptions + §Checklist — "include both what the Skill does and when to use it", "Always write in third person", "Be specific and include key terms". Validation limits (1024 chars, non-empty, no XML tags) from the API skills-guide. Example set from `anthropics/skills` skill-creator.
+
 ## CC-Specific Extensions
 
 Claude Code supports additional frontmatter fields. For cross-platform compatibility, keep CC-specific settings inside `metadata`. This also keeps the optional `skills-ref validate` check green:
@@ -106,6 +167,23 @@ If you're building a CC-only skill and don't care about cross-platform portabili
 - Only add what the AI doesn't already know. Don't explain basic concepts
 - Prefer concise examples over verbose explanations
 - Default published skill content to English. Use another language only when the skill is explicitly language-specific or culture-specific
+
+### Body Opening
+
+MUST-level gate — `validate_body_opening()`. The body MUST open with actionable content — the model, the `## Execution Procedure`, or the procedure itself — so the agent starts DOING the thing. Self-referential meta-commentary as the opener is a **must-fix**: the reader burns its first attention on prose that produces no action.
+
+The **opener** = the first lines / blockquote directly after the `# Title`. FAIL when the opener is any of:
+
+| FAIL opener | Example |
+|-------------|---------|
+| Epistemic self-description | "This skill is descriptive / prescriptive / says what things ARE" |
+| Authority declaration | "hard constraints per the X meta-protocol", "same authority as a platform-native rule file" |
+| Cross-skill navigation as the very first thing | "Read `../other/SKILL.md` first" as the opener |
+| Internal maintenance citation | "Boundary: ADR 00xx" |
+
+**Allowed:** a single one-line plain pointer to a needed definition. A *stack* of meta blockquotes → FAIL. If the opener describes the skill instead of starting the work, move it to README and lead with the procedure.
+
+Standard: Anthropic *Skill authoring best practices* §Concise is key + §Progressive disclosure — "Only add context Claude doesn't already have", lead SKILL.md with what to DO (quick-start / workflow), push background to references or README.
 
 ### Positional Test
 
