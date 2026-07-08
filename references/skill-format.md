@@ -16,20 +16,26 @@ if SKILL.md:
     check: description QUALITY — validate_description_quality() → FAIL any missing gate
     check: body under 500 lines
     check: body opening — validate_body_opening() → FAIL if opener is meta not actionable
+    check: why-discipline — validate_why_discipline() → FAIL if RATIONALE/BACKGROUND leaks into body
     check: ## Execution Procedure heading with pseudocode block for workflow skills
     check: file ordering (title → description → [preamble] → EP → content)
 if reference file:
     check: frontmatter (name, description)
-    check: ## Execution Procedure heading with pseudocode block
-    check: EP signature declares input/output
-    check: Content sections map to EP lines (alignment validation)
-    check: file ordering (title → description → [preamble] → EP → content)
-positional test: each section serves an EP line → stays. No EP line → docs/README
+    kind = procedure (ordered steps, reordering breaks correctness) | applied-knowledge (order-free taxonomy / format-spec / rules)   # EP-iff-ordering, references/execution-procedure.md
+    if kind == procedure:
+        check: ## Execution Procedure heading with pseudocode block
+        check: EP signature declares input/output
+        check: Content sections map to EP lines (alignment validation)
+    else:   # applied-knowledge → content only; an EP on order-free content is empty ceremony — do NOT FAIL a missing EP
+        check: content sections stand on their own (no fabricated EP)
+    check: why-discipline — validate_why_discipline() → FAIL if RATIONALE/BACKGROUND leaks into body
+    check: file ordering (title → description → [EP if procedure] → content)
+positional test: each section serves an EP line (procedure) or a caller's step (applied-knowledge) → stays. Otherwise → docs/README
 
 review_reference(file) → content_findings[]
 
-check: three-layer format (frontmatter + EP + content)
-positional test: each paragraph → which EP line? (not section level)
+check: format — frontmatter + content, plus an EP iff the file is an ordered procedure (EP-iff-ordering; an order-free applied-knowledge reference is frontmatter + content, no EP)
+positional test: each paragraph → which EP line (procedure) or caller's step (applied-knowledge)? (not section level)
 check: parent SKILL.md has invocation point for this module's EP (referenced ≠ invoked)
 check: terminology consistent with parent SKILL.md
 check: cross-references resolve
@@ -58,6 +64,16 @@ fail if: opener's FIRST thing is cross-skill navigation ("Read ../other/SKILL.md
 fail if: opener is an internal maintenance citation ("Boundary: ADR 00xx")
 pass if: opener is actionable — the model / Execution Procedure / the procedure itself
 # one plain one-line pointer to a needed definition is OK; a STACK of meta blockquotes = FAIL
+
+validate_why_discipline(doc) → FAIL | PASS               # MUST-level, see §Why-Discipline (IRB)
+
+# classify every "why" the doc carries by what it does for the agent-reader (delete-test)
+INTENT     := one-clause so-that that scopes a rule → lets the agent generalize → KEEP inline
+RATIONALE  := justifies a choice among alternatives ("chose X over Y because Z") → a decision record
+BACKGROUND := model-known fact / history / changes no action → CUT
+fail if: RATIONALE or BACKGROUND sits in the body — belongs in the skill's backstage decision record, not the skill
+fail if: an example / note / figure is stated as a binding requirement (informative ≠ normative)
+pass if: only INTENT-level why remains inline (the one-clause so-that beside the rule it scopes)
 ```
 
 ## TOC
@@ -67,6 +83,7 @@ pass if: opener is actionable — the model / Execution Procedure / the procedur
 - [CC-Specific Extensions](#cc-specific-extensions)
 - [Body](#body)
   - [Body Opening](#body-opening)
+  - [Why-Discipline (IRB)](#why-discipline-irb)
   - [Positional Test](#positional-test)
   - [Context Budget](#context-budget)
 - [Reference File Format](#reference-file-format)
@@ -185,6 +202,26 @@ The **opener** = the first lines / blockquote directly after the `# Title`. FAIL
 
 Standard: Anthropic *Skill authoring best practices* §Concise is key + §Progressive disclosure — "Only add context Claude doesn't already have", lead SKILL.md with what to DO (quick-start / workflow), push background to references or README.
 
+### Why-Discipline (IRB)
+
+MUST-level gate — `validate_why_discipline()`. An authored skill doc (SKILL.md body or a reference) is read once and acted from; a "why" that doesn't help the agent act is dead weight that dilutes its attention. Classify every "why" the doc carries by **what it does for the agent-reader**, then keep, relocate, or cut it. This extends the Inline-Why rule (§Content Rules) with a discipline for what NOT to keep.
+
+| Kind | What it is | Where it goes |
+|------|-----------|---------------|
+| **INTENT** | a one-clause *so-that* that scopes a rule ("X, so that Y") so the agent generalizes to cases the doc didn't enumerate | **stays inline** with the rule (one clause) |
+| **RATIONALE** | the justification of a choice among alternatives ("chose X over Y because Z") | **→ the skill's backstage decision record** (an ADR in its `<name>-ctx`), NOT the skill body |
+| **BACKGROUND** | context the model already knows, or history that changes no action | **cut** |
+
+**Delete-test** (the operational check): delete the clause — does an edge-case ACTION change? *Generalizes the rule* → INTENT (keep). *Only justifies a past choice* → RATIONALE (relocate). *Nothing* → BACKGROUND (cut).
+
+FAIL when:
+- RATIONALE or BACKGROUND sits in the body — option-comparison, "we chose this because…", a citation / name-drop, or history that changes no action.
+- an example, note, or figure is written as a binding requirement — informative content is never normative; state the binding claim as a MUST/SHALL line instead.
+
+PASS when only INTENT-level why remains inline. The sibling gates already cover facets of this: §Description Quality gate 5 (no rule-restatement / concept-teaching in the description) and §5 EP Comment Discipline in `execution-procedure.md` (a comment that changes no behavior is not a comment) are the description- and comment-scope instances of the same delete-test.
+
+Standard: adopted from the **ctx collection** (its agent-read-doc writing standard — four axes: normative/informative · RFC 2119 · IRB why-discipline · granularity). IRB names the three kinds of "why"; skill-forge validates it as a skill-authoring gate.
+
 ### Positional Test
 
 Every paragraph in SKILL.md (and in reference files) must pass the positional test:
@@ -247,13 +284,13 @@ Section format is unconstrained — tables, prose, code, decision trees. Section
 
 ### Three Layers
 
-Every reference file has three layers — the same pattern as SKILL.md, at module scale:
+A reference file has up to three layers — the same pattern as SKILL.md, at module scale. The Execution Procedure layer is present **iff the file is an ordered procedure** (EP-iff-ordering, see `execution-procedure.md`); an order-free applied-knowledge reference is frontmatter + content only:
 
 | Layer | SKILL.md | Reference |
 |-------|----------|-----------|
 | Frontmatter | Agent Skills standard (name, description, license, metadata) | skill-forge convention (name, description) |
-| Execution Procedure | Same spec — entry point, triggered by platform/user | Same spec — module, called by SKILL.md |
-| Content | Sections expanding EP steps | Sections expanding EP lines |
+| Execution Procedure | Same spec — entry point, triggered by platform/user | Same spec — module, called by SKILL.md — **iff an ordered procedure** |
+| Content | Sections expanding EP steps | Sections expanding EP lines, or applied-knowledge consumed by a caller |
 
 Same EP specification, same structural capabilities, no functional restrictions. Only difference: SKILL.md is the entry point, references are called modules.
 
@@ -361,7 +398,7 @@ skill-name/
 
 ### Directory Taxonomy
 
-**`references/`** — Domain knowledge loaded on-demand by the AI to make decisions. Checklists, format specs, evaluation criteria, rules. Reference files follow the three-layer format: frontmatter (name + description) + Execution Procedure (pseudocode) + Content (sections).
+**`references/`** — Domain knowledge loaded on-demand by the AI to reason from. Checklists, format specs, evaluation criteria, rules. A reference file is one of two shapes: an **ordered procedure** (steps whose order is load-bearing → carries an Execution Procedure) or **applied-knowledge / a taxonomy / a format-spec** (order-free, consumed by a caller's step → content only, no EP; an EP on order-free content is empty ceremony). Both carry frontmatter (name + description). Which shape it is follows the EP-iff-ordering rule in `execution-procedure.md`. (Genuinely inert files the AI *consumes* rather than reasons from — templates, images, big constant tables — belong in `assets/`, not here.)
 
 **`assets/`** — Static resources the AI consumes as raw material for output. Templates (to fill placeholders), data files, schemas, images.
 

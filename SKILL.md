@@ -4,7 +4,7 @@ description: 'Validate, fix, and publish skills as GitHub repos. Structures work
 license: MIT
 metadata:
   author: motiful
-  version: "9.0"
+  version: "9.1"
 ---
 
 # Skill Forge
@@ -269,6 +269,7 @@ Organization, layout, file existence, dependencies.
 | `description` quality | **MUST** — `references/skill-format.md` §Description Quality (`validate_description_quality()`). Both halves (what + when), explicit "Use when…" triggers + concrete keywords, third person only, no vague filler, **no body leak (no restating own MUST/NEVER rules, no concept-teaching)**. Any missing gate = must-fix |
 | Body size | `references/skill-format.md` §Body — under 500 lines |
 | Body opening | **MUST** — `references/skill-format.md` §Body Opening (`validate_body_opening()`). Opener (first lines / blockquote after H1) must be actionable (model / Execution Procedure / procedure), NOT meta-commentary — epistemic self-description, authority declaration, cross-skill navigation as opener, or maintenance citation = must-fix |
+| Why-discipline (IRB) | **MUST** — `references/skill-format.md` §Why-Discipline (IRB) (`validate_why_discipline()`). Adopted from the ctx collection. INTENT (a one-clause so-that scoping a rule) stays inline; RATIONALE ("chose X over Y") and BACKGROUND (model-known / history) must NOT leak into the body — they belong in the skill's backstage decision record; an example / note / figure stated as a binding requirement = must-fix |
 | References exist | All SKILL.md references resolve, no orphans |
 | Reference file frontmatter | Each .md in references/ must have `--- name + description ---` per `references/skill-format.md` §Reference Frontmatter |
 | Reference file size | Each reference file under 300 lines per `references/reference-extraction.md`; over 300 = must split |
