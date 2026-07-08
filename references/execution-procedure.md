@@ -283,6 +283,23 @@ assess(findings)        →  plan.checklist   →  fix(checklist)
 - Complements #10 (Observe-Then-Act) — observation produces the artifact, action consumes it
 - Enables #13 (Assert as Attention Checkpoint) — the artifact is what gets asserted against
 
+### 15. EP Contract Naming Discipline
+
+The bidirectional EP contract (skill-forge SKILL.md §EP contract integrity) extends to function names: every call in a parent EP must be **byte-identical** to a target's `def name(...)` or pseudocode entry `name(...) →`. Reference defs may use either Python-style `def` or pseudocode-arrow form — both count, but the call site must match the chosen form's name exactly.
+
+After any EP rewrite, verify mechanically:
+
+```bash
+# Every SKILL.md call has a matching def/pseudocode entry in references
+grep -oE '\b[a-z_]+\(' SKILL.md | sort -u
+grep -hE '^def [a-z_]+\(|^[a-z_]+\([^)]*\) *→' references/*.md
+# Set difference of column 1 minus column 2 = unresolved calls = must-fix
+```
+
+**Common drift**: SKILL.md says `apply_brand_kit_overrides(...)`, reference defines `apply_overrides(...)`. Either rename the reference def to match the call, or rename the call to match the def — both must agree after the rewrite. Paraphrase breaks the contract; agents resolve by string match, not semantic equivalence.
+
+**Anti-pattern**: rewriting SKILL.md to "explicit function-call style" without back-filling matching `def`s in references. The call surface widens beyond the def surface — many calls land in the void. Always grow both sides together.
+
 ## Anti-Patterns
 
 | Anti-pattern | Why it fails | Fix |

@@ -159,8 +159,6 @@ Triage does NOT own: validation, quality fixes, reference rewriting, README gene
 
 Triage does NOT touch the leftover workshop content beyond the optional annotation in Q2-B. That folder belongs to the author — skill-forge's job ends at "skill cleanly separated, relationship to the old folder stated".
 
-Triage does NOT call `repo-scaffold`. `repo-scaffold` writes new standard repos from a blank slate; Triage extracts from existing chaos. Different jobs, no coupling.
-
 ## Cross-References
 
 - `project-audit.md` — Discovery and classification (STEP 1, runs on the post-triage path)
