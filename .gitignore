@@ -3,6 +3,7 @@ Thumbs.db
 *.skill
 node_modules/
 dist/
+.impeccable/
 .env*
 .idea/
 .vscode/
